@@ -18,7 +18,7 @@ You are running Phase 1 of the ADLC pipeline: drafting and validating a requirem
 
 ## Preflight
 
-1. **Read the toolkit ETHOS.** Load `$TOOLKIT_PATH/ETHOS.md` into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line).
+1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md` and `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
 2. **Read the vault basics.** Load `.adlc/CLAUDE.md`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries), `.adlc/config.yml`, `.adlc/context/project-overview.md`, `.adlc/context/conventions.md`.
 3. **Determine the REQ ID.** Read `config.yml` → `req.id_scheme` (default `sequential` if absent) and `req.prefix`.
    - If the user passed an explicit ID, use it; verify it doesn't collide with an existing folder in `.adlc/specs/`.
@@ -56,6 +56,7 @@ Fill the content sections based on the user's description:
 - **Assumptions** — anything you're treating as true. Mark provisional ones with `STATUS: needs verification`.
 - **Open questions** — anything ambiguous that affects scope or design.
 - **Out of scope (for now)** — tempting adjacencies that are filed but separate.
+- **Flow (optional)** — a small Mermaid diagram, but only when it earns its place: the behavior has user-visible states or branches that are hard to hold in the head from prose (a multi-step journey, a status machine, a decision with several outcomes). Skip it for plain CRUD or a single happy path. Keep it at the *what* level — user-visible states and transitions — and leave components and sequencing to `/architect`. The template carries an example; delete the section if it doesn't help.
 
 If the user's description is too thin to fill any section, **ask follow-up questions in chat** rather than guessing. Don't proceed to validation until you have enough.
 
@@ -118,33 +119,28 @@ Files:
   - .adlc/specs/REQ-NNN-<slug>/requirement.md
 ```
 
-### 6. Emit the gate prompt
+### 6. Emit the gate card
 
-In chat, output:
+Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A spec gate is one of the leanest — often just verdict + `CHECKS` + `MY READ` + decision, since there's nothing structural to show. Map:
+
+- **Header** — `Gate 1 of 5 · Spec · REQ-NNN-<slug>`.
+- **Verdict** — "clean — nothing flagged, recommend approve", or "ready — `<k>` item(s) need your call".
+- **NEEDS YOU** (only if any) — open questions that bear on scope, or a vault lesson that should change an acceptance criterion. Omit when there are none.
+- **CHECKS** — the step-4 inline validation, one compact line: criteria testable · goal specific · assumptions explicit · no design · non-goals present. Note any vault references found (`[[…]]`) here or under READY.
+- **MY READ** — your recommendation + one-line why.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (ready for `/architect`), **revise** (describe the change), **abort** (discard this REQ). Mark approve *(Recommended)* per `MY READ`.
+
+Example shape:
 
 ```
-🛑 Gate: Spec — REQ-NNN-<slug>
+── Gate 1 of 5 · Spec · REQ-NNN-<slug> ──────────
+   clean — nothing flagged, recommend approve
 
-Drafted: .adlc/specs/REQ-NNN-<slug>/requirement.md
+CHECKS   ✓ criteria testable · ✓ goal specific · ✓ assumptions explicit · ✓ no design · ✓ non-goals present
 
-Inline validation:
-[✓ / ⚠] Acceptance criteria testable
-[✓ / ⚠] Goal specific
-[✓ / ⚠] Assumptions explicit
-[✓ / ⚠] No design content
-[✓ / ⚠] Non-goals present
+MY READ  approve — spec is tight; the one open question is non-blocking
 
-Vault references found:
-- [[knowledge/lessons/LESSON-xxx]] — short note
-- [[knowledge/gotchas#^gNN|GNN]] — short note
-
-Open questions in the spec:
-- ...
-
-Reply with one of:
-  approve         — clear the gate, ready to run /architect
-  revise: <text>  — describe what to change
-  abort           — discard this REQ
+Decision →  approve · revise <what> · abort
 ```
 
 ## Gate clearance

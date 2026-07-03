@@ -13,7 +13,7 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
 ## Preflight
 
 1. **Verify spec gate cleared.** Read `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`. If `currentPhase < 1` or `gateState != "cleared"` for the spec phase, **stop** — direct the user to run `/spec` first.
-2. **Read the toolkit ETHOS.**
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 10.
 3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `specs/REQ-NNN-<slug>/requirement.md`.
 4. **Establish the work path.** If `pipeline-state.json.workPath` is null:
 
@@ -68,12 +68,14 @@ Sections to fill:
 
 - **Summary** — what changes, where, why (one paragraph)
 - **Blast radius** — table populated from exploration findings. **Include user-facing docs:** if the change alters behavior the repo's docs describe (the paths in `config.yml` → `docs:`, or `README*` + `docs/` by default) — an API signature, a CLI flag, a default, a documented workflow — list those doc files in the blast radius too. They're part of the change, not an afterthought; scoping them in here is what gets them updated in the diff and reviewed instead of going stale. (`/review`'s reflector runs a doc-drift sweep as the backstop, but catching it here is cheaper.)
-- **Approach** — how the change is structured. Where the new code lives, what patterns it follows
-- **Task DAG** — tasks broken into dependency tiers
+- **Approach** — how the change is structured. Where the new code lives, what patterns it follows. **Add a diagram when it earns its place** (see below).
+- **Task DAG** — tasks broken into dependency tiers; render the dependency graph as a Mermaid `flowchart` (per the template) whenever there's more than a couple of tasks, so what's parallelizable is obvious at a glance
 - **Test strategy** — what gets tested at what level
 - **Convention alignment** — explicit statement of which conventions apply; call out any deviations with justification
 - **Risks** — what could go wrong and mitigations
 - **Open questions** — anything that couldn't be resolved
+
+**Diagrams — a judgment call, not a checkbox.** Architecture is the phase where a picture pays off most: a reader should be able to grasp the shape of the change at a glance. Include a Mermaid diagram when the design has shape that's hard to hold in the head from prose — a flow across components, an ordered interaction, a state machine, a data model, or a structural decomposition — and skip it when it would only restate a paragraph. Favor the near-free ones: the **Task DAG graph** (you already have the dependencies) and a **component diagram** when the change spans layers. Add a **sequence diagram** for the one key flow, and an **ER diagram** when schema changes. One diagram, one idea; keep it legible (~7±2 nodes); the prose stays the source of truth. The template carries ready-to-edit examples for each type. Because a stale diagram misleads, a design diagram carries the same `STATUS: needs verification` discipline as any other provisional artifact.
 
 ### 3. Create task files
 
@@ -199,49 +201,40 @@ Files:
   - .adlc/architecture/adr-NNN-<slug>.md (if drafted)
 ```
 
-### 10. Emit the gate prompt
+### 10. Emit the gate card
+
+Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (the shared card format). Map this phase's content into it:
+
+- **Header** — `Gate 2 of 5 · Architect · REQ-NNN-<slug>`.
+- **Verdict** — "ready to review — `<k>` items need your call", or "clean — nothing flagged, recommend approve".
+- **READY** — `architecture.md` (blast radius, approach); `<N>` tasks / `<M>` tiers; `exploration.md`; new ADR if drafted. Include the task DAG in compact text form: `T1,T2 → T3,T4 → T5` (the rendered diagram lives in `architecture.md` — don't restate it here).
+- **NEEDS YOU** — a proposed ADR awaiting accept/reject; each surviving adversary finding and how it was handled (ask the user to confirm the fix); unresolved open questions from `architecture.md`. Omit the block if none.
+- **CHECKS** — the step-6 inline validation as one compact `✓ / ⚠` line (criteria covered · no cycles · conventions · tests concrete · lessons/ADRs referenced), then the adversarial-hardening depth (full pass / quick self-check) and surviving-finding count.
+- **MY READ** — your recommendation and a one-line why. **Never recommend approve while a critical adversary finding is unaddressed** — that is a `revise`.
+- **Decision** — on Claude, an `AskUserQuestion` with: **approve** (clear the gate, ready for `/implement`), **revise** (describe what to change), **abort** (discard this architecture, keep the spec). Mark approve *(Recommended)* per `MY READ`. A proposed ADR's accept/reject is confirmed at clearance (Gate clearance step 3).
+
+Example shape (fill from the real REQ):
 
 ```
-🛑 Gate: Architect — REQ-NNN-<slug>
+── Gate 2 of 5 · Architect · REQ-014-payment-retries ──────────
+   ready to review — 2 items need your call
 
-Drafted:
-- architecture.md (blast radius, approach, task DAG)
-- tasks/ — <N> tasks across <M> tiers
-- exploration.md (codebase recon)
-- [new ADR if drafted]
+READY       architecture.md · 6 tasks / 3 tiers · ADR-007 proposed
+            exploration.md · adversary: full pass
+            DAG: T1,T2 → T3,T4 → T5
 
-Task DAG:
-  Tier 0: TASK-001, TASK-002
-  Tier 1: TASK-003 (depends on T1), TASK-004 (depends on T2)
-  Tier 2: ...
+NEEDS YOU   ⚠ ADR-007  retry backoff strategy — accept or reject
+            ⚠ finding  double-charge on retry → fixed; confirm in §Approach
+            ? open q   idempotency-key TTL still unresolved
 
-Inline validation:
-[✓ / ⚠] All acceptance criteria covered by tasks
-[✓ / ⚠] No circular dependencies
-[✓ / ⚠] Conventions followed or deviations justified
-[✓ / ⚠] Test strategy concrete
-[✓ / ⚠] Lessons / gotchas / ADRs referenced
+CHECKS      ✓ criteria covered · ✓ no cycles · ✓ conventions · ✓ tests concrete
 
-Adversarial hardening:
-  Depth: full pass (trigger: <new-adr | large-blast-radius | cross-repo | sensitive-surface>)
-         — or — quick self-check (low-stakes REQ)
-  Surviving findings: <C critical / M major / m minor>   (full pass only; report: architecture-adversary.md)
-    1. <locus> — <short title> → fixed
-    2. <locus> — <short title> → accepted, documented in Risks
-  [⚠ if any critical is unaddressed — this should be a revise, not an approve]
+MY READ     approve — surviving finding is handled, ADR is low-risk
 
-Vault references:
-- [[knowledge/lessons/LESSON-xxx]] — short note
-- [[architecture/adr-NNN-<slug>]] — newly proposed (if applicable)
-
-Open questions in architecture:
-- ...
-
-Reply with one of:
-  approve         — clear the gate, ready to run /implement
-  revise: <text>  — describe what to change
-  abort           — discard this architecture (keeps the spec)
+Decision →  approve · revise <what> · abort
 ```
+
+(On Claude the `Decision →` line is delivered as an `AskUserQuestion`, not typed text.)
 
 ## Gate clearance
 

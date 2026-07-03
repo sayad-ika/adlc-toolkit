@@ -7,7 +7,7 @@ This repository uses the **ADLC toolkit**: a spec-driven development pipeline wi
 **The six principles (full text: `.adlc-toolkit/ETHOS.md`):**
 1. **You decide; the assistant drafts.** Every phase boundary pauses for the user. Git writes follow `.adlc/config.yml` → `git.mode` (default `manual` = the assistant drafts; you run git).
 2. **Spec first, code second.** Never implement without a validated spec.
-3. **Read-only reviewers.** Review/audit agents report findings; they never edit. The user decides what gets fixed.
+3. **Read-only reviewers.** Review/audit agents are read-only on your code — they write only their own findings, never source. The user decides what gets fixed.
 4. **Knowledge compounds.** Every change leaves the vault smarter — lessons, gotchas, concepts, ADRs.
 5. **Process is explicit.** Skill steps are a protocol, not a guideline. No shortcuts; no `--no-verify`.
 6. **Ask in options, not open prose.** When you need a decision from the user, present discrete labeled options with a recommendation, not an open-ended question. On Claude, use the `AskUserQuestion` tool; elsewhere, a short numbered list inline. The user can always go off-menu.

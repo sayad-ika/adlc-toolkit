@@ -30,6 +30,43 @@ How the change is structured. Two or three paragraphs. Should answer:
 - What new patterns (if any) does it introduce?
 - How does it integrate with existing code?
 
+### Diagrams
+
+Include a diagram when the change has shape that's hard to hold in the head from prose — a flow across components, an ordered interaction, a state machine, a data model, or a structural decomposition. Skip it when it would only restate a paragraph. One diagram, one idea; label the edges; keep it legible (~7±2 nodes). The prose stays the source of truth — the diagram is the glance. Use Mermaid so it renders in Obsidian, GitHub, and your IDE alike. A diagram describes the *designed* state; keep it in sync or mark it `STATUS: needs verification`.
+
+Reach for whichever fits (delete the rest — most REQs need zero or one):
+
+**Component / structure** — how the pieces fit and where the new code lives:
+
+```mermaid
+flowchart LR
+  Client -->|calls| API[API layer]
+  API --> Svc[Service]
+  Svc --> Repo[(Data store)]
+  Svc --> Ext[External API]
+```
+
+**Sequence** — a multi-actor flow where ordering matters (the key path only):
+
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant API
+  participant Svc as Service
+  U->>API: request
+  API->>Svc: validate + dispatch
+  Svc-->>API: result
+  API-->>U: response
+```
+
+**Data model** — only when entities or schema change:
+
+```mermaid
+erDiagram
+  ORDER ||--o{ LINE_ITEM : contains
+  ORDER }o--|| CUSTOMER : placed_by
+```
+
 ## Task DAG
 
 Tasks broken into dependency tiers. Tier 0 has no dependencies; Tier N depends only on Tier N-1 or earlier.
@@ -44,6 +81,16 @@ Tasks broken into dependency tiers. Tier 0 has no dependencies; Tier N depends o
 
 ### Tier 2
 - `TASK-005` — depends on TASK-003, TASK-004
+
+Render the graph too when there's more than a couple of tasks — it makes the parallelizable work obvious at a glance (edit nodes/edges to match the tiers above):
+
+```mermaid
+flowchart TD
+  T1[TASK-001] --> T3[TASK-003]
+  T2[TASK-002] --> T4[TASK-004]
+  T3 --> T5[TASK-005]
+  T4 --> T5
+```
 
 ## Test strategy
 

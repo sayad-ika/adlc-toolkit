@@ -26,7 +26,7 @@ The defining feature: `/task` is **self-triaging**. Small work runs here; work t
 
 ## Preflight
 
-1. **Read the toolkit ETHOS.**
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at both gates below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Assign the REQ ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), exactly as `/spec` preflight does — `sequential` (`REQ-NNN`, max+1), `prefixed` (`REQ-<req.prefix>-NNN`), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`; else fall back to prefixed/sequential, noting it). `/task` uses the **same ID namespace and `.adlc/specs/` location as `/spec`** — this is what makes escalation to `/proceed` a clean handoff rather than a migration. Throughout, `REQ-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Determine the slug.** Short kebab-case, ≤40 chars.
@@ -96,29 +96,28 @@ Add `kind: task` to the frontmatter so the vault and `/status` can tell task-REQ
 
 Work path is created only after this gate clears (so an escalate/abort leaves no branch behind).
 
-### 5. Plan gate prompt
+### 5. Plan gate card
+
+Emit per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A task plan gate folds spec + architect into one and adds an `escalate` option:
+
+- **Verdict** — "small & low-risk — recommend approve", or "bigger than a task — recommend escalate".
+- **READY** — triage call (TASK, one-line why); `requirement.md`: goal (one line), `<N>` acceptance criteria, approach (`<N>` bullets, ~`<M>` files).
+- **NEEDS YOU** — only if triage leans escalate (name the signal — sensitive surface / blast radius / ADR needed). Omit when it's cleanly a task.
+- **CHECKS** — acceptance testable · scope bounded, no sensitive surface · approach concrete (files named).
+- **MY READ** — recommendation + why (risk forces escalate regardless of size).
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (clear the gate; implement), **escalate** (hand to `/proceed`), **revise** (adjust goal/scope/approach), **abort** (discard the REQ).
 
 ```
-🛑 Gate: Plan — REQ-NNN-<slug>  (task)
+── Gate 1 of 2 · Plan · REQ-NNN-<slug>  (task) ──────────
+   small & low-risk — recommend approve
 
-Triage: TASK — <one-line why it's small and low-risk>
-        (or: ESCALATE recommended — see options above)
+READY    triage: TASK — localized, ~3 files, no sensitive surface
+         goal: <one line> · 2 acceptance criteria · approach: 3 bullets
+CHECKS   ✓ acceptance testable · ✓ scope bounded · ✓ approach concrete
 
-Drafted: requirement.md
-  Goal: <one line>
-  Acceptance: <N criteria>
-  Approach: <N bullets>; ~<M> files
+MY READ  approve — clean small change; nothing forces escalation
 
-Inline check:
-[✓ / ⚠] Acceptance criteria testable
-[✓ / ⚠] Scope bounded; no sensitive surface
-[✓ / ⚠] Approach concrete (files named)
-
-Reply:
-  approve         — clear the gate; implement
-  escalate        — hand this to /proceed instead
-  revise: <text>  — adjust goal / scope / approach
-  abort           — discard the REQ
+Decision →  approve · escalate · revise <what> · abort
 ```
 
 On `approve`: delete any marker, set `gateState: "cleared"`, append `## [DATE] task-plan-cleared | REQ-NNN-<slug>` to `hot.md`, continue to Phase 2.
@@ -170,30 +169,30 @@ Pass `Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md`. Consoli
 - Draft `pr-draft.md` (title + body, change summary, lessons captured) and `merge-checklist.md` — same shapes as `/wrapup`, slimmer body.
 - Source write-back (optional, gated): same rule as `/wrapup` step 5a — only if `sources.write` lists the tracker and this REQ links an issue; drafted, never auto-sent.
 
-### 3. Ship gate prompt
+### 3. Ship gate card
+
+Emit per the gate protocol — one consolidated review + ship gate:
+
+- **Verdict** — "clean — recommend approve", or "`<k>` findings need a call".
+- **FINDINGS** (if any) — `crit / maj / min` + reviewer; this is the `NEEDS YOU`. Omit when clean.
+- **READY** — reviewers run (correctness, reflector, +ui if UI touched) with UI tier/counts or "n/a — no UI surface"; files changed `<N>` +a/-b, tests added/updated; commit drafted; knowledge (promoted `L-NNN` / gotcha `^gNN` / "nothing to keep — confirmed"); PR draft + merge checklist.
+- **CHECKS** — acceptance met · tests pass · no debug artifacts.
+- **MY READ** — recommendation + why (never approve while a Critical stands).
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **fix** (`<ids>`, then re-verify), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-🛑 Gate: Ship — REQ-NNN-<slug>  (task)
+── Gate 2 of 2 · Ship · REQ-NNN-<slug>  (task) ──────────
+   clean — recommend approve
 
-Reviewers: correctness, reflector<, ui (if UI touched)>
-Findings:  C<crit> / M<major> / m<minor>
+READY    reviewers: correctness, reflector · UI: n/a — no UI surface
+         4 files, +80/-12 · tests updated · commit drafted
+         knowledge: nothing to keep — confirmed
+         PR: pr-draft.md · merge-checklist.md
+CHECKS   ✓ acceptance met · ✓ tests pass · ✓ no debug
 
-UI/UX review: <tier + counts, or "n/a — no UI surface">
+MY READ  approve — small, clean, covered
 
-Files changed: <N>, +<a>/-<b>; tests: <added/updated>
-Commit drafted: commits-draft.md
-
-Knowledge: <promoted L-NNN / gotcha ^gNN / "nothing to keep — confirmed">
-
-PR draft: pr-draft.md
-Merge checklist: merge-checklist.md
-
-Reply:
-  approve         — gate cleared; run the merge checklist
-  fix: <ids>      — apply specific findings, then re-verify
-  revise: <text>  — other changes
-  merged          — finalize after you merge
-  abort
+Decision →  approve · fix <ids> · revise <what> · merged · abort
 ```
 
 Gate clearance mirrors `/wrapup`: on `approve`, set `gateState: "cleared"`, log to `hot.md`; on `merged`, finalize `pipeline-state` (`terminal`/`prState: merged`), update `now.md`, log `## [DATE] req-merged | REQ-NNN-<slug>`.

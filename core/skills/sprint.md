@@ -27,7 +27,7 @@ A reasonable upper bound is **5 concurrent REQs**. Beyond that, gate triage beco
 
 ## Preflight
 
-1. **Read the toolkit ETHOS.**
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — each per-REQ gate in the queue renders as a gate card.
 2. **Load vault.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`.
 3. **Validate input.** For each argument:
    - If it's a REQ ID, verify `.adlc/specs/REQ-NNN-*/` exists and has a `requirement.md`. If not, surface and ask: should we create it via `/spec` first?
@@ -111,7 +111,7 @@ Update the sprint registry's `currentGateQueue` with all REQs in `awaiting` stat
 When a gate becomes available (or the user asks for an update), surface the unified queue:
 
 ```
-🛑 Sprint gate queue — SPRINT-...
+── Sprint gate queue · SPRINT-... ──
 
 3 REQs in flight. 2 gates awaiting your decision:
 
@@ -136,7 +136,7 @@ Reply with one of:
   approve <N>       — clear gate N; that runner advances
   revise <N>: <txt> — send revisions to gate N's runner
   fix <N>: <ids>    — verify-phase only; apply listed fixes
-  show <N>          — see full gate prompt for gate N
+  show <N>          — render gate N's full gate card (per the gate protocol)
   pause <N>         — pause REQ N (don't clear, don't revise — leave for later)
   abort <N>         — abort REQ N (with confirmation)
   status            — refresh the queue

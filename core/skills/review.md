@@ -13,7 +13,7 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
 ## Preflight
 
 1. **Verify implement gate cleared and code is committed.** Read `pipeline-state.json` (`currentPhase >= 3`, `gateState: "cleared"` for implement). Check that `git -C <workPath> log <base-branch>..<branch> --oneline` shows commits — if the branch has no commits past the base, **stop and remind** the user to run the commits first.
-2. **Read the toolkit ETHOS.**
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 9.
 3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `specs/REQ-NNN-<slug>/requirement.md`, `architecture.md`, `commits-draft.md`.
 4. **Verify the work path and branch.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. Verify the branch ref exists: `git -C <workPath> rev-parse --verify <branch>`. (In `branch` mode, HEAD may be on a different branch — that's fine; comparisons below use `<branch>` by name.)
 5. **Identify the diff.** Determine the base branch from `config.yml` (default `main`). Capture the list of changed files: `git -C <workPath> diff --name-only <base-branch>...<branch>`.
@@ -257,50 +257,36 @@ Files:
   - .adlc/specs/REQ-NNN-<slug>/verification.md
 ```
 
-### 9. Emit the gate prompt
+### 9. Emit the gate card
+
+Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A verify gate **leads with findings** — that's its `NEEDS YOU` — and swaps in its own options (`fix` alongside approve/revise/abort). Map:
+
+- **Header** — `Gate 4 of 5 · Verify · REQ-NNN-<slug>`.
+- **Verdict** — e.g. "`<total>` findings — `<k>` need a call", or "clean — no findings, recommend approve".
+- **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. This block *is* the `NEEDS YOU` for this gate.
+- **READY** (brief) — `<4 or 5>` reviewers ran; lesson candidates surfaced `<total>` (verdicts at `/wrapup`); UI/UX review tier + counts (or "not run — no UI surface"; omit entirely when the project has no frontend); stale-repo-docs count with the offending path when non-zero (fix in this diff before merging).
+- **CHECKS** — the acceptance-criteria check as one compact `✓ / ⚠` line; call out any special item (a reflector `vault-stale` finding, an `adr-conflict`, an architecture "new ADR needed") on its own line since those need deliberate handling.
+- **MY READ** — recommendation + one-line why. **Never recommend approve while a Critical is unaddressed** — that's a `fix` or `revise`.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (accept findings as-is → `/wrapup`), **fix** (`<ids>` or `all-major` — dispatch task-implementer for them), **revise** (other changes to the review), **abort** (escalate; halt). Mark the recommended one per `MY READ`.
+
+Example shape:
 
 ```
-🛑 Gate: Verify — REQ-NNN-<slug>
+── Gate 4 of 5 · Verify · REQ-NNN-<slug> ──────────
+   3 findings — 1 needs a call
 
-<4 or 5> reviewers dispatched <(+ ui-reviewer: this change touches UI)>. Findings:
+FINDINGS    crit · correctness  double-charge path on retry (src/pay/retry.ts:88)
+            maj  · quality      duplicated retry helper — consider extracting
+            min  · arch         layering fine, no action
 
-  Critical: <N>  ← must fix
-  Major:    <N>  ← strongly recommend fix
-  Minor:    <N>  ← your call
-  Trivial:  <N>  ← noise filter
+READY       4 reviewers · 3 lesson candidates · UI: not run (no UI surface)
 
-Lesson candidates surfaced: <total> (corr: <N>, qual: <N>, arch: <N>, reflect: <N>, ui: <N>)
-  See lesson-candidates.md. Verdicts come at /wrapup.
+CHECKS      ✓ AC-1 · ✓ AC-2 · ⚠ AC-3 (retry idempotency unverified)
+            ! reflector: repeats LESSON-007 (retry side effects)
 
-UI/UX review: <ran @ chrome|headless tier — C<crit>/M<major>/m<minor>, <N> screenshots>
-             <— or — static-only (no browser available): manual checklist left for you>
-             <— or — not run: no UI surface in this change>
-  (omit this block entirely when there is no frontend in the project)
+MY READ     fix — the correctness finding must land before ship
 
-Stale repo docs (repo-doc-stale): <N>
-  <doc-path> — <the claim that's now wrong>
-  Fix in this diff before merging; /wrapup re-checks any left unresolved.
-  (omit this line when <N> is 0)
-
-Top findings (Critical + Major):
-
-  1. <file>:<line> — short title (correctness)
-  2. <file>:<line> — short title (architecture)
-  3. <file>:<line> — short title (reflector — repeats LESSON-007)
-
-Acceptance criteria check:
-[✓ / ⚠] Criterion 1
-[✓ / ⚠] Criterion 2
-
-Reviewer reports special items:
-- <reflector flagged vault-stale finding — read it carefully>
-- <architecture flagged new ADR needed for X>
-
-Reply with one of:
-  approve                 — accept findings as-is, no fixes needed. Proceed to /wrapup.
-  fix: <ids or "all-major"> — fix listed findings. I'll dispatch task-implementer for them.
-  revise: <text>          — other revisions to the review or findings
-  abort                   — escalate; halt this REQ
+Decision →  approve · fix <ids|all-major> · revise <what> · abort
 ```
 
 ## Gate clearance

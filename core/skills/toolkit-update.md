@@ -67,6 +67,7 @@ If the user only uses some tools, offer `--tool=<theirs>` instead. `sync` cleanl
 The toolkit update does **not** reach into project vaults. Tell the user:
 
 - New `config.yml` settings won't appear automatically. In each active project, run **`/config migrate`** to scaffold any new keys additively (it never changes existing values).
+- **Vault templates don't refresh automatically either.** `.adlc/templates/` is copied per-project at `/init`, so changes to the toolkit's `templates/` (e.g. new diagram sections) won't reach existing vaults on their own. `/config migrate` now **offers a gated, per-file template refresh** at the end, or run **`/config templates`** directly — it shows a diff and never overwrites a customized template without approval. This skill can't do it for you: it's scoped to the toolkit repo and doesn't know where your project vaults live, so refreshing templates is always a per-project action.
 - If the CHANGELOG flagged a **vault-format** change, point them at the relevant note and, if applicable, suggest `/recover` in affected projects to reconcile.
 
 ## If the pull won't be clean

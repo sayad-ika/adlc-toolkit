@@ -88,6 +88,24 @@ Suggested next actions:
 
 If a REQ's work path is missing — or, in `worktree` mode, the worktree isn't registered with git; or, in `branch` mode, the branch ref is gone — but the REQ isn't marked complete, surface that explicitly. It's an inconsistency the user should know about.
 
+### 6. Pipeline board (when 2+ REQs/bugs are active)
+
+When more than one REQ or bug is in flight, append a Mermaid board after the text report so the whole queue is legible at a glance — which stage each item sits at, and which are waiting on the user. Skip it for a single active item (the text line already says it all). Mermaid renders in Obsidian, GitHub, and markdown-aware IDEs; where it doesn't render, it degrades to readable text, so it's safe to always include when the threshold is met.
+
+Place each active item at its current phase; color by gate state (`awaiting` = waiting on the user, `cleared` = ready to move). Use the item's real ID/slug and current phase:
+
+```mermaid
+flowchart LR
+  spec --> architect --> implement --> review --> wrapup
+  classDef await fill:#fde68a,stroke:#b45309,color:#000;
+  classDef cleared fill:#bbf7d0,stroke:#15803d,color:#000;
+  R012["REQ-012-payments<br/>awaiting"]:::await --> architect
+  R007["REQ-007-search<br/>cleared"]:::cleared --> implement
+  B003["BUG-003-null-cart<br/>awaiting"]:::await --> review
+```
+
+Keep it to the active items only — don't plot REQs already merged/closed. This is still chat output; write no files.
+
 ## Constraints
 
 - **Read-only.** Don't update `now.md`, don't update `hot.md`, don't fix inconsistencies — just surface them.

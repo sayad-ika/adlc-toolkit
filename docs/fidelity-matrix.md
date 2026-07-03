@@ -18,7 +18,7 @@ All five assistants converged on the same three primitives — a memory/context 
 | Slash commands (`/spec` etc.) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Auto-loaded project memory | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Isolated sub-agents | ✅ | ⚠️ inline | ✅ | ✅ | ✅ |
-| **Read-only enforced by tool** | ✅ `tools:` | ❌ advisory | ✅ tool sets | ✅ `read_only` | ⚠️ advisory |
+| **Reviewer read-only on source** | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction |
 | Parallel sub-agents (`/sprint`) | ✅ | ❌ sequential | ⚠️ handoffs | ✅ | ✅ |
 | Per-agent model tier | ✅ | ❌ | ✅ | ✅ | ✅ |
 
@@ -26,7 +26,7 @@ All five assistants converged on the same three primitives — a memory/context 
 
 ## What the ⚠️/❌ cells mean in practice
 
-**Read-only reviewers.** Principle 3 says review agents report but never edit. Claude enforces this with a `tools:` allow-list (no `Write`/`Edit`); Codex with `read_only = true`; Copilot via restricted agent tool sets. **Cursor and Gemini lean on instruction** — the agent stub tells the model not to edit, but nothing blocks it at the tool layer. On those two, treat read-only as a convention: review passes shouldn't touch files, and you should eyeball the diff after a review phase to confirm nothing changed.
+**Read-only reviewers.** Principle 3 says review agents report but never touch your code. Reviewers are granted `Write`/`Edit` so they can author their own findings artifact (`verification.md`, an audit report, `gate-decisions.md`) cleanly — so "never touch source" is enforced by **instruction on every tool**, not by the tool sandbox, and the fidelity is the same across all five. (It was never fully tool-enforced anyway: reviewers also carry `Bash`, which can write files.) The real guardrail is the agent's constraint (write only your findings file) plus the git-mutation ban. On **every** tool, treat read-only-on-source as a discipline: after a review pass, confirm `git status` shows only `.adlc/` changes and no edits to your source or repo files.
 
 **Parallel sub-agents / `/sprint`.** `/sprint` runs several REQs at once, each in its own worktree, via the `pipeline-runner` agent. Claude, Codex, and Gemini can spawn parallel sub-agents, so `/sprint` works as designed. **Copilot uses sequential "handoffs"** and **Cursor has no isolated sub-agents**, so on those two `/sprint` degrades to one REQ at a time — still correct, just not concurrent. The single-REQ pipeline (`/proceed`) works fully everywhere.
 

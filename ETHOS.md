@@ -26,9 +26,9 @@ Never implement without a validated spec. The cheapest bug to fix is one caught 
 
 ## 3. Read-Only Reviewers
 
-Review and audit agents have access to `Read`, `Grep`, `Glob`, and `Bash` — never `Edit` or `Write`. They report findings; the orchestrating skill consolidates them; you decide what gets fixed. This prevents reviewer drift, eliminates conflicting overlapping fixes, and keeps the audit trail clean.
+Review and audit agents are **read-only on your code**. They may read anything and write **only their own findings artifact in the vault** — a section of `verification.md`, `exploration.md`, an audit report, `gate-decisions.md`, and the like — never source, config, or any repository file, and never a git mutation. They report; the orchestrating skill consolidates; you decide what gets fixed. This prevents reviewer drift, eliminates conflicting overlapping fixes, and keeps the audit trail clean.
 
-The temptation to let every agent fix what it finds is real. Resist it.
+Be clear-eyed about how this is enforced: it's the agent's **instructions and role**, not the tool list alone. Reviewers carry `Bash` (they need it for `git diff`/`log` and greps), and `Bash` — like `Write` — can touch files, so the tool sandbox was never the real fence. The fence is the discipline: an agent that finds a problem **files it as a finding and never fixes it**. Granting `Write` just lets them author their report cleanly instead of through `Bash` heredocs; it does not widen what a disciplined reviewer may do. The temptation to let every agent fix what it finds is real. Resist it.
 
 **Applies when:** Defining any new agent, dispatching reviewers, deciding how to handle multi-agent findings.
 

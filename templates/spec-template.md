@@ -30,6 +30,19 @@ Bulleted list of testable statements. Each one is a thing that must be true for 
 - [ ] Criterion 2
 - [ ] Criterion 3
 
+## Flow (optional)
+
+Include a small diagram **only** when the behavior has states or branches that are hard to hold in the head from prose — a multi-step user journey, a status machine (draft → submitted → approved), a decision with several outcomes. Skip it for straightforward CRUD or a single happy path; a diagram that just restates a sentence is noise. This stays at the *what* level (user-visible states and transitions), not the *how* — leave components and sequencing to `/architect`. Use Mermaid so it renders everywhere; delete this section if it doesn't earn its place.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Submitted: submit
+  Submitted --> Approved: approve
+  Submitted --> Draft: request changes
+  Approved --> [*]
+```
+
 ## Assumptions
 
 Things you're treating as true to keep moving. Mark provisional ones with `STATUS: needs verification` and link the assumption file if one was created.

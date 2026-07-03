@@ -13,7 +13,7 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 ## Preflight
 
 1. **Verify verify gate cleared.** Read `pipeline-state.json`. `currentPhase >= 4`, `gateState: "cleared"` for verify.
-2. **Read the toolkit ETHOS.**
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 8.
 3. **Load context.** Everything for this REQ: `requirement.md`, `architecture.md`, `tasks/*.md`, `exploration.md`, `verification.md`, `commits-draft.md`. Plus vault navigation files: `now.md`, `hot.md`, `index.md`, `decisions.md`, `glossary.md`.
 4. **Verify the commits exist.** Read `pipeline-state.json.workPath` and `.branch`. `git -C <workPath> log <base-branch>..<branch> --oneline` should show all the drafted commits actually committed by the user. If any draft isn't in the log, halt and ask the user to finish committing.
 
@@ -278,51 +278,34 @@ Files:
   - New / updated vault files (see below)
 ```
 
-### 8. Emit the gate prompt
+### 8. Emit the gate card
+
+Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A ship gate's body is the **PR + vault capture + merge checklist**, and it carries an extra `merged` option (used after the user runs the merge). Map:
+
+- **Header** — `Gate 5 of 5 · Ship · REQ-NNN-<slug>`.
+- **Verdict** — e.g. "PR + vault ready — run the checklist when you're set", or flag if the final sanity check surfaced anything.
+- **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable).
+- **NEEDS YOU** — only genuine calls: a drafted source write-back awaiting approval (external write — hard-stop-eligible, never auto-sent); a `Candidates considered: 0` confirmation; any unresolved final-sanity item. Omit if none.
+- **CHECKS** — final diff sanity as one compact `✓ / ⚠` line: blast radius matches architecture · user-facing docs updated (no unresolved repo-doc-stale) · no debug artifacts · no `--no-verify` · commit drafts all in git log.
+- **MY READ** — recommendation + one-line why.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (gate cleared — run the merge checklist), **revise** (adjust PR draft or vault updates), **merged** (after you merge — finalize state, log to `hot.md`), **abort** (halt without merging). Mark approve *(Recommended)* per `MY READ`.
+
+Example shape:
 
 ```
-🛑 Gate: Ship — REQ-NNN-<slug>
+── Gate 5 of 5 · Ship · REQ-NNN-<slug> ──────────
+   PR + vault ready — run the checklist when you're set
 
-PR drafted:
-  Title: <title>
-  Body:  .adlc/specs/REQ-NNN-<slug>/pr-draft.md
-  Files: <count> changed, +<N>/-<N>
+READY       PR: feat(pay): retry with backoff — pr-draft.md · 9 files, +240/-37
+            merge-checklist.md
+            vault: 4 candidates → L-042 promoted, ^g14 gotcha, ADR-007 accepted
+NEEDS YOU   ⚠ write-back  comment on #842 + → In Review — source-writeback.md (not sent)
 
-Merge checklist: .adlc/specs/REQ-NNN-<slug>/merge-checklist.md
+CHECKS      ✓ blast radius · ✓ docs updated · ✓ no debug · ✓ no --no-verify · ✓ commits in log
 
-Source write-back (only if sources.write is configured):
-  Proposed: comment on <issue> + transition <from> → <to>
-  Draft:    .adlc/specs/REQ-NNN-<slug>/source-writeback.md
-  ⚠ Not sent until you approve — external write, hard-stop-eligible.
+MY READ     approve — clean wrap; the write-back is the only thing awaiting you
 
-Vault updates from candidates:
-  Candidates considered:    <N>
-  Promoted to lesson:       <count> — <list of new LESSON-NNN>
-  Demoted to gotcha:        <count> — <list of new ^gNN>
-  Discarded:                <count> — see lesson-candidates.md verdicts
-  Other vault writes:
-    ADRs accepted:          <list>
-    Concepts:               <list of new / updated>
-    Components:             <list of new / updated>
-    Glossary:               <terms added>
-    Hot log:                <count> entries appended
-
-  ⚠ If "Candidates considered: 0" — confirm this REQ genuinely produced no
-    knowledge worth keeping, or `revise: capture` to walk back through
-    verification.md and commits-draft.md.
-
-Final diff sanity:
-[✓ / ⚠] Blast radius matches architecture
-[✓ / ⚠] User-facing docs updated (no unresolved repo-doc-stale findings)
-[✓ / ⚠] No residual debug artifacts
-[✓ / ⚠] No --no-verify traces
-[✓ / ⚠] Commit drafts all landed in git log
-
-Reply with one of:
-  approve         — gate cleared. Run the merge checklist when ready.
-  revise: <text>  — adjust the PR draft or vault updates
-  merged          — (after running the merge) finalize state, log to hot.md
-  abort           — halt without merging
+Decision →  approve · revise <what> · merged · abort
 ```
 
 ## Gate clearance

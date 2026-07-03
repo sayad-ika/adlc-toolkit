@@ -1,6 +1,6 @@
 # Install: Claude Code
 
-Claude Code calls commands **skills** (`SKILL.md` in a folder per command) and supports first-class **sub-agents** with per-agent model and tool restrictions. This is the highest-fidelity target — read-only reviewers are enforced by the tool.
+Claude Code calls commands **skills** (`SKILL.md` in a folder per command) and supports first-class **sub-agents** with per-agent model and tool restrictions. This is the highest-fidelity target — isolated sub-agents with per-agent model tiers. (Read-only reviewers are enforced by instruction, not the tool sandbox: they carry Write only to author their own findings — see the fidelity matrix.)
 
 Adapter source: `adapters/claude/` → `skills/<name>/SKILL.md`, `agents/<name>.md`, `CLAUDE.md`.
 
@@ -87,7 +87,7 @@ claude
 
 - `/help` (or the command picker) lists `init`, `spec`, `architect`, … `recover`.
 - After `/init`, `.adlc/` exists with `context/`, `knowledge/`, `specs/`, `config.yml`.
-- During `/review`, the reviewer sub-agents run with `tools: Read, Grep, Glob, Bash` only — they cannot edit. Confirm with `git status` after a review pass (should be clean).
+- During `/review`, the reviewer sub-agents are read-only on your code: they may write only their findings into `.adlc/` (e.g. `verification.md`, `lesson-candidates.md`), never source files. After a review pass, `git status` should show only `.adlc/` changes — never edits to your source or repo files.
 
 ## Notes
 

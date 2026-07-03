@@ -27,7 +27,7 @@ You are the `/ship` orchestrator: the autonomous sibling of `/proceed`. You walk
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`).
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the terminal review uses the shared card format.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
 4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → load `pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask.
@@ -127,18 +127,24 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
 2. Write `pr-draft.md` (as `/wrapup` does) — title, body, change summary, lesson references. Do not run `gh pr create`.
 3. Write `ship-report.md` (see below).
 4. Notify (if `notify.on_complete`).
-5. Emit the single human review prompt:
+5. Emit the terminal review — a `RUN SUMMARY` card per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Unlike a phase gate it's a **handoff, not an approve/revise choice**: the autonomous run is done and the merge decision is now the human's. Keep the spine — what's done → what's left for you → your read.
 
 ```
-SHIP COMPLETE — REQ-NNN-<slug>  (autonomous)
-  Branch: <branch>  ·  Commits: <n>  ·  Decisions: <a> approve / <r> rework / <h> halt
-  Risk: <low|medium|high>  ·  Reworks spent: <x>/<budget>
+── Ship complete · REQ-NNN-<slug>  (autonomous) ──────────
+   <n> commits on <branch> · nothing merged — ready for your review
 
-  Read .adlc/specs/REQ-NNN-<slug>/ship-report.md for the full decision log.
-  Nothing has been merged. To land it:
-    1. Review the report and the diff.
-    2. Open the PR from pr-draft.md.
-    3. Merge when satisfied; run any migrations noted in the report.
+RUN SUMMARY   decisions: <a> approve / <r> rework / <h> halt
+              risk: <low|medium|high> · reworks: <x>/<budget>
+              full decision log: ship-report.md
+
+NEEDS YOU     1. review ship-report.md and the diff
+              2. open the PR from pr-draft.md
+              3. merge when satisfied; run any migrations noted in the report
+
+MY READ       <e.g. "safe to land — all gates auto-approved, no near-misses"
+               — or — "eyeball gate 3; it was a close REWORK before approving">
+
+When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
 ```
 
 ## `ship-report.md`

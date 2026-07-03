@@ -29,6 +29,7 @@ Team-shaped defaults are configurable, not baked in: REQ IDs can come from your 
 → **[Quickstart](docs/quickstart.md)** — zero to your first gated REQ in four steps.
 → **Install for your tool:** [Claude Code](docs/install/claude.md) · [Cursor](docs/install/cursor.md) · [GitHub Copilot](docs/install/copilot.md) · [OpenAI Codex](docs/install/codex.md) · [Gemini CLI](docs/install/gemini.md)
 → **[Fidelity matrix](docs/fidelity-matrix.md)** — what's first-class vs. degraded on each tool.
+→ **[Gate cards](docs/gate-cards.md)** — how every human gate presents its decision.
 
 ## How it works
 

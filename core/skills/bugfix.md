@@ -20,7 +20,7 @@ If during investigation the bug turns out to be larger than expected, **stop and
 
 ## Preflight
 
-1. **Read the toolkit ETHOS.**
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at every gate below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/conventions.md`, `context/architecture.md`.
 3. **Assign the BUG ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), applied to the `BUG` namespace: `sequential` (`BUG-NNN`, scan `.adlc/bugs/` for max+1, pad to 3), `prefixed` (`BUG-<req.prefix>-NNN`), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`, e.g. `BUG-842`; else fall back to prefixed/sequential, noting it). Throughout, `BUG-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Create the bug folder:** `.adlc/bugs/BUG-NNN-<slug>/`.
@@ -57,24 +57,25 @@ Seeded content is a **draft, not truth**. The gate's runnable-repro requirement 
 }
 ```
 
-### Gate prompt
+### Gate card
+
+Emit per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (loaded at preflight). A bug-report gate is lean and adds a `reframe` option:
+
+- **Verdict** — "report ready — recommend approve", or "needs a runnable repro".
+- **NEEDS YOU** — a missing / still-non-runnable repro, or a label suggesting this is a feature not a defect (→ reframe). Omit if none.
+- **CHECKS** — symptom concise · repro runnable · expected-vs-actual concrete · environment captured.
+- **MY READ** — recommendation + why (never approve without a runnable repro).
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ investigate), **revise** (refine the report), **reframe** (convert to a feature REQ — calls `/spec`), **abort** (discard).
 
 ```
-🛑 Gate: Bug report — BUG-NNN-<slug>
+── Gate 1 of 5 · Bug report · BUG-NNN-<slug> ──────────
+   report ready — recommend approve
 
-Drafted: .adlc/bugs/BUG-NNN-<slug>/bug.md
+CHECKS   ✓ symptom concise · ✓ repro runnable · ✓ expected vs actual · ✓ environment
 
-Inline check:
-[✓ / ⚠] Symptom described in one or two sentences
-[✓ / ⚠] Reproduction steps are runnable
-[✓ / ⚠] Expected vs actual is concrete
-[✓ / ⚠] Environment captured
+MY READ  approve — repro is clean and reproduces the symptom
 
-Reply:
-  approve         — proceed to investigation
-  revise: <text>  — refine the report
-  reframe         — convert this to a feature REQ (will call /spec)
-  abort           — discard
+Decision →  approve · revise <what> · reframe · abort
 ```
 
 On `approve`: clear gate, advance.
@@ -119,31 +120,28 @@ Sketch a fix approach in the bug.md "Fix approach" section. Two or three bullets
 
 While diagnosing, if the codebase quirk that produced the bug or any insight from `investigation.md` deserves vault capture, append a candidate to `.adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md` (source tag `bugfix-investigate`). The Phase 5 verdict step decides whether it becomes a lesson, gotcha, or discard.
 
-### Gate prompt
+### Gate card
+
+Emit per the gate protocol:
+
+- **Verdict** — "root cause found — recommend approve", or "scope looks bigger than a bug (→ reframe)".
+- **READY** — root cause `<file>:<line>` in one sentence; fix approach in 2-3 bullets; related vault entries (`[[…]]`).
+- **NEEDS YOU** — only if the diagnosis is uncertain or scope is creeping (→ reframe). Omit otherwise.
+- **CHECKS** — diagnosis matches repro · fix in scope (no creep) · regression-test plan concrete.
+- **MY READ** — recommendation + why.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ fix), **revise** (refine diagnosis/approach), **reframe** (scope too big → feature REQ), **abort** (halt; cleanup worktree).
 
 ```
-🛑 Gate: Investigation — BUG-NNN-<slug>
+── Gate 2 of 5 · Investigation · BUG-NNN-<slug> ──────────
+   root cause found — recommend approve
 
-Root cause: <file>:<line> — <one-sentence summary>
+READY    cause: src/pay/retry.ts:88 — retry re-enters before the guard clears
+         approach: move the idempotency check above the retry loop; add a guard test
+CHECKS   ✓ diagnosis matches repro · ✓ in scope · ✓ regression plan concrete
 
-Fix approach:
-- <bullet>
-- <bullet>
+MY READ  approve — tight diagnosis, contained fix
 
-Reviewer-style cross-check:
-[✓ / ⚠] Diagnosis matches the repro (the cause would produce the observed symptom)
-[✓ / ⚠] Fix approach is in scope (no scope creep)
-[✓ / ⚠] Regression test plan is concrete
-
-Related vault entries:
-- [[knowledge/gotchas#^gNN|GNN]] — short note (if applicable)
-- [[knowledge/lessons/LESSON-NNN]] — short note (if applicable)
-
-Reply:
-  approve         — proceed to fix
-  revise: <text>  — refine the diagnosis or approach
-  reframe         — convert to a feature REQ (scope too big)
-  abort           — halt; cleanup worktree
+Decision →  approve · revise <what> · reframe · abort
 ```
 
 ## Phase 3 — Fix (gate)
@@ -176,21 +174,26 @@ After task-implementer returns:
 - Confirm running the original repro steps no longer produces the bug
 - Confirm no other tests broke
 
-### Gate prompt
+### Gate card
+
+Emit per the gate protocol:
+
+- **Verdict** — "fixed, regression test green — recommend approve".
+- **READY** — `<count>` files changed; regression test `<name>` (fails before, passes after); all tests pass; commit drafted.
+- **CHECKS** — regression test present · original repro no longer triggers · no other tests broke.
+- **MY READ** — recommendation + why.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ verify), **revise** (adjust the fix), **abort**.
 
 ```
-🛑 Gate: Fix — BUG-NNN-<slug>
+── Gate 3 of 5 · Fix · BUG-NNN-<slug> ──────────
+   fixed, regression test green — recommend approve
 
-Files changed: <count>
-Tests added: <count> (regression: <name>)
-All tests pass: ✓
+READY    3 files · regression: retry_guard_test (red→green) · all tests pass · commit drafted
+CHECKS   ✓ regression test · ✓ repro no longer triggers · ✓ no other tests broke
 
-Commit drafted: .adlc/bugs/BUG-NNN-<slug>/commits-draft.md
+MY READ  approve — fix is contained and covered
 
-Reply:
-  approve         — proceed to verify
-  revise: <text>  — adjust the fix
-  abort
+Decision →  approve · revise <what> · abort
 ```
 
 ## Phase 4 — Verify (gate)
@@ -205,23 +208,24 @@ When dispatching, pass `Candidates file: .adlc/bugs/BUG-NNN-<slug>/lesson-candid
 
 Consolidate into `.adlc/bugs/BUG-NNN-<slug>/verification.md` with the same shape as `/review`'s output but only two reviewer sections.
 
-### Gate prompt
+### Gate card
+
+Emit per the gate protocol — findings-led like `/review`, but only two reviewers (correctness, reflector):
+
+- **Verdict** — "`<total>` findings — `<k>` need a call", or "clean — recommend approve".
+- **FINDINGS** — one line each, `crit / maj / min` + reviewer. This block is the `NEEDS YOU`.
+- **MY READ** — recommendation + why (never approve while a Critical stands).
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ ship), **fix** (`<ids>`), **revise**, **abort**.
 
 ```
-🛑 Gate: Verify — BUG-NNN-<slug>
+── Gate 4 of 5 · Verify · BUG-NNN-<slug> ──────────
+   clean — no findings, recommend approve
 
-Reviewers: correctness, reflector
+FINDINGS  (none)
 
-Findings:
-  Critical: <N>
-  Major:    <N>
-  Minor:    <N>
+MY READ   approve — correctness and reflector both clean
 
-Reply:
-  approve              — proceed to ship
-  fix: <ids>           — apply fixes
-  revise: <text>       — other revisions
-  abort
+Decision →  approve · fix <ids> · revise <what> · abort
 ```
 
 ## Phase 5 — Ship (gate)
@@ -253,35 +257,30 @@ Same shape as `/wrapup`'s `merge-checklist.md`.
 
 Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. External write — hard-stop-eligible, capped by `sources.write` and (under `/ship`) `autonomy.sources`.
 
-### Gate prompt
+### Gate card
+
+Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
+
+- **Verdict** — "PR + vault ready — run the checklist".
+- **READY** — PR draft (`bug-fix-pr-draft.md`); merge checklist; vault capture in one line (candidates `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; hot entries).
+- **NEEDS YOU** — a drafted source write-back awaiting approval (external write, hard-stop-eligible, never auto-sent); or, if promoted + demoted = 0, the mandatory-capture confirmation (bugfix requires at least one non-discard — confirm, or `revise: capture` to walk back through `bug.md` / `investigation.md` / `verification.md`). Omit if neither applies.
+- **CHECKS** — regression test in the diff · commit drafts landed in git log · no debug artifacts.
+- **MY READ** — recommendation + why.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-🛑 Gate: Ship — BUG-NNN-<slug>
+── Gate 5 of 5 · Ship · BUG-NNN-<slug> ──────────
+   PR + vault ready — run the checklist
 
-PR drafted: .adlc/bugs/BUG-NNN-<slug>/bug-fix-pr-draft.md
-Merge checklist: .adlc/bugs/BUG-NNN-<slug>/merge-checklist.md
+READY       PR: bug-fix-pr-draft.md · merge-checklist.md
+            vault: 2 candidates → ^g14 gotcha, 1 hot entry
+NEEDS YOU   (none — capture satisfied)
 
-Source write-back (only if sources.write is configured):
-  Proposed: comment on <issue> + transition → Closed
-  Draft:    .adlc/bugs/BUG-NNN-<slug>/source-writeback.md
-  ⚠ Not sent until you approve — external write, hard-stop-eligible.
+CHECKS      ✓ regression test in diff · ✓ commits in log · ✓ no debug
 
-Vault updates from candidates:
-  Candidates considered:    <N>
-  Promoted to lesson:       <count> — <list of new LESSON-NNN>
-  Demoted to gotcha:        <count> — <list of new ^gNN>
-  Discarded:                <count> — see lesson-candidates.md verdicts
-  Hot log:                  <count> entries
+MY READ     approve — fix is shipped-ready; knowledge captured
 
-  ⚠ If "Promoted + Demoted = 0" on a bugfix — confirm this fix genuinely
-    produced no vault-worthy knowledge, or `revise: capture` to walk back
-    through bug.md, investigation.md, and verification.md.
-
-Reply:
-  approve         — gate cleared, run the merge checklist
-  revise: <text>
-  merged          — finalize after merge
-  abort
+Decision →  approve · revise <what> · merged · abort
 ```
 
 ## Constraints

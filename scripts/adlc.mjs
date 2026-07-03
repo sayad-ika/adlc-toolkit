@@ -282,7 +282,7 @@ function buildModel(toolkitPath) {
   }
   function agentBody(a) {
     const ro = a.readonly
-      ? `**READ-ONLY.** Do not edit, write, or create source files, and never run git write commands. You report findings only — the orchestrator consolidates them and the user decides what to fix.`
+      ? `**Read-only on source and repo.** You may write ONLY your own findings/report artifact in the vault (named in your role doc) — never source, config, or repository files, and never git writes. A fix you'd make is a finding, not an edit. You report findings only — the orchestrator consolidates them and the user decides what to fix.`
       : `You write code for the assigned task only. Never run git write commands.`;
     return [
       `You are the **${a.name}** agent in the ADLC pipeline.`,
@@ -293,7 +293,7 @@ function buildModel(toolkitPath) {
     ].join('\n');
   }
   const claudeTools = (a) =>
-    a.readonly ? 'Read, Grep, Glob, Bash' : 'Read, Write, Edit, Grep, Glob, Bash';
+    'Read, Write, Edit, Grep, Glob, Bash'; // all agents get Write; read-only agents write ONLY their own findings (role doc + ETHOS #3), never source
   const model = (tool, tier) =>
     (manifest.tierToModel[tool] && manifest.tierToModel[tool][tier]) || 'default';
 
@@ -308,7 +308,7 @@ function buildModel(toolkitPath) {
       `**The six principles (full text: \`${tp}/ETHOS.md\`):**`,
       `1. **You decide; the assistant drafts.** Every phase boundary pauses for the user. Git writes follow \`${manifest.vaultDir}/config.yml\` → \`git.mode\` (default \`manual\` = the assistant drafts; you run git).`,
       `2. **Spec first, code second.** Never implement without a validated spec.`,
-      `3. **Read-only reviewers.** Review/audit agents report findings; they never edit. The user decides what gets fixed.`,
+      `3. **Read-only reviewers.** Review/audit agents are read-only on your code — they write only their own findings, never source. The user decides what gets fixed.`,
       `4. **Knowledge compounds.** Every change leaves the vault smarter — lessons, gotchas, concepts, ADRs.`,
       `5. **Process is explicit.** Skill steps are a protocol, not a guideline. No shortcuts; no \`--no-verify\`.`,
       `6. **Ask in options, not open prose.** When you need a decision from the user, present discrete labeled options with a recommendation, not an open-ended question. On Claude, use the \`AskUserQuestion\` tool; elsewhere, a short numbered list inline. The user can always go off-menu.`,
@@ -369,7 +369,7 @@ function buildModel(toolkitPath) {
           `name = ${tomlStr(a.name)}\n` +
           `description = ${tomlStr(a.description)}\n` +
           `model = ${tomlStr(model('codex', a.tier))}\n` +
-          `read_only = ${a.readonly ? 'true' : 'false'}\n` +
+          `read_only = false\n` +
           `instructions = """\n${agentBody(a)}\n"""\n`,
       }),
       memory: { path: 'AGENTS.md', body: memoryFile('OpenAI Codex') },

@@ -20,7 +20,9 @@ It exists for one reason hand-editing YAML can't satisfy: some settings have a *
 
 **C. Interactive (any other free text, or a bare request to "change settings").** Present the editable groups as labeled options (ETHOS principle 6 — use the assistant's structured-question UI if it has one). When the user picks a setting, present its **allowed values as options** with the current one marked. Confirm the before→after, then apply.
 
-**D. Migrate (`migrate`, `update`, or "pick up new settings after updating the toolkit").** Add keys/blocks the toolkit has gained since this vault was created, without changing any existing value. See "Migrate" below. This is the supported way to refresh an existing `.adlc/` after a `git pull` of the toolkit — `/init` is one-shot and won't touch a populated vault.
+**D. Migrate (`migrate`, `update`, or "pick up new settings after updating the toolkit").** Add keys/blocks the toolkit has gained since this vault was created, without changing any existing value, then **offer** a template refresh (mode E). See "Migrate" below. This is the supported way to refresh an existing `.adlc/` after a `git pull` of the toolkit — `/init` is one-shot and won't touch a populated vault.
+
+**E. Refresh templates (`templates`, `refresh-templates`, or offered at the end of `migrate`).** Update this vault's `.adlc/templates/` copies to match the toolkit's current `templates/` after an update — gated, per file, never silent. See "Template refresh" below.
 
 In every mode, **confirm before writing** when a value actually changes: show `key: old → new` and any derived-file re-sync that will follow, and proceed only on explicit confirmation. There's no formal gate, but a settings change is consequential — don't write silently.
 
@@ -84,6 +86,27 @@ When the toolkit gains new settings (e.g. `workflow.edits`, the `sources` block,
 
 If the project config is already current, say so and write nothing.
 
+7. **Offer template refresh.** A toolkit update usually changes the templates too (e.g. new diagram sections), and those live in `.adlc/templates/`, not `config.yml`. After the config keys are handled, offer to run the template refresh (mode E / below) as a separate, clearly-labeled gated step. The user can decline it independently of the config migration.
+
+## Template refresh (vault templates vs. the toolkit's)
+
+Each vault carries its own copy of the in-REQ and vault templates under `.adlc/templates/`, seeded once at `/init`. When the toolkit's `templates/` change (e.g. new Mermaid diagram sections in the spec and architecture templates), existing vaults keep the old copies until refreshed here. This is **not additive** — a template is a whole file — so it is always gated and always resolved per file.
+
+The hazard mirrors the `local/` overlay-shadow problem: a vault template may have been hand-edited for this project, and we can't distinguish an intentional customization from staleness. So we never overwrite silently — show the difference and let the user decide, file by file.
+
+**Steps:**
+
+1. **Enumerate.** Walk `$TOOLKIT_PATH/templates/` recursively (including `templates/vault/`) and compare each file with the matching path under `.adlc/templates/`. Classify each:
+   - **current** — byte-identical. Skip.
+   - **missing in vault** — the toolkit ships it, the vault lacks it (a newly added template). Low-risk to add.
+   - **differs** — both exist but differ. Could be a toolkit improvement, a project customization, or both. Flag for review.
+2. **Preview per file.** For every non-current file, show a unified diff (vault copy → toolkit copy) with a one-line note on what changed. Group them: lead with **missing** (safe additions), then **differs** (call these out as possibly-customized).
+3. **Choose per file.** Present options (ETHOS principle 6 — use the assistant's structured-question UI if it has one): **update** (overwrite the vault copy with the toolkit's), **keep** (leave the vault copy untouched), plus batch shortcuts **add all missing** and **update all**. Recommend *update* for `missing` files and for `differs` files whose vault copy shows no project-specific content; recommend *keep* where the diff shows obvious local customization.
+4. **Apply** only the chosen updates. Never touch a file the user chose to keep.
+5. **Report + log.** List what was updated / added / kept, and append one line to `.adlc/hot.md`: `## [DATE] config-templates | updated: <files>`.
+
+This skill replaces whole template files; it does **not** merge. If a user wants to keep local edits *and* take the upstream changes, that's their manual merge — show both sides and let them do it. If every template is already current, say so and write nothing.
+
 ## Derived-file sync
 
 After writing config, refresh anything that mirrors a setting:
@@ -110,4 +133,4 @@ No other setting currently has a derived file — `workflow.isolation`, `workflo
 
 ## Output
 
-The edited `.adlc/config.yml` (minimal diff), a possibly-updated `.adlc/CLAUDE.md` git-policy section, one `hot.md` line, and a change summary in chat. In show mode: nothing written, current settings printed in chat. In migrate mode: additive insertions only (missing blocks/keys with their template comments), a `config-migrate` line in `hot.md`, and a summary of what was added vs. already current.
+The edited `.adlc/config.yml` (minimal diff), a possibly-updated `.adlc/CLAUDE.md` git-policy section, one `hot.md` line, and a change summary in chat. In show mode: nothing written, current settings printed in chat. In migrate mode: additive insertions only (missing blocks/keys with their template comments), a `config-migrate` line in `hot.md`, and a summary of what was added vs. already current, followed by the offer to refresh templates. In templates mode: per-file overwrites of `.adlc/templates/` for the files the user chose to update, a `config-templates` line in `hot.md`, and a summary of updated / added / kept.
