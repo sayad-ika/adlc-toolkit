@@ -1,11 +1,11 @@
 ---
-name: ship
+name: autopilot
 description: Autonomous end-to-end pipeline. Runs /spec → /architect → /implement → /review → /wrapup like /proceed, but instead of pausing at each gate it routes the decision through the decision-maker agent, commits its work as it goes, and ends in a single terminal human review backed by a full audit log. Opt-in; conservative by default; never merges to main or rewrites history.
 ---
 
-You are the `/ship` orchestrator: the autonomous sibling of `/proceed`. You walk a REQ through all five phases **without pausing at the inline gates**. At each boundary you let the `decision-maker` decide (APPROVE / REWORK / HALT), you commit checkpoints as you go, and you finish with a feature branch, a drafted PR, and a complete `ship-report.md` for one terminal human review.
+You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You walk a REQ through all five phases **without pausing at the inline gates**. At each boundary you let the `decision-maker` decide (APPROVE / REWORK / HALT), you commit checkpoints as you go, and you finish with a feature branch, a drafted PR, and a complete `run-report.md` for one terminal human review.
 
-`/ship` does not delete the human gate — it **batches** it to the end and backs it with an audit trail. Every decision you make is logged, conservative by default, and bounded by circuit breakers. Read `$TOOLKIT_PATH/ETHOS.md` first: this skill honors principle 1 (you decide; the assistant drafts) by keeping the *merge* decision human, and principle 5 (process is explicit) by logging every intermediate verdict rather than hand-waving it.
+`/autopilot` does not delete the human gate — it **batches** it to the end and backs it with an audit trail. Every decision you make is logged, conservative by default, and bounded by circuit breakers. Read `$TOOLKIT_PATH/ETHOS.md` first: this skill honors principle 1 (you decide; the assistant drafts) by keeping the *merge* decision human, and principle 5 (process is explicit) by logging every intermediate verdict rather than hand-waving it.
 
 ## When to use
 
@@ -15,15 +15,15 @@ You are the `/ship` orchestrator: the autonomous sibling of `/proceed`. You walk
 ## When NOT to use
 
 - High-stakes work where the user wants to see each phase. Use `/proceed`.
-- A REQ that obviously touches a hard-stop category (auth, security, secrets, payments, data migration, public-API contract, irreversible ops) — `/ship` will halt at the relevant gate anyway, so `/proceed` is usually less friction.
+- A REQ that obviously touches a hard-stop category (auth, security, secrets, payments, data migration, public-API contract, irreversible ops) — `/autopilot` will halt at the relevant gate anyway, so `/proceed` is usually less friction.
 
 ## Invocation patterns
 
-- `/ship <free-text feature description>` — start a new REQ and run it autonomously.
-- `/ship REQ-NNN-<slug>` — run or resume an existing REQ autonomously from its pipeline-state.
-- `/ship REQ-NNN-<slug> --dry-run` — plan only: emit the decisions you *would* make at each gate; execute nothing, commit nothing.
-- `/ship REQ-NNN-<slug> --until=<phase>` — run autonomously up to a named phase (spec|architect|implement|verify), then hand to the human.
-- `/ship REQ-NNN-<slug> --gates=<manual|assisted|auto>` — override the gates dial for this run.
+- `/autopilot <free-text feature description>` — start a new REQ and run it autonomously.
+- `/autopilot REQ-NNN-<slug>` — run or resume an existing REQ autonomously from its pipeline-state.
+- `/autopilot REQ-NNN-<slug> --dry-run` — plan only: emit the decisions you *would* make at each gate; execute nothing, commit nothing.
+- `/autopilot REQ-NNN-<slug> --until=<phase>` — run autonomously up to a named phase (spec|architect|implement|verify), then hand to the human.
+- `/autopilot REQ-NNN-<slug> --gates=<manual|assisted|auto>` — override the gates dial for this run.
 
 ## Preflight
 
@@ -52,7 +52,7 @@ Before the phase walk (and refine it after `/architect`), compute and store a ri
 - **Sensitivity** — does it touch any `hard_stops` area (auth, security, secrets, payments, data-migration, public-API-contract, infra/CI)?
 - **Reversibility** — additive/reversible vs. destructive/irreversible.
 
-If the profile flags a hard-stop area, mark the relevant gate `forced_halt: true`. High-risk REQs auto-downgrade: `/ship` runs the easy phases autonomously and **always** halts at the sensitive gate for the human. Record this in `gate-decisions.md` when it fires.
+If the profile flags a hard-stop area, mark the relevant gate `forced_halt: true`. High-risk REQs auto-downgrade: `/autopilot` runs the easy phases autonomously and **always** halts at the sensitive gate for the human. Record this in `gate-decisions.md` when it fires.
 
 ## The autonomous gate loop
 
@@ -101,7 +101,7 @@ Never inline the whole diff, the whole spec context, or vault context files — 
 
 ## Git behavior
 
-`/ship` is the **one** skill granted commit authority — a deliberate, scoped exception to the toolkit's "the user runs all git" rule, bounded to a history-preserving allow-list:
+`/autopilot` is the **one** skill granted commit authority — a deliberate, scoped exception to the toolkit's "the user runs all git" rule, bounded to a history-preserving allow-list:
 
 **Allowed:** `git add`; `git commit` to the REQ's feature branch; `git switch -c` / `git checkout -b` for the feature branch; worktree create/remove; under `commit+push`, `git push` to the feature branch **fast-forward only**.
 
@@ -125,7 +125,7 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
 
 1. Ensure the feature branch holds the checkpoint commits; under `commit+push`, fast-forward push it.
 2. Write `pr-draft.md` (as `/wrapup` does) — title, body, change summary, lesson references. Do not run `gh pr create`.
-3. Write `ship-report.md` (see below).
+3. Write `run-report.md` (see below).
 4. Notify (if `notify.on_complete`).
 5. Emit the terminal review — a `RUN SUMMARY` card per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Unlike a phase gate it's a **handoff, not an approve/revise choice**: the autonomous run is done and the merge decision is now the human's. Keep the spine — what's done → what's left for you → your read.
 
@@ -135,9 +135,9 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
 
 RUN SUMMARY   decisions: <a> approve / <r> rework / <h> halt
               risk: <low|medium|high> · reworks: <x>/<budget>
-              full decision log: ship-report.md
+              full decision log: run-report.md
 
-NEEDS YOU     1. review ship-report.md and the diff
+NEEDS YOU     1. review run-report.md and the diff
               2. open the PR from pr-draft.md
               3. merge when satisfied; run any migrations noted in the report
 
@@ -147,9 +147,9 @@ MY READ       <e.g. "safe to land — all gates auto-approved, no near-misses"
 When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
 ```
 
-## `ship-report.md`
+## `run-report.md`
 
-The artifact that earns the autonomy. Write to `.adlc/specs/REQ-NNN-<slug>/ship-report.md`:
+The artifact that earns the autonomy. Write to `.adlc/specs/REQ-NNN-<slug>/autopilot-report.md`:
 
 - **Summary** — what was built, against which acceptance criteria.
 - **Decision log** — every gate verdict (from `gate-decisions.md`): phase, verdict, confidence, rationale, independence.
@@ -161,7 +161,7 @@ The artifact that earns the autonomy. Write to `.adlc/specs/REQ-NNN-<slug>/ship-
 
 ## Resumability
 
-Same `pipeline-state.json` model as `/proceed`. A HALT leaves a normal awaiting-gate that `/ship`, `/proceed`, or `/recover` can pick up. Add to pipeline-state: `mode: "ship"`, `risk`, `reworkBudgetSpent`, and per-gate `reworkLoops`. `--dry-run` writes nothing but the emitted plan. On resume, re-read pipeline-state as the source of truth; never skip a phase silently.
+Same `pipeline-state.json` model as `/proceed`. A HALT leaves a normal awaiting-gate that `/autopilot`, `/proceed`, or `/recover` can pick up. Add to pipeline-state: `mode: "ship"`, `risk`, `reworkBudgetSpent`, and per-gate `reworkLoops`. `--dry-run` writes nothing but the emitted plan. On resume, re-read pipeline-state as the source of truth; never skip a phase silently.
 
 ## Notifications
 
@@ -179,11 +179,11 @@ If `autonomy.notify.on_halt`, ping the user when the run halts (escalation needs
 
 ## Done condition
 
-`/ship` completes when:
+`/autopilot` completes when:
 
 - All five phases ran; the ship gate cleared (deterministically or via the decision-maker).
 - Checkpoint commits exist on the feature branch; nothing is merged.
-- `pr-draft.md` and `ship-report.md` are written; `gate-decisions.md` logs every gate.
+- `pr-draft.md` and `run-report.md` are written; `gate-decisions.md` logs every gate.
 - The terminal review prompt is emitted and (if configured) the completion ping sent.
 
 OR when a HALT or a circuit breaker stops the run, at which point `.awaiting-approval` holds the open question, the halt ping is sent, and the run is cleanly resumable.

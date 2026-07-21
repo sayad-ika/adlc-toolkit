@@ -1,6 +1,6 @@
 # Gate cards — how the pipeline asks for your decision
 
-Every human gate in the ADLC pipeline — the pause at the end of `/spec`, `/architect`, `/implement`, `/review`, `/wrapup`, and inside `/bugfix`, `/task`, and `/ship` — presents the same **gate card**: a compact, scannable summary that ends in a decision. This page is the reader's tour; the authoritative spec the skills follow is [`core/GATE-PROTOCOL.md`](../core/GATE-PROTOCOL.md).
+Every human gate in the ADLC pipeline — the pause at the end of `/spec`, `/architect`, `/implement`, `/review`, `/wrapup`, and inside `/bugfix`, `/task`, and `/autopilot` — presents the same **gate card**: a compact, scannable summary that ends in a decision. This page is the reader's tour; the authoritative spec the skills follow is [`core/GATE-PROTOCOL.md`](../core/GATE-PROTOCOL.md).
 
 ## The idea
 
@@ -26,7 +26,7 @@ MY READ     the recommendation + one-line why
 Decision →  the gate's options
 ```
 
-`READY` / `NEEDS YOU` / `CHECKS` / `MY READ` are a **palette, not a fixed form** — each gate uses the sections its phase needs and can rename or add its own. A spec gate is often just verdict + `CHECKS` + decision; a review gate leads with `FINDINGS`; `/wrapup` shows a ship checklist; `/ship`'s terminal review opens with a `RUN SUMMARY`. The *spine* (done → needs-you → recommend → decide) is what's constant.
+`READY` / `NEEDS YOU` / `CHECKS` / `MY READ` are a **palette, not a fixed form** — each gate uses the sections its phase needs and can rename or add its own. A spec gate is often just verdict + `CHECKS` + decision; a review gate leads with `FINDINGS`; `/wrapup` shows the wrap-up checklist; `/autopilot`'s terminal review opens with a `RUN SUMMARY`. The *spine* (done → needs-you → recommend → decide) is what's constant.
 
 ## Example — the architect gate
 

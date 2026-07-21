@@ -259,9 +259,9 @@ Files:
 
 ### 9. Emit the gate card
 
-Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A verify gate **leads with findings** — that's its `NEEDS YOU` — and swaps in its own options (`fix` alongside approve/revise/abort). Map:
+Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads with findings** — that's its `NEEDS YOU` — and swaps in its own options (`fix` alongside approve/revise/abort). Map:
 
-- **Header** — `Gate 4 of 5 · Verify · REQ-NNN-<slug>`.
+- **Header** — `Gate 4 of 5 · Review · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "`<total>` findings — `<k>` need a call", or "clean — no findings, recommend approve".
 - **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. This block *is* the `NEEDS YOU` for this gate.
 - **READY** (brief) — `<4 or 5>` reviewers ran; lesson candidates surfaced `<total>` (verdicts at `/wrapup`); UI/UX review tier + counts (or "not run — no UI surface"; omit entirely when the project has no frontend); stale-repo-docs count with the offending path when non-zero (fix in this diff before merging).
@@ -272,7 +272,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A verify gate **leads w
 Example shape:
 
 ```
-── Gate 4 of 5 · Verify · REQ-NNN-<slug> ──────────
+── Gate 4 of 5 · Review · REQ-NNN-<slug> ──────────
    3 findings — 1 needs a call
 
 FINDINGS    crit · correctness  double-charge path on retry (src/pay/retry.ts:88)

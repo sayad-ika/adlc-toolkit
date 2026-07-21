@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}} — `.adlc/` Vault
 
-This directory is the project's knowledge vault and SDLC workspace. It's an Obsidian-compatible vault — open it in Obsidian for graph view and backlinks, or just edit the markdown directly.
+This directory is the project's knowledge vault and ADLC workspace. It's an Obsidian-compatible vault — open it in Obsidian for graph view and backlinks, or just edit the markdown directly.
 
 ## Read this first
 
@@ -41,4 +41,4 @@ Each phase of `/proceed` creates or updates artifacts in this vault:
 4. `/review` → `specs/REQ-xxx/verification.md`
 5. `/wrapup` → `pr-draft.md`, updates to `lessons/`, `gotchas.md`, `concepts/`, `index.md`, `hot.md`
 
-You commit everything yourself. Claude never runs git.
+By default you commit everything yourself (`git.mode: manual`). You can let the assistant commit or push on the feature branch — see `config.yml` → Git policy.

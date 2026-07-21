@@ -122,8 +122,8 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
    | 1 — Spec     | `requirement.md` | — |
    | 2 — Architect | `architecture.md`, `tasks/`, any `exploration.md` content authored by /architect | — |
    | 3 — Implement | per-task implementation notes in `tasks/`; reset task completion flags in pipeline-state | — |
-   | 4 — Verify    | `verification.md` | — |
-   | 5 — Ship      | `pr-draft.md`, `merge-checklist.md` | `knowledge/lessons/L-*` entries this REQ added; `knowledge/gotchas.md` `^g##` anchors this REQ added; `architecture/adr-*` files this REQ added |
+   | 4 — Review    | `verification.md` | — |
+   | 5 — Wrap up   | `pr-draft.md`, `merge-checklist.md` | `knowledge/lessons/L-*` entries this REQ added; `knowledge/gotchas.md` `^g##` anchors this REQ added; `architecture/adr-*` files this REQ added |
 
    Knowledge-layer entries authored by /wrapup are **tombstoned, not deleted** — they remain in the vault with a banner: `> **STATUS: retracted on YYYY-MM-DD via /proceed --revert from REQ-NNN-<slug>** — kept for historical reference.` Institutional memory is lossy on the way out, never silently wiped.
 
@@ -294,8 +294,8 @@ The phase-to-skill mapping:
 | 1 — Spec | `/spec` |
 | 2 — Architect | `/architect` |
 | 3 — Implement | `/implement` |
-| 4 — Verify | `/review` |
-| 5 — Ship | `/wrapup` |
+| 4 — Review | `/review` |
+| 5 — Wrap up | `/wrapup` |
 
 Each phase skill knows how to:
 

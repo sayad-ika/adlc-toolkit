@@ -34,7 +34,7 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 |---|---|---|
 | `project.name` | free text | non-empty |
 | `project.description` | free text | one line |
-| `git.mode` | `manual` \| `commit` \| `commit+push` | **derived-file sync** (see below). Lowering it below `autonomy.git` silently caps `/ship`; mention that. |
+| `git.mode` | `manual` \| `commit` \| `commit+push` | **derived-file sync** (see below). Lowering it below `autonomy.git` silently caps `/autopilot`; mention that. |
 | `git.protect` | list of branch globs | must be non-empty; warn (don't block) if `main`/`master` is removed |
 | `workflow.isolation` | `auto` \| `branch` \| `worktree` | explain the trade-off when changing (branch keeps the editor session; worktree tolerates a dirty checkout) |
 | `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | in-phase edit friction for the implementer. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
@@ -43,9 +43,9 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `sources.repo` | free text (`owner/name`) | default repo for bare refs like `/spec #8`. |
 | `sources.write` | list — subset of the configured services | **default empty (reads only).** Listing a service enables gated write-back (`/wrapup`, `/bugfix` P5). **Warn before enabling:** this permits external writes (issue comments/transitions); every write is still drafted and approved at a gate, never silent. |
 | `sources.mechanism` | `auto` \| `gh` \| `mcp` \| `url` | override the auto resolution order. Rarely needed; default `auto`. |
-| `autonomy.gates` | `manual` \| `assisted` \| `auto` | only consumed by `/ship` |
+| `autonomy.gates` | `manual` \| `assisted` \| `auto` | only consumed by `/autopilot` |
 | `autonomy.git` | `read-only` \| `commit` \| `commit+push` | **capped by `git.mode`** — refuse to set it higher than `git.mode` (offer to raise `git.mode` too, or set the capped value) |
-| `autonomy.sources` | `read-only` \| `write` | only consumed by `/ship`. **Capped by `sources.write`** — refuse to set `write` if `sources.write` is empty (offer to populate it first). External writes are hard-stop-eligible. |
+| `autonomy.sources` | `read-only` \| `write` | only consumed by `/autopilot`. **Capped by `sources.write`** — refuse to set `write` if `sources.write` is empty (offer to populate it first). External writes are hard-stop-eligible. |
 | `autonomy.escalation` | `cautious` \| `balanced` \| `aggressive` | decision-maker bias |
 | `autonomy.rework_cap_per_gate` | integer ≥ 0 | |
 | `autonomy.rework_budget_total` | integer ≥ 0 | |
@@ -113,14 +113,14 @@ After writing config, refresh anything that mirrors a setting:
 
 - **`git.mode` → `.adlc/CLAUDE.md` "### Git policy" section.** Replace that section's body with the canonical version from `$TOOLKIT_PATH/templates/vault/CLAUDE.md` (it already describes all three modes and the invariants, keyed off `git.mode`, so it's correct for any value). If the user's `.adlc/CLAUDE.md` has local edits around it, replace only the `### Git policy` section, not the whole file.
 
-No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/ship` respectively). If a future setting gains a derived twin, extend this section.
+No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived twin, extend this section.
 
 ## After applying
 
 1. Echo a concise summary: each `key: old → new`, plus any derived file re-synced.
 2. Append one line to `.adlc/hot.md`: `## [DATE] config | <key>=<value>[, …]`.
 3. If `git.mode` changed to `commit` or `commit+push`, remind the user of the invariants that still hold (feature branch only; never a `protect:` branch, force-push, history rewrite, branch delete, PR create/merge, or `--no-verify`).
-4. If you changed settings that only `/ship` reads (`autonomy.*`), note they take effect on the next `/ship` run.
+4. If you changed settings that only `/autopilot` reads (`autonomy.*`), note they take effect on the next `/autopilot` run.
 
 ## Constraints
 

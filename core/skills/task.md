@@ -181,7 +181,7 @@ Emit per the gate protocol — one consolidated review + ship gate:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **fix** (`<ids>`, then re-verify), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-── Gate 2 of 2 · Ship · REQ-NNN-<slug>  (task) ──────────
+── Gate 2 of 2 · Wrap up · REQ-NNN-<slug>  (task) ──────────
    clean — recommend approve
 
 READY    reviewers: correctness, reflector · UI: n/a — no UI surface

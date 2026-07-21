@@ -15,7 +15,7 @@ You are running as a subagent. **You CANNOT dispatch sub-agents.** All work must
 
 - **Phase 2 (Architect):** You explore the codebase yourself using `Read`, `Grep`, `Glob`. Do not attempt to launch a codebase-explorer sub-agent. Use the codebase-explorer's checklist (similar implementations, blast radius, integration points, existing tests) as your guide.
 - **Phase 3 (Implement):** Execute tasks **one at a time**, in dependency order. No tier-based parallelism within a REQ in sprint mode. (You gain parallelism across REQs, you lose it within.)
-- **Phase 4 (Verify):** Run the review checklists (correctness, quality, architecture, reflection) **inline in your own context**. Do not attempt to launch reviewer sub-agents. Use the checklists below.
+- **Phase 4 (Review):** Run the review checklists (correctness, quality, architecture, reflection) **inline in your own context**. Do not attempt to launch reviewer sub-agents. Use the checklists below.
 
 ## CRITICAL: Git follows `git.mode`
 
@@ -97,7 +97,7 @@ For each task, follow the `task-implementer` checklist inline:
 
 After all tasks: update state. **Gate.** Emit terminal claim `gate-blocked:implement`.
 
-### Phase 4 — Verify (gate)
+### Phase 4 — Review (gate)
 
 When the user clears the implement gate, proceed.
 
@@ -111,7 +111,7 @@ Update state. **Gate.** Emit terminal claim `gate-blocked:verify`.
 
 If the user approves fixes during the gate review, apply them in a single consolidated pass, then re-verify.
 
-### Phase 5 — Ship (gate)
+### Phase 5 — Wrap up (gate)
 
 When the user clears the verify gate, proceed.
 
@@ -202,7 +202,7 @@ You produce knowledge across phases 3, 4, and 5. Append candidate lesson entries
 ### When to surface, by phase
 
 - **Phase 3 (Implement):** As you write code, capture workarounds for codebase quirks, non-obvious decisions you almost made wrong, integration points with unexpected behavior, patterns you should have known about earlier. Source tag: `implement-task`.
-- **Phase 4 (Verify):** As you run each review checklist, capture findings that might generalize. Source tag depends on the lens:
+- **Phase 4 (Review):** As you run each review checklist, capture findings that might generalize. Source tag depends on the lens:
   - Correctness lens → `review-corr` — bug shapes likely to recur, security gaps with clear rules, error-handling patterns this codebase gets wrong, concurrency pitfalls.
   - Quality lens → `review-qual` — convention gaps worth codifying, duplication suggesting missing utilities, repeated test patterns or anti-patterns.
   - Architecture lens → `review-arch` — pattern divergences that will spread, layering rules worth codifying, contract-drift shapes, mock-completeness rules.

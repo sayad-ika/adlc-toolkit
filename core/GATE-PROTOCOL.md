@@ -1,6 +1,6 @@
 # Gate Protocol — the base for every human gate
 
-This is the **shared spine** every gate uses to hand a decision back to the user — **not a fixed template.** Gates differ: a spec gate has no task DAG, a review gate is almost all findings, `/wrapup` is a ship checklist, `/ship`'s terminal review summarizes a whole run. So each skill **adapts** this base to what its phase actually produced. What's constant is the spine and the principles below; the sections are a palette, not a mold.
+This is the **shared spine** every gate uses to hand a decision back to the user — **not a fixed template.** Gates differ: a spec gate has no task DAG, a review gate is almost all findings, `/wrapup` is a ship checklist, `/autopilot`'s terminal review summarizes a whole run. So each skill **adapts** this base to what its phase actually produced. What's constant is the spine and the principles below; the sections are a palette, not a mold.
 
 Load it at preflight (with `ETHOS.md`) from `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. It governs **presentation, not semantics** — `approve` / `revise` / `abort` do whatever each skill defines.
 
@@ -35,7 +35,7 @@ Decision →        the gate's options
 - **`/architect`** — `READY` with the task DAG in compact text (`T1,T2 → T3,T4 → T5`); `NEEDS YOU` for a proposed ADR or a surviving adversary finding.
 - **`/review`** — leads with `FINDINGS` grouped by severity; the decision is which to fix vs. accept.
 - **`/wrapup`** — a `SHIP CHECKLIST` and the PR/lessons/vault state.
-- **`/ship` terminal review** — opens with a `RUN SUMMARY` across every gate it auto-cleared.
+- **`/autopilot` terminal review** — opens with a `RUN SUMMARY` across every gate it auto-cleared.
 
 The spine (done → needs-you → recommend → decide) holds; the middle is the phase's to shape.
 

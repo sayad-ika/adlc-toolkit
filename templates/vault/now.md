@@ -17,7 +17,7 @@ _(empty — populated by /proceed, /sprint, /bugfix)_
 
 What you're working on right now, in plain prose. Edit this manually when you switch focus.
 
-> _(empty — describe what's primary attention)_
+> _(empty — describe what you're focused on right now)_
 
 ## Blockers
 

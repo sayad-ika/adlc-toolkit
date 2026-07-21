@@ -196,7 +196,7 @@ MY READ  approve — fix is contained and covered
 Decision →  approve · revise <what> · abort
 ```
 
-## Phase 4 — Verify (gate)
+## Phase 4 — Review (gate)
 
 Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector` (the two most likely to find issues in a bug fix). Skip quality and architecture unless the fix touched layering or introduced significant new code.
 
@@ -218,7 +218,7 @@ Emit per the gate protocol — findings-led like `/review`, but only two reviewe
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ ship), **fix** (`<ids>`), **revise**, **abort**.
 
 ```
-── Gate 4 of 5 · Verify · BUG-NNN-<slug> ──────────
+── Gate 4 of 5 · Review · BUG-NNN-<slug> ──────────
    clean — no findings, recommend approve
 
 FINDINGS  (none)
@@ -228,7 +228,7 @@ MY READ   approve — correctness and reflector both clean
 Decision →  approve · fix <ids> · revise <what> · abort
 ```
 
-## Phase 5 — Ship (gate)
+## Phase 5 — Wrap up (gate)
 
 Same as `/wrapup`, but with the bug-specific knowledge capture:
 
@@ -255,7 +255,7 @@ Same shape as `/wrapup`'s `merge-checklist.md`.
 
 ### Source write-back (optional, gated)
 
-Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. External write — hard-stop-eligible, capped by `sources.write` and (under `/ship`) `autonomy.sources`.
+Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. External write — hard-stop-eligible, capped by `sources.write` and (under `/autopilot`) `autonomy.sources`.
 
 ### Gate card
 
@@ -269,7 +269,7 @@ Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-── Gate 5 of 5 · Ship · BUG-NNN-<slug> ──────────
+── Gate 5 of 5 · Wrap up · BUG-NNN-<slug> ──────────
    PR + vault ready — run the checklist
 
 READY       PR: bug-fix-pr-draft.md · merge-checklist.md
