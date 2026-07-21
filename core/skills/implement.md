@@ -140,7 +140,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Map this phase's conten
 
 - **Header** — `Gate 3 of 5 · Implement · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "all tasks done, tests pass — `<k>` items to clean before committing", or "clean — recommend approve".
-- **READY** — `<N>` tasks / `<T>` tiers; tests `<X>` passed / `<Y>` added; `<count>` commits drafted (`commits-draft.md`); `<count>` lesson candidates surfaced (verdicts at `/wrapup`). Include a one-line `git diff --stat` roll-up (full stat lives in the diff, not the card).
+- **READY** — `<N>` tasks in `<T>` stages; tests `<X>` passed / `<Y>` added; `<count>` commits drafted (`commits-draft.md`); `<count>` possible lessons noted (you decide what to keep at `/wrapup`). Include a one-line `git diff --stat` roll-up (full stat lives in the diff, not the card).
 - **NEEDS YOU** — flagged artifacts to clean before committing (debug prints, TODO without link, `.skip()`/commented tests) and any surfaced deviation and whether it's handled or unresolved. Omit if nothing flagged.
 - **CHECKS** — one compact line: no debug prints · no untracked TODO · no skipped/commented tests · all tests pass.
 - **MY READ** — recommendation + one-line why (don't recommend approve while a deviation is unresolved or tests fail).
@@ -152,7 +152,7 @@ Example shape:
 ── Gate 3 of 5 · Implement · REQ-NNN-<slug> ──────────
    all tasks done, tests pass — 1 item to clean first
 
-READY       6 tasks / 3 tiers · tests 41 passed / 5 added · 6 commits drafted
+READY       6 tasks in 3 stages · tests 41 passed / 5 added · 6 commits drafted
             diff: 9 files, +240 / -37
 NEEDS YOU   ⚠ debug  console.log left in src/checkout/retry.ts:88
 

@@ -101,7 +101,7 @@ Findings:
   Major:    <N>
   Minor:    <N>
 
-Top 3 priorities (by impact × effort):
+Top 3 things worth fixing first (biggest payoff for the effort):
   1. <finding> (effort: <small/medium/large>)
   2. <finding>
   3. <finding>
@@ -109,7 +109,7 @@ Top 3 priorities (by impact × effort):
 Trends since last audit (YYYY-MM-DD):
   Better:  <count> findings resolved
   Worse:   <count> new findings
-  Stale:   <count> findings still open
+  Still open: <count> findings
 
 Full report: .adlc/audits/health-YYYY-MM-DD.md
 ```

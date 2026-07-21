@@ -99,30 +99,31 @@ Scanned: <count> entries (<spec-count> REQs, <bug-count> bugs, <sprint-count> sp
   1. REQ-042-firestore-indexes
      Claimed: phase 3 (implement) / gateState: awaiting
      Reality: merged via PR #117 on 2026-05-09
-     Class:   stale-state-reality-further
+     Status:  records are behind — this actually shipped
+              (stale-state-reality-further)
      Recommend: recover (back-fill phases 4-5, mark merged)
 
   2. REQ-051-export-button
      Claimed: phase 2 (architect) / gateState: cleared
      Reality: branch deleted, no merge, no commits in base
-     Class:   abandoned
+     Status:  looks abandoned — nothing came of it (abandoned)
      Recommend: abort
 
   3. BUG-009-cookie-domain
-     Claimed: phase 4 (verify) / gateState: awaiting
-     Reality: branch alive, 3 commits past base, unmerged
-     Class:   in-sync-alive
-     Recommend: resume (run /proceed BUG-009-cookie-domain)
+     Claimed: phase 4 (review) / gateState: awaiting
+     Reality: branch alive, 3 commits ahead of base, unmerged
+     Status:  alive and consistent — just pick it back up (in-sync-alive)
+     Recommend: leave (run /proceed BUG-009-cookie-domain yourself)
 
   4. SPRINT-2026-04-30-1400
      Claimed: status running, 3 REQs
      Reality: all 3 REQs are merged or abandoned
-     Class:   sprint-stuck
+     Status:  sprint finished but never closed out (sprint-stuck)
      Recommend: end sprint
 
 Reply with one of:
   recover N             — execute the recommended action for entry N
-  resume N              — leave as-is; user will run /proceed
+  leave N               — it's fine as-is; you'll run /proceed yourself
   abort N               — mark aborted (confirm)
   skip N                — leave untouched; reappears in next scan
   show N                — full diagnosis for one entry
@@ -241,7 +242,7 @@ Same as above but skip steps 2 and 3 (those files already exist or were skipped 
 
 4. Append to `hot.md`: `## [DATE] req-aborted-via-recover | REQ-NNN-<slug>`.
 
-#### `resume`
+#### `leave` (formerly `resume`)
 
 No vault changes. Just confirm:
 
@@ -270,7 +271,7 @@ Recovered (back-filled):       <count>
 Aborted:                       <count>
 Resumed (no action needed):    <count>
 Skipped:                       <count>
-Still uncertain (divergent):   <count> — surface these for manual decision
+Still uncertain (divergent):   <count> — records and git disagree; needs your call
 
 Lessons captured:              <count>
 Gotchas captured:              <count>

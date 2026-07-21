@@ -188,7 +188,8 @@ Emit per the gate protocol:
 ── Gate 3 of 5 · Fix · BUG-NNN-<slug> ──────────
    fixed, regression test green — recommend approve
 
-READY    3 files · regression: retry_guard_test (red→green) · all tests pass · commit drafted
+READY    3 files · regression test retry_guard_test — fails without the
+         fix, passes with it · all tests pass · commit drafted
 CHECKS   ✓ regression test · ✓ repro no longer triggers · ✓ no other tests broke
 
 MY READ  approve — fix is contained and covered
@@ -255,7 +256,7 @@ Same shape as `/wrapup`'s `merge-checklist.md`.
 
 ### Source write-back (optional, gated)
 
-Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. External write — hard-stop-eligible, capped by `sources.write` and (under `/autopilot`) `autonomy.sources`.
+Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. An external write — it always stops for your OK (even under `/autopilot`), and is limited by `sources.write` and `autonomy.sources`.
 
 ### Gate card
 
@@ -263,7 +264,7 @@ Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
 
 - **Verdict** — "PR + vault ready — run the checklist".
 - **READY** — PR draft (`bug-fix-pr-draft.md`); merge checklist; vault capture in one line (candidates `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; hot entries).
-- **NEEDS YOU** — a drafted source write-back awaiting approval (external write, hard-stop-eligible, never auto-sent); or, if promoted + demoted = 0, the mandatory-capture confirmation (bugfix requires at least one non-discard — confirm, or `revise: capture` to walk back through `bug.md` / `investigation.md` / `verification.md`). Omit if neither applies.
+- **NEEDS YOU** — a drafted comment for the issue tracker, shown before sending (it is never sent without your OK); or, if no lesson or gotcha was kept at all, a confirmation — bug fixes usually teach something, so confirm that's right or reply `revise: capture` to take another pass through `bug.md` / `investigation.md` / `verification.md`. Omit if neither applies.
 - **CHECKS** — regression test in the diff · commit drafts landed in git log · no debug artifacts.
 - **MY READ** — recommendation + why.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **revise**, **merged** (finalize after you merge), **abort**.
@@ -273,8 +274,8 @@ Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
    PR + vault ready — run the checklist
 
 READY       PR: bug-fix-pr-draft.md · merge-checklist.md
-            vault: 2 candidates → ^g14 gotcha, 1 hot entry
-NEEDS YOU   (none — capture satisfied)
+            knowledge saved: 1 gotcha (g14) · 1 activity-log entry
+NEEDS YOU   (none — knowledge capture done)
 
 CHECKS      ✓ regression test in diff · ✓ commits in log · ✓ no debug
 

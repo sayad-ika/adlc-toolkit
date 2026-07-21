@@ -45,7 +45,7 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `sources.mechanism` | `auto` \| `gh` \| `mcp` \| `url` | override the auto resolution order. Rarely needed; default `auto`. |
 | `autonomy.gates` | `manual` \| `assisted` \| `auto` | only consumed by `/autopilot` |
 | `autonomy.git` | `read-only` \| `commit` \| `commit+push` | **capped by `git.mode`** — refuse to set it higher than `git.mode` (offer to raise `git.mode` too, or set the capped value) |
-| `autonomy.sources` | `read-only` \| `write` | only consumed by `/autopilot`. **Capped by `sources.write`** — refuse to set `write` if `sources.write` is empty (offer to populate it first). External writes are hard-stop-eligible. |
+| `autonomy.sources` | `read-only` \| `write` | only consumed by `/autopilot`. **Capped by `sources.write`** — refuse to set `write` if `sources.write` is empty (offer to populate it first). External writes always stop for your explicit OK. |
 | `autonomy.escalation` | `cautious` \| `balanced` \| `aggressive` | decision-maker bias |
 | `autonomy.rework_cap_per_gate` | integer ≥ 0 | |
 | `autonomy.rework_budget_total` | integer ≥ 0 | |

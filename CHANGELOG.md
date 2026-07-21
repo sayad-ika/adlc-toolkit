@@ -4,6 +4,15 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.3] — 2026-07-21
+
+### Plain-language pass 2 — gate-card examples and queues **[protocol]**
+
+- Every example gate card rewritten in the VOICE register: severities spelled out, options carry their consequence (`approve (move on to implementation)`), no more symbol soup (`vault: 4 candidates → L-042 promoted, ^g14 gotcha` is now `knowledge saved: lesson L-042 · gotcha g14 · ADR-007 confirmed`), "red→green" spelled out as "fails without the fix, passes with it", `✓ blast radius` is now `✓ changed files match the plan`, and "hard-stop-eligible" reads "always stops for your OK — even under `/autopilot`".
+- `/recover`'s queue leads with a plain status line per entry ("records are behind — this actually shipped") with the class slug in parentheses; the `resume` reply is renamed `leave` (it never resumed anything — it leaves the entry as-is).
+- One payoff-for-effort phrasing across `/analyze`, `/optimize`, and `/ux-doctor` (was three different formulas, one of them contradictory).
+- `/init` explains the committed-vs-gitignored split in two sentences instead of a taxonomy lecture; "hermetic" is gone; reflector's severity rules define `landmine` / `trap` / `careful` inline.
+
 ## [1.3.2] — 2026-07-21
 
 ### Plain-language layer — `core/VOICE.md` **[protocol]**

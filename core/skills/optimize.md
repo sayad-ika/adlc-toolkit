@@ -79,7 +79,7 @@ Performance & cost scan — YYYY-MM-DD
 Focus: <focus>
 Files scanned: <count>
 
-Top opportunities (impact × ease):
+Top opportunities (biggest payoff for the least effort):
 
   Quick wins (small effort, high impact):
     1. <file>:<line> — <title> (<estimated impact>)

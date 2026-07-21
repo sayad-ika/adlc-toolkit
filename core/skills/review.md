@@ -264,7 +264,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads w
 - **Header** — `Gate 4 of 5 · Review · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "`<total>` findings — `<k>` need a call", or "clean — no findings, recommend approve".
 - **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. This block *is* the `NEEDS YOU` for this gate.
-- **READY** (brief) — `<4 or 5>` reviewers ran; lesson candidates surfaced `<total>` (verdicts at `/wrapup`); UI/UX review tier + counts (or "not run — no UI surface"; omit entirely when the project has no frontend); stale-repo-docs count with the offending path when non-zero (fix in this diff before merging).
+- **READY** (brief) — `<4 or 5>` reviewers ran; `<total>` possible lessons noted (you decide what to keep at `/wrapup`); how the UI was checked + counts (or "UI check skipped — nothing visual changed"; omit entirely when the project has no frontend); when any doc is now out of date, name it ("docs now stale: docs/auth.md — update it in this branch before merging").
 - **CHECKS** — the acceptance-criteria check as one compact `✓ / ⚠` line; call out any special item (a reflector `vault-stale` finding, an `adr-conflict`, an architecture "new ADR needed") on its own line since those need deliberate handling.
 - **MY READ** — recommendation + one-line why. **Never recommend approve while a Critical is unaddressed** — that's a `fix` or `revise`.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (accept findings as-is → `/wrapup`), **fix** (`<ids>` or `all-major` — dispatch task-implementer for them), **revise** (other changes to the review), **abort** (escalate; halt). Mark the recommended one per `MY READ`.
@@ -275,18 +275,21 @@ Example shape:
 ── Gate 4 of 5 · Review · REQ-NNN-<slug> ──────────
    3 findings — 1 needs a call
 
-FINDINGS    crit · correctness  double-charge path on retry (src/pay/retry.ts:88)
-            maj  · quality      duplicated retry helper — consider extracting
-            min  · arch         layering fine, no action
+FINDINGS    critical · correctness — double-charge path on retry
+                       (src/pay/retry.ts:88)
+            major · quality — duplicated retry helper; extract it
+            minor · architecture — layering fine, no action
 
-READY       4 reviewers · 3 lesson candidates · UI: not run (no UI surface)
+READY       4 reviewers ran · 3 possible lessons noted (decided at /wrapup)
+            UI check skipped — nothing visual changed
 
-CHECKS      ✓ AC-1 · ✓ AC-2 · ⚠ AC-3 (retry idempotency unverified)
-            ! reflector: repeats LESSON-007 (retry side effects)
+CHECKS      ✓ criteria 1–2 met · ⚠ criterion 3 — safe-retry not verified
+            ! past-mistakes check: repeats LESSON-007 (retry side effects)
 
-MY READ     fix — the correctness finding must land before ship
+MY READ     fix — the critical finding must be fixed before this ships
 
-Decision →  approve · fix <ids|all-major> · revise <what> · abort
+Decision →  approve (accept as-is) · fix <ids|all-major> (I fix, then
+            re-check) · revise <what> · abort
 ```
 
 ## Gate clearance

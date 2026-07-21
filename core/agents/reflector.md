@@ -156,8 +156,8 @@ Each finding:
 
 ### Severity guidelines
 
-- **Critical** — directly contradicts an `accepted` ADR; removes code protected by a `landmine`-severity gotcha
-- **Major** — repeats a `trap`-severity lesson; ignores a `careful`-severity gotcha
+- **Critical** — directly contradicts an `accepted` ADR; removes code protected by a `landmine` gotcha (one that breaks production if touched)
+- **Major** — repeats a `trap` lesson (a mistake that cost real time before); ignores a `careful` gotcha (check before touching)
 - **Minor** — re-derives a pattern that should be reused; missing component page for a touched module; concept drift in a non-load-bearing way
 - **repo-doc-stale** — severity by reader impact: **major** when the stale doc would actively mislead (wrong API signature, wrong command, contradicted default); **minor** when it's merely incomplete or cosmetically out of date
 

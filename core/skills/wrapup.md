@@ -253,7 +253,7 @@ This updates pipeline-state and adds a hot.md entry.
 Only if `config.yml.sources.write` includes the issue tracker **and** this REQ was seeded from (or links to) an issue. Otherwise skip this step entirely.
 
 - **Draft, don't send.** Write the proposed write-back into `.adlc/specs/REQ-NNN-<slug>/source-writeback.md`: the target issue, the comment text (e.g. "Addressed in PR <link> — REQ-NNN-<slug>"), and any status transition (e.g. `→ In Review`). Use the PR link only if one exists yet; otherwise leave a placeholder the user fills after opening the PR.
-- **Never auto-submit.** This is surfaced at the wrap-up gate as a proposed action and executed only on explicit approval, using the resolved mechanism (`gh issue comment` / MCP / etc.). External writes are hard-stop-eligible.
+- **Never auto-submit.** This is surfaced at the wrap-up gate as a proposed action and executed only on explicit approval, using the resolved mechanism (`gh issue comment` / MCP / etc.). External writes always stop for your explicit OK — even under `/autopilot`.
 - **Capped.** Under `/proceed`, the user approves it at the gate like everything else. Under `/autopilot`, it is additionally capped by `autonomy.sources` (default `read-only` ⇒ never auto-sent) and `sources.write`.
 
 ### 6. Update pipeline state
@@ -285,7 +285,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body i
 - **Header** — `Gate 5 of 5 · Wrap up · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "PR + vault ready — run the checklist when you're set", or flag if the final sanity check surfaced anything.
 - **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable).
-- **NEEDS YOU** — only genuine calls: a drafted source write-back awaiting approval (external write — hard-stop-eligible, never auto-sent); a `Candidates considered: 0` confirmation; any unresolved final-sanity item. Omit if none.
+- **NEEDS YOU** — only genuine calls: a drafted issue-tracker write-back awaiting your OK (never auto-sent); a "no knowledge captured — is that right?" confirmation; any unresolved final-sanity item. Omit if none.
 - **CHECKS** — final diff sanity as one compact `✓ / ⚠` line: blast radius matches architecture · user-facing docs updated (no unresolved repo-doc-stale) · no debug artifacts · no `--no-verify` · commit drafts all in git log.
 - **MY READ** — recommendation + one-line why.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (gate cleared — run the merge checklist), **revise** (adjust PR draft or vault updates), **merged** (after you merge — finalize state, log to `hot.md`), **abort** (halt without merging). Mark approve *(Recommended)* per `MY READ`.
@@ -298,10 +298,12 @@ Example shape:
 
 READY       PR: feat(pay): retry with backoff — pr-draft.md · 9 files, +240/-37
             merge-checklist.md
-            vault: 4 candidates → L-042 promoted, ^g14 gotcha, ADR-007 accepted
-NEEDS YOU   ⚠ write-back  comment on #842 + → In Review — source-writeback.md (not sent)
+            knowledge saved: lesson L-042 · gotcha g14 · ADR-007 confirmed
+NEEDS YOU   ⚠ drafted, not sent: comment on issue #842 and a move to
+            'In Review' — see source-writeback.md
 
-CHECKS      ✓ blast radius · ✓ docs updated · ✓ no debug · ✓ no --no-verify · ✓ commits in log
+CHECKS      ✓ changed files match the plan · ✓ docs updated · ✓ no debug
+            ✓ no --no-verify · ✓ commits in log
 
 MY READ     approve — clean wrap; the write-back is the only thing awaiting you
 
@@ -340,8 +342,8 @@ If `abort`:
 - **Git follows `git.mode`** (`.adlc/config.yml`, default `manual`). In `manual`, NEVER run `git add/commit/push` — the merge checklist exists because you don't run those. In `commit`/`commit+push`, you may commit the vault/lesson updates on the REQ's feature branch (and push it, ff-only, in `commit+push`) after the wrapup gate is approved. In **every** mode, NEVER run `gh pr create`, `gh pr merge`, branch deletes, force-pushes, or anything touching a protected branch — opening and merging the PR is always the user's.
 - **Vault updates** go on the REQ's feature branch: committed by you in `commit`/`commit+push`, or left for the user's final commit in `manual`.
 - **`pr-draft.md` is a draft.** The user can paste it into `gh pr create --body-file` or copy/paste into a web form. Don't auto-submit anywhere.
-- **Source write-back is off unless `sources.write` lists the tracker, and always gated.** Even when configured, the comment/transition is drafted to `source-writeback.md` and sent only on explicit approval — never as a silent side effect. It's an external write: hard-stop-eligible, and capped by `autonomy.sources` under `/autopilot`.
-- **Capture liberally as candidates, prune deliberately at verdict.** Candidates are cheap — one line in a scratch file. Lessons are precious — the vault stays high-signal because the verdict step is rigorous, not because the candidate bar is high. Silent zero-capture is a failure mode: if no candidates surfaced upstream and the sweep over `verification.md` finds nothing either, surface that as a question to the user at the gate ("REQ produced zero knowledge — confirm or revise"), don't pass silently.
+- **Source write-back is off unless `sources.write` lists the tracker, and always gated.** Even when configured, the comment/transition is drafted to `source-writeback.md` and sent only on explicit approval — never as a silent side effect. It's an external write: it always stops for your OK, and under `/autopilot` it is further limited by `autonomy.sources`.
+- **Capture liberally as candidates, prune deliberately at verdict.** Candidates are cheap — one line in a scratch file. Lessons are precious — the vault stays high-signal because the verdict step is rigorous, not because the candidate bar is high. Silent zero-capture is a failure mode: if no candidates surfaced upstream and the sweep over `verification.md` finds nothing either, ask the user at the gate — "We didn't capture any lessons from this one. Does that sound right, or should I take another look?" — don't pass silently.
 
 ## Output artifacts
 

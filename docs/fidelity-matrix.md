@@ -55,7 +55,7 @@ Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugf
 | Capability | Notes |
 |---|---|
 | Read-seed (`/spec`, `/bugfix`, `/architect`) | First-class wherever any one mechanism resolves. The same resolver serves `/spec` and `/bugfix`. |
-| Write-back (`/wrapup`, `/bugfix` P5) | Off unless `sources.write` lists the service. Always drafted to `source-writeback.md` and sent only on approval. Under `/autopilot`, additionally capped by `autonomy.sources`. External writes are hard-stop-eligible. |
+| Write-back (`/wrapup`, `/bugfix` P5) | Off unless `sources.write` lists the service. Always drafted to `source-writeback.md` and sent only on approval. Under `/autopilot`, additionally capped by `autonomy.sources`. External writes always stop for your explicit OK. |
 
 The honest line, as everywhere else in this matrix: sources are **strictly additive**. The hermetic pipeline is always intact; a missing CLI, unattached MCP, or unreachable URL never blocks a phase — it just means you type the draft yourself.
 

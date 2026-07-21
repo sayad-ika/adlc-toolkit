@@ -220,19 +220,20 @@ Example shape (fill from the real REQ):
 ── Gate 2 of 5 · Architect · REQ-014-payment-retries ──────────
    ready to review — 2 items need your call
 
-READY       architecture.md · 6 tasks / 3 tiers · ADR-007 proposed
-            exploration.md · adversary: full pass
-            DAG: T1,T2 → T3,T4 → T5
+READY       architecture.md · 6 tasks in 3 stages · new decision ADR-007
+            exploration.md · stress-test ran: full pass
+            task order: T1,T2 → T3,T4 → T5
 
 NEEDS YOU   ⚠ ADR-007  retry backoff strategy — accept or reject
-            ⚠ finding  double-charge on retry → fixed; confirm in §Approach
-            ? open q   idempotency-key TTL still unresolved
+            ⚠ fixed    double-charge on retry — the fix is in the
+                       Approach section; please confirm it
+            ? open     how long should idempotency keys live?
 
 CHECKS      ✓ criteria covered · ✓ no cycles · ✓ conventions · ✓ tests concrete
 
-MY READ     approve — surviving finding is handled, ADR is low-risk
+MY READ     approve — the flagged risk is fixed; the new decision is low-risk
 
-Decision →  approve · revise <what> · abort
+Decision →  approve (move on to implementation) · revise <what> · abort
 ```
 
 (On Claude the `Decision →` line is delivered as an `AskUserQuestion`, not typed text.)

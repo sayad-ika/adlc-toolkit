@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },

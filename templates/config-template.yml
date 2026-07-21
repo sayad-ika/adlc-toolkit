@@ -180,7 +180,7 @@ workflow:
 #                            #   the autonomous external-write ceiling for /autopilot.
 #                            #   Capped by `sources.write` above — can lower it but
 #                            #   never exceed it (empty sources.write ⇒ read-only).
-#                            #   External writes are hard-stop-eligible (see below).
+#                            #   External writes always stop for your explicit OK (see below).
 #   escalation: balanced     # cautious | balanced | aggressive  (decision-maker bias)
 #   rework_cap_per_gate: 2   # max REWORK loops at one gate before forced HALT
 #   rework_budget_total: 5   # max REWORK loops across the whole run

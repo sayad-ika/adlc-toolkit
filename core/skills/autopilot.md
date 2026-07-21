@@ -31,7 +31,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
 4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → load `pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask.
-5. **Confirm the run.** Before doing anything irreversible, emit a one-block summary of the dials in effect (gates / git / escalation / caps) and the REQ, so the user sees the autonomy level. For `--dry-run`, skip straight to the plan.
+5. **Confirm the run.** Before doing anything irreversible, emit a one-block summary of what this run may do on its own — which gates it decides itself, what git it may run, and how cautious the gate-keeper is (gates / git / escalation / caps) — plus the REQ, so the user sees the autonomy level. For `--dry-run`, skip straight to the plan.
 6. **Create the work surface:** feature branch (or worktree per `config.yml.workflow.isolation`), exactly as `/architect` would. Branch creation and worktree lifecycle are allowed git ops.
 
 ## Dials
@@ -134,7 +134,7 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
    <n> commits on <branch> · nothing merged — ready for your review
 
 RUN SUMMARY   decisions: <a> approve / <r> rework / <h> halt
-              risk: <low|medium|high> · reworks: <x>/<budget>
+              risk: <low|medium|high> · reworks: <x> (of <budget> allowed)
               full decision log: run-report.md
 
 NEEDS YOU     1. review run-report.md and the diff
@@ -142,7 +142,7 @@ NEEDS YOU     1. review run-report.md and the diff
               3. merge when satisfied; run any migrations noted in the report
 
 MY READ       <e.g. "safe to land — all gates auto-approved, no near-misses"
-               — or — "eyeball gate 3; it was a close REWORK before approving">
+               — or — "look closely at the review gate — it took two tries to pass">
 
 When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
 ```
@@ -152,7 +152,7 @@ When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
 The artifact that earns the autonomy. Write to `.adlc/specs/REQ-NNN-<slug>/autopilot-report.md`:
 
 - **Summary** — what was built, against which acceptance criteria.
-- **Decision log** — every gate verdict (from `gate-decisions.md`): phase, verdict, confidence, rationale, independence.
+- **Decision log** — every gate verdict (from `gate-decisions.md`): phase, verdict, confidence, why, and whether it was judged independently.
 - **Reworks** — what looped and why; the recurring-failure tripwire status.
 - **Near-misses** — anything that *almost* escalated, so the human knows where it was close.
 - **Risk profile** and any forced hard-stop downgrades.

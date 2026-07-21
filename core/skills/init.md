@@ -45,7 +45,7 @@ Ask the user (use your assistant's structured-question UI if it has one; otherwi
   - **Design tool** — `figma` or `none`.
   - **Write-back?** — default **none** (reads only). Only if the user explicitly wants it, add the issue tracker to `sources.write` so `/wrapup` and `/bugfix` can offer (always gated) to post a PR link or transition the issue.
 
-  Default every source to `none` if the user is unsure or skips — the pipeline then runs fully hermetic, exactly as before. The *mechanism* (gh CLI / MCP / URL) is auto-resolved at runtime and need not be asked; mention only that for GitHub the `gh` CLI, if installed and authed, is used first.
+  Default every source to `none` if the user is unsure or skips — the pipeline then runs fully self-contained — no external services, exactly as before. The *mechanism* (gh CLI / MCP / URL) is auto-resolved at runtime and need not be asked; mention only that for GitHub the `gh` CLI, if installed and authed, is used first.
 
 If the user prefers to skip and fill `config.yml` themselves, accept that and proceed with placeholder values.
 
@@ -218,7 +218,7 @@ Open `.adlc/config.yml` and pre-fill what you gathered:
 - `git.mode` (the value chosen in step 1; default `manual`)
 - `stack.languages` (best effort from the user's free text)
 - `repos.<this-repo-id>.primary: true`
-- `sources` (the services chosen in step 1). If the user picked an issue tracker or design tool, uncomment the `sources:` block and fill `issues`, `design`, `repo`, and `write` accordingly. If they chose `none` for everything, leave the block commented out so the pipeline stays hermetic.
+- `sources` (the services chosen in step 1). If the user picked an issue tracker or design tool, uncomment the `sources:` block and fill `issues`, `design`, `repo`, and `write` accordingly. If they chose `none` for everything, leave the block commented out so the pipeline stays self-contained.
 
 Leave everything else as commented placeholders for the user to fill.
 
@@ -333,11 +333,11 @@ Fill these with starting content:
 
 The `.adlc/` vault contains three tiers: **durable knowledge** (specs, ADRs, lessons, gotchas, glossary, concepts, components, cancelled tombstones, revert plans), **shared append-only logs** (the activity log `hot.md`, `decisions.md`, `glossary.md`), and **per-developer ephemeral state** (pipeline heartbeats, gate markers, draft commit/PR/checklist files, the active-focus view `now.md`, sprint registries, resume timestamps). The durable side and the append-only logs are institutional memory and should be **committed** — the shipped `.adlc/.gitattributes` gives the logs `merge=union` so parallel branches never conflict on them (see the activity-log note below). Only the per-developer ephemeral state is gitignored: it churns on every run, is regenerable, and would otherwise pollute history and cause merge conflicts.
 
-If `.gitignore` exists at the repo root, **propose** (don't auto-write) appending the block below. Show the user the block, briefly explain the three-tier split above, and ask whether to add it. Accept three responses: `add`, `add except <pattern>`, `skip`.
+If `.gitignore` exists at the repo root, **propose** (don't auto-write) appending the block below. Show the user the block and explain it in two sentences: shared knowledge files are committed so the team keeps its memory; per-developer scratch files (drafts, state, gate markers) are gitignored so they don't churn history or cause merge conflicts. Then ask whether to add it. Accept three responses: `add`, `add except <pattern>`, `skip`.
 
 ```
-# ADLC — per-developer ephemeral state; durable knowledge and the union-merged
-# append-only logs (hot.md, decisions.md, glossary.md) stay committed.
+# ADLC — per-developer scratch state. Shared knowledge files stay committed;
+# the shared logs (hot.md, decisions.md, glossary.md) are committed too.
 .adlc/now.md
 .adlc/specs/*/pipeline-state.json
 .adlc/specs/*/.awaiting-approval

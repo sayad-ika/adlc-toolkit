@@ -138,7 +138,7 @@ Write the final report — `ux-YYYY-MM-DD.md` (scoped runs: `ux-YYYY-MM-DD-<slug
 - **Summary** — one paragraph: the top three patterns across all passes.
 - **Findings** — merged and deduplicated across all partials. When a static and a runtime finding describe the same defect (matched by file/component/route), merge into one finding carrying **both** evidence trails (`file:line` + screenshot); note `seen in: source + runtime` — those are the highest-confidence items. Keep each pass's IDs (DS-###, UI-###) so evidence stays traceable.
 - **Cross-segment consistency** *(segmented mode — this is why consolidation is a real phase, not a paste-up)*: per-segment passes structurally cannot see a misalignment *between* segments. Compare the accumulated evidence across segments — sibling patterns, shared components, spacing/typography/empty-state structure on peer screens in different features — and record divergences as findings here, citing evidence from both segments.
-- **Severity × effort matrix** — quick wins (high impact, low effort — lead with these), strategic (high/high), easy fixes (low/low), deprioritized (low/high — listed, not detailed).
+- **Payoff × effort matrix** — do first (big payoff, small effort — lead with these), worth planning (big payoff, big effort), easy tidy-ups (small/small), probably skip (small payoff, big effort — listed, not detailed).
 - **Trends** — against prior audits of the **same scope** (full-app audits compare to full-app audits; scoped to same-scope): resolved / new / still-open.
 
 Then delete the partial files — their content now lives in the report; the evidence directory stays. Mark the plan `complete` — the plan file survives as the audit's coverage record.
