@@ -1,6 +1,6 @@
-# Instructions for Claude (Per-Project Schema Doc)
+# Instructions for Claude (how this vault works)
 
-This file is the **schema doc** for the `.adlc/` vault in this repo. Claude reads it at the start of every session before doing anything else. It tells Claude what's authoritative, what the conventions are, what's allowed, and what's forbidden.
+This file is the **rulebook** for the `.adlc/` vault in this repo. Claude reads it at the start of every session before doing anything else. It tells Claude what's authoritative, what the conventions are, what's allowed, and what's forbidden.
 
 Edit this file when project-wide rules change. Don't edit it in response to a single REQ.
 
@@ -184,11 +184,11 @@ In addition to the per-phase artifacts above, `/proceed` supports three out-of-b
 
 | Operation | Writes | When |
 |---|---|---|
-| `/proceed --resume` | `specs/REQ-xxx/last-seen.json` (timestamp only) | When the user wants a decision dossier before continuing |
+| `/proceed --resume` | `specs/REQ-xxx/last-seen.json` (timestamp only) | When the user wants a catch-up summary before continuing |
 | `/proceed --revert~N` | `specs/REQ-xxx/revert-plan.md` (always); `code-revert-plan.md` (if Phase 3 is being walked back) | When the user wants to undo the last N completed phases |
 | `/proceed --cancel` | `specs/REQ-xxx/cancelled.md` (tombstone with reason) | When the user wants to abandon the REQ deliberately |
 
-Pipeline-state fields written by these operations: `revertedAt`, `revertedFrom`, `revertCount` (revert); `cancelledAt`, `cancelReason`, `terminal: "cancelled"` (cancel). Knowledge-layer entries authored by /wrapup are **tombstoned, not deleted** on revert — they remain in the vault with a retraction banner.
+Pipeline-state fields written by these operations: `revertedAt`, `revertedFrom`, `revertCount` (revert); `cancelledAt`, `cancelReason`, `terminal: "cancelled"` (cancel). Lessons and notes written by /wrapup are **kept, not deleted** when work is reverted — each gets a notice on top saying it was retracted — they remain in the vault with a retraction banner.
 
 ---
 
@@ -210,9 +210,9 @@ When in doubt, ask the user whether to capture. Don't over-capture (a vault full
 
 ## When in doubt
 
-- Don't pattern-match across REQs. Two REQs that look similar may have different acceptance criteria or different blast radii. Open the specific spec.
+- Don't pattern-match across REQs. Two REQs that look similar may have different acceptance criteria or touch different files. Open the specific spec.
 - If a vault page is missing a detail you need, **ask the user** — do not silently extrapolate.
-- If two vault pages contradict, **stop and surface the contradiction** to the user. Cowork-style "I'll just pick one" is not allowed.
+- If two vault pages contradict, **stop and surface the contradiction** to the user. Never silently pick one — that is not allowed here.
 - If the user's request would violate a hard constraint, **refuse and explain**. The constraint takes precedence.
 
 ---

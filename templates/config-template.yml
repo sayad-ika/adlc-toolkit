@@ -6,7 +6,7 @@ project:
   name: <project-name>
   description: <one-line description>
 
-# How REQ (and BUG) IDs are minted. Matters most for teams: the default
+# How REQ (and BUG) IDs are chosen. Matters most for teams: the default
 # `sequential` scheme picks the next number by scanning the vault, so two people
 # branching at the same time can both mint REQ-042 and collide at merge.
 #
@@ -16,7 +16,7 @@ project:
 #   ticket      — derive the ID from the tracker issue the REQ implements:
 #                 `/spec #842` (or an issue URL) with `sources.issues` set yields
 #                 REQ-842 (or the native key like PROJ-842 for Jira/Linear).
-#                 Globally unique by construction — recommended for teams. With no
+#                 Always unique — the tracker already guarantees it — recommended for teams. With no
 #                 issue ref it falls back to `prefixed` (if `prefix` set) else
 #                 `sequential`. The same scheme applies to BUG IDs in /bugfix.
 req:
@@ -35,7 +35,7 @@ req:
 #   commit+push  — also `git push` the REQ's feature branch (fast-forward only).
 #                  You still open and merge the PR.
 #
-# Invariants in EVERY mode (never overridable): only the REQ's own feature branch;
+# Rules that hold in EVERY mode (you can't turn these off): only the REQ's own feature branch;
 # never commit/push to a `protect:` branch; never force-push, rebase, amend
 # published commits, `reset --hard` away commits, delete branches, run
 # `gh pr create` / `gh pr merge`, or use `--no-verify`. Read commands
@@ -98,14 +98,14 @@ stack:
 
 # External sources — where this project's requirements and designs live, so the
 # pipeline can SEED an artifact from them instead of you retyping it. Optional:
-# omit the block entirely and the pipeline runs fully hermetic, exactly as before.
+# omit the block entirely and the pipeline runs fully self-contained, exactly as before.
 # Set by /init.
 #
 # Two layers:
 #   SERVICE   — which system holds the work (github | linear | jira | none for
 #               issues; figma | none for design). A stable project fact; chosen
 #               once at /init.
-#   MECHANISM — HOW a skill reaches that service at runtime. NOT MCP-only. The
+#   MECHANISM — HOW the skill connects at run time (tries these in order, first that works). The
 #               skill auto-resolves, first that works wins:
 #                 1. a dedicated CLI if installed + authed (`gh` for GitHub)
 #                 2. an attached MCP server for that service
@@ -138,7 +138,7 @@ stack:
 #   branch    — always use a branch on the current checkout. /sprint and
 #               cross-repo REQs still escalate to worktree.
 #   worktree  — always create an isolated worktree per REQ. Older default;
-#               useful if you don't use a stateful editor like VS Code, or
+#               useful if your editor doesn't mind switching folders, or
 #               prefer one-line aborts via `git worktree remove --force`.
 #
 # Trade-off: branch mode keeps your editor session intact across REQ start
@@ -231,7 +231,7 @@ repos:
 #   production: <command-or-target>
 
 # Optional: paths Claude should treat as read-only legacy code
-# (Karpathy's "raw sources" layer — the immutable input the vault curates).
+# (legacy code the assistant may read but must never change).
 # Read-only verification is allowed; writes never are.
 # read_only_sources:
 #   - D:/legacy/codebase

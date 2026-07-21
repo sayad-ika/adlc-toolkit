@@ -2,18 +2,18 @@
 
 A spec-driven development pipeline with a **human approval gate at every phase boundary** — that runs on whatever AI coding assistant you use.
 
-Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**, on **macOS, Windows, and Linux**, for **teams or solo**. One protocol, one knowledge vault, five front-ends.
+Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**, on **macOS, Windows, and Linux**, for **teams or solo**. One workflow, one shared knowledge vault, five AI tools.
 
 Inspired by Brett Luelling's [adlc-toolkit](https://github.com/atelier-fashion/sdlc-toolkit) and Karpathy's [LLM wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern, reshaped for **production work where the developer wants control at every decision step**.
 
-## This is a base model — make it yours
+## This is a starting point — make it yours
 
 Every team works differently: different stacks, review bars, ticketing, and house philosophy. **This repo is a starting point, not a framework to obey.** Fork it and shape it to how your team actually works.
 
 The repo is split into two layers so you can do that without ever fighting upstream:
 
 - **`core/` is the engine** — the upstream-maintained protocol. You don't edit it.
-- **`local/` is your overlay** — add your own skills/agents, override a core skill's prompt, or disable ones you don't use. The generator resolves `local/` **over** `core/`. See **[`local/README.md`](local/README.md)**.
+- **`local/` is your overlay** — add your own skills/agents, override a core skill's prompt, or disable ones you don't use. Files in `local/` win over files with the same name in `core/`. See **[`local/README.md`](local/README.md)**.
 
 Because your customizations live only in `local/` (plus each project's `.adlc/config.yml`), pulling a new upstream release merges cleanly — there's nothing in `core/` for your changes to conflict with:
 
@@ -33,7 +33,7 @@ Team-shaped defaults are configurable, not baked in: REQ IDs can come from your 
 
 ## How it works
 
-Every major assistant converged on the same three primitives — a memory file, custom slash commands, and sub-agents — so the pipeline maps cleanly onto all of them:
+Every major assistant now has the same three building blocks — a memory file, custom slash commands, and sub-agents — so the pipeline maps cleanly onto all of them:
 
 | Primitive | Claude Code | Cursor | Copilot | Codex | Gemini CLI |
 |---|---|---|---|---|---|
@@ -41,7 +41,7 @@ Every major assistant converged on the same three primitives — a memory file, 
 | **Slash commands** | skills (`SKILL.md`) | `.cursor/commands/*.md` | `.github/prompts/*.prompt.md` | `~/.codex/prompts/` | `.gemini/commands/*.toml` |
 | **Sub-agents** | `agents/*.md` | (sequential) | `.github/agents/*.agent.md` | `~/.codex/agents/*.toml` | `.gemini/agents/*.md` |
 
-The toolkit keeps the protocol in **one tool-agnostic place** (`core/`) and generates thin **pointer-stub adapters** per tool. A stub doesn't copy the protocol — it routes the assistant's command at `core/`, read at runtime. So there is exactly one source of truth and nothing to keep in sync.
+The toolkit keeps the protocol in **one tool-agnostic place** (`core/`) and generates a small **adapter file** per tool. An adapter doesn't copy the protocol — it just tells the assistant to read the real instructions from `core/` when the command runs. So there is exactly one source of truth and nothing to keep in sync.
 
 ```
 adlc-toolkit/
@@ -79,13 +79,13 @@ Under the hood it builds machine-specific stubs (absolute toolkit path) into the
 
 ### Updating
 
-Run the **same command** again — `sync` is an idempotent reconciler, not a one-shot installer:
+Run the **same command** again — `sync` is safe to run again and again — each run just brings your install up to date:
 
 ```bash
 node scripts/adlc.mjs sync --tool=all --pull    # git pull the toolkit, then reconcile every install
 ```
 
-Re-running reconciles your install against what the toolkit currently ships: **new skills/agents get linked, removed ones get pruned, and renamed ones are cleaned up** — while anything *you* added to `~/.claude/skills` (etc.) is left untouched. Content edits flow through automatically because every stub is a thin pointer into `core/`. There is no separate "update" step to remember and no orphaned commands left behind when the skill set changes.
+Re-running updates your install to match what the toolkit currently ships: **new skills/agents get linked, removed ones get pruned, and renamed ones are cleaned up** — while anything *you* added to `~/.claude/skills` (etc.) is left untouched. Content edits flow through automatically because every stub is a thin pointer into `core/`. There is no separate "update" step to remember and no orphaned commands left behind when the skill set changes.
 
 ### Or let your AI assistant install it
 
@@ -196,7 +196,7 @@ The `.adlc/` directory is an Obsidian-compatible vault — open it in Obsidian f
 
 The toolkit is solo-friendly out of the box; two settings make it team-safe.
 
-**REQ IDs that don't collide.** The default `req.id_scheme: sequential` numbers REQs by scanning the vault (`REQ-001`, `REQ-002`, …), so two people branching at once can both mint `REQ-042` and clash at merge. For teams, set the scheme in `.adlc/config.yml`:
+**REQ IDs that don't collide.** The default `req.id_scheme: sequential` numbers REQs by scanning the vault (`REQ-001`, `REQ-002`, …), so two people starting work at the same time can both end up with `REQ-042` and hit a conflict at merge. For teams, set the scheme in `.adlc/config.yml`:
 
 | `req.id_scheme` | ID looks like | When |
 |---|---|---|
@@ -218,15 +218,15 @@ How much git the assistant runs is **your choice per project**, set at `init` an
 | `commit` | The assistant also `git add` + `git commit`s the approved work on the REQ's feature branch at each gate. You push and open/merge the PR. |
 | `commit+push` | The assistant also `git push`es the feature branch (fast-forward only). You open and merge the PR. |
 
-In **every** mode the hard invariants hold: only the REQ's own feature branch, and never a protected branch (`git.protect`, default `main`/`master`/`release/*`), force-push, rebase, history rewrite, branch delete, `gh pr create`, `gh pr merge`, or `--no-verify`. `/autopilot`'s `autonomy.git` is capped by `git.mode` and can never exceed it.
+These rules hold in **every** mode: the assistant only ever touches the REQ's own feature branch. It never commits to a protected branch (`git.protect`, default `main`/`master`/`release/*`), never force-pushes, rebases, rewrites history, or deletes branches, and never runs `gh pr create`, `gh pr merge`, or `--no-verify`. `/autopilot`'s `autonomy.git` is capped by `git.mode` and can never exceed it.
 
 ## Philosophy
 
-The six principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **spec first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask in options, not open prose**.
+The six principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **spec first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask with concrete options, not open-ended questions**.
 
 ## Contributing / extending
 
-- **Customize for your team (don't touch `core/`):** put overrides and additions in `local/` — a same-named file shadows a core skill, a new file adds one, and a `local/manifest.json` entry with `"disabled": true` drops one. Then `node scripts/adlc.mjs sync`. See [`local/README.md`](local/README.md). This is the path that keeps `git pull upstream` conflict-free.
+- **Customize for your team (don't touch `core/`):** put overrides and additions in `local/` — a file with the same name replaces the core version, a new file adds one, and a `local/manifest.json` entry with `"disabled": true` drops one. Then `node scripts/adlc.mjs sync`. See [`local/README.md`](local/README.md). This is the path that keeps `git pull upstream` conflict-free.
 - **Improve the engine (upstream):** edit `core/skills/<name>.md` / `core/agents/<name>.md` (or add/remove in `core/` + `core/manifest.json`), then `node scripts/adlc.mjs sync` — added stubs are linked and removed ones pruned automatically. Open a PR upstream for fixes that aren't team-specific.
 - **Add a tool:** add an emitter to the `TOOLS` map in `scripts/adlc.mjs` and regenerate.
 - **Add a stack preset:** see `templates/config-template.yml`.

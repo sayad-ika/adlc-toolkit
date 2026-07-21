@@ -17,9 +17,9 @@ This page gets you from install to your first approved piece of work in four ste
 
 Three pieces:
 
-1. **The toolkit** — this repository. Holds the tool-agnostic protocol engine (`core/`), your team's overlay (`local/` — customizations resolved over `core/`), the vault templates (`templates/`), and generated per-tool adapters (`adapters/`). It's a base model: fork it and shape `local/` to your team. See [`local/README.md`](../local/README.md).
+1. **The toolkit** — this repository. Holds the workflow definitions (`core/`), your team's customizations (`local/` — files here replace or add to `core/`), the note templates (`templates/`), and small generated files that hook each AI tool up to the workflow (`adapters/`). It's a starting point: fork it and put your team's changes in `local/`. See [`local/README.md`](../local/README.md).
 2. **Adapters** — thin "pointer" files that wire your assistant's slash commands and sub-agents to the protocol in `core/`. One per tool, already generated in `adapters/<tool>/`. They contain no copied logic — they route your assistant at the single source of truth, so there is nothing to keep in sync.
-3. **The `.adlc/` vault** — created per code-repo by the `init` command. Holds that project's specs, architecture, conventions, decisions, and compounding knowledge. Plain markdown; Obsidian-compatible.
+3. **The `.adlc/` vault** — created per code-repo by the `init` command. Holds that project's specs, architecture, conventions, decisions, and compounding knowledge. Plain markdown files. (If you use the Obsidian note app, this opens as a vault; if not, it's just a folder of markdown.)
 
 ```
 adlc-toolkit/            ← the toolkit (shared across all your projects)
@@ -72,7 +72,7 @@ Per-tool detail (exact locations, verification, caveats) lives in each install g
 
 > The installer builds machine-specific stubs (with an absolute path to the toolkit) into the gitignored `dist/` folder and symlinks from there, so the committed `adapters/` stays portable and your `git status` stays clean.
 >
-> **Updating is the same command.** Re-run `node scripts/adlc.mjs sync --tool=all --pull` to git-pull the toolkit and reconcile — added skills are linked, removed ones pruned, content changes flow through automatically. Or, from inside your assistant, run **`/toolkit-update`** for a guided pull that also flags any `local/` override shadowing a changed engine file.
+> **Updating is the same command.** Re-run `node scripts/adlc.mjs sync --tool=all --pull` to pull the latest toolkit and update your install — new commands are added, deleted ones removed, changed ones update automatically. Or, from inside your assistant, run **`/toolkit-update`** for a guided update that also warns you when a file you customized in `local/` has changed upstream.
 
 ### 3. Initialize a project
 
@@ -110,4 +110,4 @@ Project settings live in `.adlc/config.yml` and are easiest to change with the *
 - **The vault is portable.** It's just markdown — switch tools or use several at once against the same `.adlc/`.
 - **Read-only reviewers** report findings; they never edit.
 
-Where tools differ — read-only enforcement strength, parallel sub-agents, command file format — is documented in the [fidelity matrix](fidelity-matrix.md).
+Where tools differ — read-only enforcement strength, parallel sub-agents, command file format — is documented in [what works on each tool](fidelity-matrix.md).

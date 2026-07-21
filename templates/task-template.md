@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | REQ | {{REQ_ID}} |
-| Tier | 0 \| 1 \| 2 \| ... |
+| Tier | 0 \| 1 \| 2 \| ... (dependency order — see architecture.md) |
 | Status | pending \| in-progress \| complete \| blocked |
 | Repo | {{REPO_ID}} |
 | Depends on | {{TASK_IDS}} |

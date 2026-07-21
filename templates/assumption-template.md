@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | ID | ASSUMPTION-{{NN}} |
-| Status | provisional \| validated \| invalidated |
+| Status | unverified \| confirmed \| disproven |
 | Made | {{DATE}} |
-| Made during | {{REQ_ID}} \| {{PHASE}} |
+| Made during | {{REQ_ID}}, {{PHASE}} phase |
 | Owner | who validates this |
-| Validates by | {{DATE_OR_EVENT}} |
+| Check by | {{DATE_OR_EVENT}} |
 
 ## Assumption
 

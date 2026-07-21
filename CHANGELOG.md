@@ -4,6 +4,16 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.7] — 2026-07-21
+
+### Docs pass — the reading surfaces speak plainly too **[tooling]**
+
+- README and quickstart lose their jargon: "base model" → "starting point", "pointer-stub adapters" → "a small adapter file that just points at core/", "idempotent reconciler" → "safe to run again and again", "resolves local/ over core/" → "files in local/ win", and the every-mode git rules are now a parseable sentence instead of a noun/verb pile-up.
+- The fidelity matrix is retitled **"What works on each tool"** (same filename); "hermetic" and "degrades" are gone; the reviewer-Write paragraph reads like an explanation instead of a legal clause.
+- ETHOS grounds its aphorisms ("Auto-fix is borrowed time" now says what actually goes wrong) and principle 6 is titled "Offer Choices, Don't Ask Open-Ended Questions".
+- Template fields a person had to guess at are named for what they want: `Anchored on` → `Based on`, `Validates by` → `Check by`, assumption status `provisional|validated|invalidated` → `unverified|confirmed|disproven`, design-system status `de facto|ratified` → `as-found|agreed`, task `Tier` gets a gloss, and hot.md leads with the one rule that matters (only add entries).
+- Vault docs: CLAUDE.md is a "rulebook" not a "schema doc"; "tombstoned" is explained; config comments drop "minted", "hermetic", "invariants", and the unexplained Karpathy reference.
+
 ## [1.3.6] — 2026-07-21
 
 ### Claude extras — statusline + gate notifications **[tooling]**

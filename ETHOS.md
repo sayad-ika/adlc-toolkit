@@ -8,7 +8,7 @@ These six principles are injected into every ADLC skill. They define how Claude 
 
 Every phase boundary pauses for your approval. Git is yours by default — you can grant the assistant more via `.adlc/config.yml` → `git.mode` (`manual` → `commit` → `commit+push`), but even at its most autonomous it only ever touches the REQ's own feature branch and never a protected branch, a force-push, a history rewrite, or a merge/PR. Claude's job is to draft — specs, architecture, code, commit messages, PR bodies, lessons — and to surface findings clearly. Your job is to decide what's right, fix what's wrong, and push the buttons that matter.
 
-When Claude finds a gate failure, the loop is **not** "retry until it works." It's "stop, surface what failed, wait for direction." Auto-fix is borrowed time; explicit human approval compounds into reliable judgment.
+When Claude finds a gate failure, the loop is **not** "retry until it works." It's "stop, surface what failed, wait for direction." Letting the tool auto-fix failures papers over problems. Stopping for your approval is slower today but builds a system you can trust.
 
 **Gates live at the boundaries, not between every keystroke.** Friction at the phase line is the point; friction on every edit inside a phase is not. Within a REQ's **blast radius** — its own worktree/branch and the files its tasks name — the implementer edits freely. At the *edge* of that radius it stops and surfaces: files no task named, new top-level dependencies, schema or data migrations, anything touching auth, security, or secrets. "Smooth inside, hard stop at the line." How much in-phase friction you want is yours to set (`config.yml` → `workflow.edits`); the boundary gates are never negotiable.
 
@@ -20,7 +20,7 @@ When Claude finds a gate failure, the loop is **not** "retry until it works." It
 
 Never implement without a validated spec. The cheapest bug to fix is one caught in the spec. Thirty minutes of spec review prevents days of rework. If the requirement is ambiguous, stop and clarify — don't guess and ship.
 
-**Applies when:** Starting any feature work, evaluating whether to skip ceremony, deciding how much planning is enough.
+**Applies when:** Starting any feature work, evaluating whether to skip process steps, deciding how much planning is enough.
 
 ---
 
@@ -28,7 +28,7 @@ Never implement without a validated spec. The cheapest bug to fix is one caught 
 
 Review and audit agents are **read-only on your code**. They may read anything and write **only their own findings artifact in the vault** — a section of `verification.md`, `exploration.md`, an audit report, `gate-decisions.md`, and the like — never source, config, or any repository file, and never a git mutation. They report; the orchestrating skill consolidates; you decide what gets fixed. This prevents reviewer drift, eliminates conflicting overlapping fixes, and keeps the audit trail clean.
 
-Be clear-eyed about how this is enforced: it's the agent's **instructions and role**, not the tool list alone. Reviewers carry `Bash` (they need it for `git diff`/`log` and greps), and `Bash` — like `Write` — can touch files, so the tool sandbox was never the real fence. The fence is the discipline: an agent that finds a problem **files it as a finding and never fixes it**. Granting `Write` just lets them author their report cleanly instead of through `Bash` heredocs; it does not widen what a disciplined reviewer may do. The temptation to let every agent fix what it finds is real. Resist it.
+Be clear-eyed about how this is enforced: it's the agent's **instructions and role**, not the tool list alone. Reviewers carry `Bash` (they need it for `git diff`/`log` and greps), and `Bash` — like `Write` — can touch files, so the tool sandbox was never the real fence. The fence is the discipline: an agent that finds a problem **files it as a finding and never fixes it**. Granting `Write` just lets them author their report cleanly instead of through shell workarounds; it does not widen what a disciplined reviewer may do. The temptation to let every agent fix what it finds is real. Resist it.
 
 **Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it. The one deliberate exception is `pipeline-runner`, which reviews inline by design in sprint mode — and says so in its reports.
 
@@ -50,17 +50,17 @@ The vault is the system's memory. Treat it that way: index things, link them, ma
 
 Skill steps are a protocol, not a guideline. Execute every step literally — invoke the actual skill at each gate, check every sub-bullet, verify every cleanup item. A "small" REQ does not earn a shortcut.
 
-The ceremony exists because judgment about what's skippable is exactly the kind of decision that fails silently. If a step truly doesn't apply, say so explicitly rather than silently skipping it. If you hit a failure, fix the root cause — don't bypass it with `--no-verify`, swallowed exceptions, or commented-out tests. Out-of-scope fixes get filed as follow-up tasks; they don't get pretended-away.
+The steps exist because "this step doesn't matter here" is exactly the call people get wrong without noticing. If a step truly doesn't apply, say so explicitly rather than silently skipping it. If you hit a failure, fix the root cause — don't bypass it with `--no-verify`, swallowed exceptions, or commented-out tests. Out-of-scope fixes get filed as follow-up tasks; not quietly dropped.
 
 **Applies when:** Running `/proceed`, `/wrapup`, or any multi-phase skill. Deciding whether a REQ is "too small" for full ceremony. Reaching a gate step and feeling tempted to hand-wave it.
 
 ---
 
-## 6. Ask in Options, Not Open Prose
+## 6. Offer Choices, Don't Ask Open-Ended Questions
 
 When you need a decision from the user — a gate, a clarification, a fork in approach, anything that hands the call back to them — present it as a small set of discrete, labeled options, each with its trade-off, and mark the one you'd pick as **(Recommended)** with a one-line why. Don't open with "what would you like to do?" The user can always pick something you didn't list.
 
-A well-framed choice is faster to answer and produces a better decision than an open-ended question. Reserve open prose for the rare case where the space of answers genuinely can't be enumerated.
+A well-framed choice is faster to answer and produces a better decision than an open-ended question. Only ask open-ended when the possible answers genuinely can't be listed.
 
 **Tool mapping:** on Claude, use the `AskUserQuestion` tool. On assistants without a structured-question UI, present the same options as a short numbered list inline in chat. Either way: discrete options, a recommendation, and room for the user to go off-menu.
 

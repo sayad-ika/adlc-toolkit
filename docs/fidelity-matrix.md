@@ -1,6 +1,8 @@
-# Fidelity matrix
+# What works on each tool
 
-All five assistants converged on the same three primitives — a memory/context file, custom slash commands, and sub-agents — so the ADLC pipeline runs on all of them. But they are not identical. This page is the honest account of what's first-class, what degrades, and what to expect per tool.
+_(a.k.a. the fidelity matrix)_
+
+All five assistants converged on the same three primitives — a memory/context file, custom slash commands, and sub-agents — so the ADLC pipeline runs on all of them. But they are not identical. This page is the honest account of what works fully, what works with limits, and what to expect on each tool.
 
 ## Primitives, per tool
 
@@ -26,9 +28,9 @@ All five assistants converged on the same three primitives — a memory/context 
 
 ## What the ⚠️/❌ cells mean in practice
 
-**Read-only reviewers.** Principle 3 says review agents report but never touch your code. Reviewers are granted `Write`/`Edit` so they can author their own findings artifact (`verification.md`, an audit report, `gate-decisions.md`) cleanly — so "never touch source" is enforced by **instruction on every tool**, not by the tool sandbox, and the fidelity is the same across all five. (It was never fully tool-enforced anyway: reviewers also carry `Bash`, which can write files.) The real guardrail is the agent's constraint (write only your findings file) plus the git-mutation ban. On **every** tool, treat read-only-on-source as a discipline: after a review pass, confirm `git status` shows only `.adlc/` changes and no edits to your source or repo files.
+**Read-only reviewers.** Principle 3 says review agents report but never touch your code. Reviewers do have `Write`/`Edit` — they need it to write their own report files (`verification.md`, an audit report, `gate-decisions.md`). So "never touch your source code" is enforced by the reviewer's instructions, not by the tool's permission system, and that is equally true on all five tools. (It was never fully tool-enforced anyway: reviewers also carry `Bash`, which can write files.) The real guardrail is the agent's constraint (write only your findings file) plus the git-mutation ban. On **every** tool, treat read-only-on-source as a discipline: after a review pass, confirm `git status` shows only `.adlc/` changes and no edits to your source or repo files.
 
-**Parallel sub-agents / `/sprint`.** `/sprint` runs several REQs at once, each in its own worktree, via the `pipeline-runner` agent. Claude, Codex, and Gemini can spawn parallel sub-agents, so `/sprint` works as designed. **Copilot uses sequential "handoffs"** and **Cursor has no isolated sub-agents**, so on those two `/sprint` degrades to one REQ at a time — still correct, just not concurrent. The single-REQ pipeline (`/proceed`) works fully everywhere.
+**Parallel sub-agents / `/sprint`.** `/sprint` runs several REQs at once, each in its own worktree, via the `pipeline-runner` agent. Claude, Codex, and Gemini can spawn parallel sub-agents, so `/sprint` works as designed. **Copilot uses sequential "handoffs"** and **Cursor has no isolated sub-agents**, so on those two `/sprint` runs one REQ at a time — same results, just not in parallel. The single-REQ pipeline (`/proceed`) works fully everywhere.
 
 **Inline agents on Cursor.** Cursor has no sub-agent process, so the reviewer/explorer/implementer roles run sequentially inside the main session. The generated `adlc-agent-*` command files let you invoke a role on demand, and the orchestration stubs instruct the main agent to run each role's checklist in its own pass. You lose isolation (each role sees the others' context) but keep the substance.
 
@@ -44,7 +46,7 @@ All five assistants converged on the same three primitives — a memory/context 
 
 ## External sources (issues / designs)
 
-Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugfix` can **seed** a draft from a tracker issue and `/architect` from a design frame; `/wrapup` and `/bugfix` Phase 5 can optionally **write back** (gated). The *service* is fixed at `/init`; the *mechanism* — how a skill reaches that service — is auto-resolved at runtime, first that works wins. This degrades gracefully: with no mechanism available, the skill says so in one line and you author the artifact manually, exactly as a hermetic project always has.
+Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugfix` can **seed** a draft from a tracker issue and `/architect` from a design frame; `/wrapup` and `/bugfix` Phase 5 can optionally **write back** (gated). The *service* is fixed at `/init`; the *mechanism* — how a skill reaches that service — is auto-resolved at runtime, first that works wins. This degrades gracefully: with no mechanism available, the skill says so in one line and you author the artifact manually, exactly as a project with no integrations always has.
 
 | Mechanism | What it needs | Typical availability |
 |---|---|---|
@@ -57,7 +59,7 @@ Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugf
 | Read-seed (`/spec`, `/bugfix`, `/architect`) | First-class wherever any one mechanism resolves. The same resolver serves `/spec` and `/bugfix`. |
 | Write-back (`/wrapup`, `/bugfix` P5) | Off unless `sources.write` lists the service. Always drafted to `source-writeback.md` and sent only on approval. Under `/autopilot`, additionally capped by `autonomy.sources`. External writes always stop for your explicit OK. |
 
-The honest line, as everywhere else in this matrix: sources are **strictly additive**. The hermetic pipeline is always intact; a missing CLI, unattached MCP, or unreachable URL never blocks a phase — it just means you type the draft yourself.
+Bottom line, as everywhere else on this page: integrations only ever **add** convenience. The self-contained, no-integrations pipeline always works; a missing CLI, unattached MCP, or unreachable URL never blocks a phase — it just means you type the draft yourself.
 
 ## Notes on accuracy
 

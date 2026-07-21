@@ -4,9 +4,9 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 
 ## Read this first
 
-- [[CLAUDE]] — schema doc. How Claude reads and writes this vault. Claude reads this at the start of every session.
+- [[CLAUDE]] — the rulebook: how Claude reads and writes this folder. How Claude reads and writes this vault. Claude reads this at the start of every session.
 - [[now]] — what's actively in flight right now.
-- [[hot]] — append-only chronological log of significant events.
+- [[hot]] — the activity log. New entries go on top; old ones are never edited.
 - [[index]] — content catalog. Drill into specific pages from here.
 
 ## Layout

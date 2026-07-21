@@ -7,11 +7,11 @@
 | Author | {{AUTHOR}} |
 | Supersedes | {{ADR_LINK or "(none)"}} |
 | Superseded by | {{ADR_LINK or "(none)"}} |
-| Anchored on | {{LINKS}} |
+| Based on | {{LINKS}} |
 
 ## Context
 
-Two or three paragraphs. What forces are at play, what constraints exist, what we know and don't know. Link to relevant gotchas, lessons, concept pages, and external references. The reader should understand *why this decision needs to be made* before reading the options.
+Two or three paragraphs. What pressures and constraints exist, what we know and don't know. Link to relevant gotchas, lessons, concept pages, and external references. The reader should understand *why this decision needs to be made* before reading the options.
 
 ## Considered options
 

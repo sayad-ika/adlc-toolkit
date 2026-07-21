@@ -2,12 +2,12 @@
 
 | Field | Value |
 |---|---|
-| Status | de facto (observed) \| ratified |
+| Status | as-found (what the code does) \| agreed (what the team decided) |
 | Last audited | YYYY-MM-DD (`/ux-doctor`) |
 | Token source | <path to theme/tokens, or "none — values inline"> |
 | Component library | <path / package, or "in-repo components"> |
 
-> STATUS: needs verification — seeded from the observed de facto system by `/ux-doctor`. Sections describe what the code *does*, not yet what the team has *decided*. Ratify or correct each section, then flip Status.
+> STATUS: needs verification — seeded from the observed de facto system by `/ux-doctor`. Sections describe what the code *does*, not yet what the team has *decided*. Confirm or correct each section, then set Status to `agreed`.
 
 This file is the UI contract the toolkit audits against: `/ux-doctor` measures drift from it, the `ui-reviewer` design-matches against it in `/review`, and the `architecture-adversary`'s UX lens checks plans against it in `/architect`. Keep it honest — a stale rule here produces false findings everywhere.
 
@@ -47,7 +47,7 @@ House rules for recurring UI situations: empty states, loading, error display, f
 
 ## Exceptions
 
-Deliberate divergences, each with a reason and scope. An undocumented divergence is drift; a documented one is a decision.
+Places we deliberately break our own rules, each with a reason and scope. If it's written down here it's a decision; if it isn't, it's drift.
 
 | Where | Diverges how | Why | Since |
 |---|---|---|---|
@@ -67,5 +67,5 @@ Deliberate divergences, each with a reason and scope. An undocumented divergence
 ### Theming / brands
 <!-- Multi-theme or white-label rules; which tiers may vary per theme. -->
 
-### Contribution & governance
-<!-- How a one-off gets promoted into the system; who ratifies; deprecation path. -->
+### How the system grows
+<!-- How a one-off becomes an official component; who signs off; how old ones get retired. -->
