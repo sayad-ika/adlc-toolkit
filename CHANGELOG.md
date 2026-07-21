@@ -4,6 +4,16 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.8] — 2026-07-21
+
+### Review sweep — closing the gaps the series left **[tooling]**
+
+- **Seven principles, everywhere.** ETHOS gained "Speak Plainly" in 1.3.2, but four surfaces still said six — ETHOS's own intro, README's principle list, the vault CLAUDE.md authority table, and the generated memory file (which now also carries principle 7 and the renamed principle 6).
+- **`docs/gate-cards.md` caught up with the card format it documents**: plain `GATE n/N` headers instead of rulers, the current architect example (stages, stress-test, task order, options with consequences), "a menu of sections" instead of "a palette", and no more "surviving finding".
+- "Terminal review" is now the **final review** everywhere ("terminal" read as a CLI or as fatal); the decision-maker's REWORK verdict carries `{fixes}`, matching its "Fixes requested" output.
+- Leftover wording caught by the sweep: toolkit-update's "idempotent installer", config's "derived twin" / "edit friction" / "decision-maker bias" / "inert", sprint's "verify-phase", proceed's "reconciles state-vs-reality", implement's "edit posture" (and a quote it attributed to ETHOS that ETHOS never said), the dense ui-reviewer / design-system-auditor / adversary descriptions, and small template fixes (lesson "manifestation", spec "provisional", bug/index/decisions glosses).
+- The quickstart glossary gains its seventh term: **ADR**, finally expanded.
+
 ## [1.3.7] — 2026-07-21
 
 ### Docs pass — the reading surfaces speak plainly too **[tooling]**

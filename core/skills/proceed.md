@@ -21,7 +21,7 @@ Invocation patterns:
 
 Each flag's full protocol is in **Invocation flags** below. If the REQ ID is omitted with a flag, use `now.md`'s active REQ; if none, ask.
 
-These flags assume `pipeline-state.json` is in sync with git reality. If state has drifted (session crash, work shipped outside the toolkit, branch deleted without /wrapup), run `/recover` first — it reconciles state-vs-reality. `--revert`, `--resume`, and `--cancel` are for deliberate operations on a healthy pipeline.
+These flags assume `pipeline-state.json` is in sync with git reality. If state has drifted (session crash, work shipped outside the toolkit, branch deleted without /wrapup), run `/recover` first — it checks the records against what git actually shows and fixes the records. `--revert`, `--resume`, and `--cancel` are for deliberate operations on a healthy pipeline.
 
 ## Preflight
 

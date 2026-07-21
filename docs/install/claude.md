@@ -1,6 +1,6 @@
 # Install: Claude Code
 
-Claude Code calls commands **skills** (`SKILL.md` in a folder per command) and supports first-class **sub-agents** with per-agent model and tool restrictions. This is the highest-fidelity target — isolated sub-agents with per-agent model tiers. (Read-only reviewers are enforced by instruction, not the tool sandbox: they carry Write only to author their own findings — see the fidelity matrix.)
+Claude Code calls commands **skills** (`SKILL.md` in a folder per command) and supports first-class **sub-agents** with per-agent model and tool restrictions. Claude Code supports everything the toolkit does — isolated sub-agents, each on its own model tier. (Read-only reviewers are enforced by instruction, not the tool sandbox: they carry Write only to author their own findings — see the fidelity matrix.)
 
 Adapter source: `adapters/claude/` → `skills/<name>/SKILL.md`, `agents/<name>.md`, `CLAUDE.md`.
 

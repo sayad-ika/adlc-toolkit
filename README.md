@@ -142,7 +142,7 @@ The committed `adapters/` are built vendored (relative `.adlc-toolkit`) so they 
 | `review` | Dispatch reviewers, consolidate findings | Yes |
 | `wrapup` | Draft PR + lessons + vault updates + git checklist | Yes |
 | `proceed` | Run all five phase skills with gates between | — |
-| `autopilot` | Autonomous pipeline — routes each gate through the decision-maker; ends in one terminal human review | — |
+| `autopilot` | Autonomous pipeline — routes each gate through the decision-maker; ends in one final human review | — |
 | `sprint` | Parallel multi-REQ orchestrator (gate-pause) | — |
 | `bugfix` | Slimmer pipeline for bugs | Yes |
 | `task` | Slim self-triaging pipeline for small changes; escalates to `proceed` when large | Yes |
@@ -222,7 +222,7 @@ These rules hold in **every** mode: the assistant only ever touches the REQ's ow
 
 ## Philosophy
 
-The six principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **spec first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask with concrete options, not open-ended questions**.
+The seven principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **spec first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask with concrete options, not open-ended questions**; **speak plainly**.
 
 ## Contributing / extending
 

@@ -32,7 +32,7 @@ How the change is structured. Two or three paragraphs. Should answer:
 
 ### Diagrams
 
-Include a diagram when the change has shape that's hard to hold in the head from prose — a flow across components, an ordered interaction, a state machine, a data model, or a structural decomposition. Skip it when it would only restate a paragraph. One diagram, one idea; label the edges; keep it legible (~7±2 nodes). The prose stays the source of truth — the diagram is the glance. Use Mermaid so it renders in Obsidian, GitHub, and your IDE alike. A diagram describes the *designed* state; keep it in sync or mark it `STATUS: needs verification`.
+Include a diagram when the change has shape that's hard to hold in the head from prose — a flow across components, an ordered interaction, a state machine, a data model, or a structural decomposition. Skip it when it would only restate a paragraph. One diagram, one idea; label the edges; keep it readable (about 7 boxes). The prose stays the source of truth — the diagram is the glance. Use Mermaid so it renders in Obsidian, GitHub, and your IDE alike. A diagram describes the *designed* state; keep it in sync or mark it `STATUS: needs verification`.
 
 Reach for whichever fits (delete the rest — most REQs need zero or one):
 
@@ -69,7 +69,7 @@ erDiagram
 
 ## Task DAG
 
-Tasks broken into dependency tiers. Tier 0 has no dependencies; Tier N depends only on Tier N-1 or earlier.
+Tasks grouped by dependency. Tier 0 depends on nothing; each later tier depends only on earlier tiers, so everything in one tier can run in parallel.
 
 ### Tier 0
 - `TASK-001` — {{description}}

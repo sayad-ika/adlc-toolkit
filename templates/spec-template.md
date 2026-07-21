@@ -20,7 +20,7 @@ The state of the world after this REQ ships. One paragraph. Specific enough that
 
 ## Non-goals
 
-What this REQ explicitly does **not** cover. Two or three bullets. Cuts down ambiguity at architecture time.
+What this REQ explicitly does **not** cover. Two or three bullets. Saves arguments later when the design is drawn up.
 
 ## Acceptance criteria
 
@@ -45,7 +45,7 @@ stateDiagram-v2
 
 ## Assumptions
 
-Things you're treating as true to keep moving. Mark provisional ones with `STATUS: needs verification` and link the assumption file if one was created.
+Things you're treating as true to keep moving. Mark unconfirmed ones with `STATUS: needs verification` and link the assumption file if one was created.
 
 - Assumption 1
 - Assumption 2 — `STATUS: needs verification`

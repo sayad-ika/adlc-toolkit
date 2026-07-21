@@ -1,6 +1,6 @@
 ---
 name: toolkit-update
-description: Update the ADLC toolkit install itself from upstream and reconcile every tool's adapters. Pulls new core/ engine changes, runs the idempotent installer (added skills linked, removed ones pruned), and — crucially — flags where your local/ overlay shadows an engine file upstream just changed. Operates on the toolkit repo, not a project vault. Use after "a new toolkit version is out" / "pull the latest ADLC" / "update my pipeline".
+description: Update the ADLC toolkit install itself from upstream and reconcile every tool's adapters. Pulls new core/ engine changes, re-runs the installer (safe to run repeatedly; new skills linked, removed ones cleaned up), and — crucially — flags where a file you customized in local/ overrides a core file that upstream just changed. Operates on the toolkit repo, not a project vault. Use after "a new toolkit version is out" / "pull the latest ADLC" / "update my pipeline".
 ---
 
 You are updating the **ADLC toolkit itself** — the engine at `$TOOLKIT_PATH`, not any project's `.adlc/` vault. This skill pulls upstream changes into the toolkit clone, then reconciles the per-tool adapters so every assistant picks up new/changed/removed skills and agents. It is a utility skill: no phase, no pipeline gate, no sub-agents — but it **runs git and the installer against the toolkit repo**, so it always shows the plan and waits for explicit approval before any write.
@@ -54,7 +54,7 @@ On approval, pull. Because the user customizes via `local/` and never edits `cor
 
 ### 4. Reconcile every install
 
-Run the idempotent installer so adapters match the new engine:
+Re-run the installer (safe to run repeatedly) so adapters match the new engine:
 
 ```
 node "$TOOLKIT_PATH/scripts/adlc.mjs" sync --tool=all

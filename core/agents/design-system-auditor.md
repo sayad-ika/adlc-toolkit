@@ -1,6 +1,6 @@
 ---
 name: design-system-auditor
-description: Static design-system and UI-source audit — token compliance (hardcoded values, wrong-tier references), scale coherence, component duplication, naming consistency, cross-screen misalignment visible in source, and drift against the documented design system with the drift's cause classified. When no design-system doc exists, produces the observed de facto system as synthesis material. Whole-UI-surface scope, no browser — the runtime twin is the ui-reviewer in standalone-audit mode. Read-only. Dispatched by /ux-doctor.
+description: Audits the UI source for design-system problems without running the app — hardcoded values that should be tokens, too many font sizes or spacing values, duplicated components, inconsistent names, screens that disagree with each other, and code that breaks the documented design system (with the cause classified). When no design-system doc exists, writes down the system the code implies, as material for creating one. Whole-UI scope, no browser — the ui-reviewer runs the matching audit in a live browser. Read-only. Dispatched by /ux-doctor.
 tier: balanced
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---

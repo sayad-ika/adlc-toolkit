@@ -14,18 +14,18 @@
 
 ## The lesson
 
-The single sentence to remember. Phrased as an imperative or a checkable rule.
+The single sentence to remember. Written as a do/don't or a rule you can check.
 
 > Always declare Firestore composite indexes before deploying queries that need them.
 
 ## Saw it in
 
-- `src/path/to/file.ts:42` — short note on the manifestation
+- `src/path/to/file.ts:42` — short note on what it looked like there
 - (additional file references if applicable)
 
 ---
 
-## Optional — fill on recurrence
+## Optional — fill in when it happens again
 
 ### What happened
 

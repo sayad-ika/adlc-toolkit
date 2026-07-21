@@ -1,6 +1,6 @@
 # Builder Ethos
 
-These six principles are injected into every ADLC skill. They define how Claude operates inside this pipeline.
+These seven principles are injected into every ADLC skill. They define how Claude operates inside this pipeline.
 
 ---
 

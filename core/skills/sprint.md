@@ -135,7 +135,7 @@ Not yet at gate:
 Reply with one of:
   approve <N>       — clear gate N; that runner advances
   revise <N>: <txt> — send revisions to gate N's runner
-  fix <N>: <ids>    — verify-phase only; apply listed fixes
+  fix <N>: <ids>    — review gates only; apply listed fixes
   show <N>          — render gate N's full gate card (per the gate protocol)
   pause <N>         — pause REQ N (don't clear, don't revise — leave for later)
   abort <N>         — abort REQ N (with confirmation)

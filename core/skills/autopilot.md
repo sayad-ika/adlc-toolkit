@@ -1,9 +1,9 @@
 ---
 name: autopilot
-description: Autonomous end-to-end pipeline. Runs /spec → /architect → /implement → /review → /wrapup like /proceed, but instead of pausing at each gate it routes the decision through the decision-maker agent, commits its work as it goes, and ends in a single terminal human review backed by a full audit log. Opt-in; conservative by default; never merges to main or rewrites history.
+description: Autonomous end-to-end pipeline. Runs /spec → /architect → /implement → /review → /wrapup like /proceed, but instead of pausing at each gate it routes the decision through the decision-maker agent, commits its work as it goes, and ends in a single final human review backed by a full audit log. Opt-in; conservative by default; never merges to main or rewrites history.
 ---
 
-You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You walk a REQ through all five phases **without pausing at the inline gates**. At each boundary you let the `decision-maker` decide (APPROVE / REWORK / HALT), you commit checkpoints as you go, and you finish with a feature branch, a drafted PR, and a complete `run-report.md` for one terminal human review.
+You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You walk a REQ through all five phases **without pausing at the inline gates**. At each boundary you let the `decision-maker` decide (APPROVE / REWORK / HALT), you commit checkpoints as you go, and you finish with a feature branch, a drafted PR, and a complete `run-report.md` for one final human review.
 
 `/autopilot` does not delete the human gate — it **batches** it to the end and backs it with an audit trail. Every decision you make is logged, conservative by default, and bounded by circuit breakers. Read `$TOOLKIT_PATH/ETHOS.md` first: this skill honors principle 1 (you decide; the assistant drafts) by keeping the *merge* decision human, and principle 5 (process is explicit) by logging every intermediate verdict rather than hand-waving it.
 
@@ -27,7 +27,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the terminal review uses the shared card format.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the final review uses the shared card format.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
 4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → load `pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask.
@@ -127,7 +127,7 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
 2. Write `pr-draft.md` (as `/wrapup` does) — title, body, change summary, lesson references. Do not run `gh pr create`.
 3. Write `run-report.md` (see below).
 4. Notify (if `notify.on_complete`).
-5. Emit the terminal review — a `RUN SUMMARY` card per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Unlike a phase gate it's a **handoff, not an approve/revise choice**: the autonomous run is done and the merge decision is now the human's. Keep the spine — what's done → what's left for you → your read.
+5. Emit the final review — a `RUN SUMMARY` card per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Unlike a phase gate it's a **handoff, not an approve/revise choice**: the autonomous run is done and the merge decision is now the human's. Keep the spine — what's done → what's left for you → your read.
 
 ```
 RUN COMPLETE · REQ-NNN-<slug>  (autonomous)
@@ -169,7 +169,7 @@ If `autonomy.notify.on_halt`, ping the user when the run halts (escalation needs
 
 ## Constraints
 
-- **Never merge to `main` or open/merge a PR.** The terminal human gate is non-negotiable.
+- **Never merge to `main` or open/merge a PR.** The final human gate is non-negotiable.
 - **Never force-push or rewrite history.** Commits and fast-forward feature-branch pushes only.
 - **Never cross a hard-stop autonomously.** Hard-stop categories always HALT for the human regardless of dials or confidence.
 - **Dispatch by exact agent name; never inline a missing agent.** If a phase's agent isn't installed, HALT and tell the user to run the sync — inline fallback runs at the wrong model and, for reviewers, removes independence. The one sanctioned inline case is the decision-maker on Cursor (documented in the fidelity matrix), and its verdicts must say `Judged independently: no`.
@@ -185,7 +185,7 @@ If `autonomy.notify.on_halt`, ping the user when the run halts (escalation needs
 - All five phases ran; the ship gate cleared (deterministically or via the decision-maker).
 - Checkpoint commits exist on the feature branch; nothing is merged.
 - `pr-draft.md` and `run-report.md` are written; `gate-decisions.md` logs every gate.
-- The terminal review prompt is emitted and (if configured) the completion ping sent.
+- The final review prompt is emitted and (if configured) the completion ping sent.
 
 OR when a HALT or a circuit breaker stops the run, at which point `.awaiting-approval` holds the open question, the halt ping is sent, and the run is cleanly resumable.
 

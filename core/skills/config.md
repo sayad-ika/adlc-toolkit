@@ -1,11 +1,11 @@
 ---
 name: config
-description: View and change ADLC project settings in .adlc/config.yml — git policy, isolation, edit posture, external sources, autonomy dials, stack, protected branches, repos — through guided options, then re-sync any derived files. Also migrates an existing vault's config to pick up new keys after a toolkit update. Use to change how the pipeline behaves without hand-editing YAML. Vault-only; never commits.
+description: View and change ADLC project settings in .adlc/config.yml — git policy, isolation, how freely the assistant may edit, external sources, autonomy levels, stack, protected branches, repos — through guided options, then re-sync any derived files. Also migrates an existing vault's config to pick up new keys after a toolkit update. Use to change how the pipeline behaves without hand-editing YAML. Vault-only; never commits.
 ---
 
 You are viewing or changing this project's ADLC settings in `.adlc/config.yml`. This is a utility skill: no phase, no gate, no sub-agents. It edits **only** the vault, never source code, and never runs git.
 
-It exists for one reason hand-editing YAML can't satisfy: some settings have a **derived twin** that must stay in sync (changing `git.mode` must also refresh the git-policy block in `.adlc/CLAUDE.md`). This skill owns "validate → write → re-sync → report."
+It exists for one reason hand-editing YAML can't satisfy: some settings have a **derived file** — a second copy elsewhere that must stay in sync (changing `git.mode` must also refresh the git-policy block in `.adlc/CLAUDE.md`). This skill owns "validate → write → re-sync → report."
 
 ## Preconditions
 
@@ -37,7 +37,7 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `git.mode` | `manual` \| `commit` \| `commit+push` | **derived-file sync** (see below). Lowering it below `autonomy.git` silently caps `/autopilot`; mention that. |
 | `git.protect` | list of branch globs | must be non-empty; warn (don't block) if `main`/`master` is removed |
 | `workflow.isolation` | `auto` \| `branch` \| `worktree` | explain the trade-off when changing (branch keeps the editor session; worktree tolerates a dirty checkout) |
-| `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | in-phase edit friction for the implementer. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
+| `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | how often the implementer asks before editing within a phase. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
 | `sources.issues` | `github` \| `linear` \| `jira` \| `none` | issue tracker `/spec` and `/bugfix` seed from. Setting non-`none` enables read-seeding (mechanism auto-resolved: CLI → MCP → URL). If set, prompt for `sources.repo` too. |
 | `sources.design` | `figma` \| `none` | design tool `/architect` seeds UI/component specs from. |
 | `sources.repo` | free text (`owner/name`) | default repo for bare refs like `/spec #8`. |
@@ -46,7 +46,7 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `autonomy.gates` | `manual` \| `assisted` \| `auto` | only consumed by `/autopilot` |
 | `autonomy.git` | `read-only` \| `commit` \| `commit+push` | **capped by `git.mode`** — refuse to set it higher than `git.mode` (offer to raise `git.mode` too, or set the capped value) |
 | `autonomy.sources` | `read-only` \| `write` | only consumed by `/autopilot`. **Capped by `sources.write`** — refuse to set `write` if `sources.write` is empty (offer to populate it first). External writes always stop for your explicit OK. |
-| `autonomy.escalation` | `cautious` \| `balanced` \| `aggressive` | decision-maker bias |
+| `autonomy.escalation` | `cautious` \| `balanced` \| `aggressive` | how cautious the automatic gate-keeper is |
 | `autonomy.rework_cap_per_gate` | integer ≥ 0 | |
 | `autonomy.rework_budget_total` | integer ≥ 0 | |
 | `autonomy.confidence_floor` | number 0.0–1.0 | |
@@ -82,7 +82,7 @@ When the toolkit gains new settings (e.g. `workflow.edits`, the `sources` block,
 3. **Preserve the commented/default shape.** If the template ships a block commented-out (like `sources:`), insert it commented-out too — migration makes the option *available*, it doesn't enable it. Setting a real value is a separate `/config <key>=<value>` action afterward.
 4. **Preview before writing.** Show the user the exact additions (as a unified-diff-style preview), grouped by block, with a one-line note on what each new setting does. Nothing is written until they confirm. Offer `add all`, `add except <block>`, or `skip`.
 5. **Insert surgically.** Place each addition next to its sibling keys in the same order the template uses (e.g. `workflow.edits` right after `workflow.isolation`), comments intact. Keep the file valid YAML.
-6. **Report.** List what was added (and what was already current), append one `.adlc/hot.md` line: `## [DATE] config-migrate | added: <keys/blocks>`, and remind the user that newly added blocks are inert until they set a value (e.g. "run `/config sources.issues=github` to start seeding from GitHub").
+6. **Report.** List what was added (and what was already current), append one `.adlc/hot.md` line: `## [DATE] config-migrate | added: <keys/blocks>`, and remind the user that newly added blocks do nothing until they set a value (e.g. "run `/config sources.issues=github` to start seeding from GitHub").
 
 If the project config is already current, say so and write nothing.
 
@@ -113,7 +113,7 @@ After writing config, refresh anything that mirrors a setting:
 
 - **`git.mode` → `.adlc/CLAUDE.md` "### Git policy" section.** Replace that section's body with the canonical version from `$TOOLKIT_PATH/templates/vault/CLAUDE.md` (it already describes all three modes and the invariants, keyed off `git.mode`, so it's correct for any value). If the user's `.adlc/CLAUDE.md` has local edits around it, replace only the `### Git policy` section, not the whole file.
 
-No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived twin, extend this section.
+No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived file, extend this section.
 
 ## After applying
 

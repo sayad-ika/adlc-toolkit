@@ -48,7 +48,7 @@ The actual cause, with file/line references. Why it produces the symptom.
 
 ## Fix approach
 
-Two or three bullets. Specific enough that task-implementer can execute.
+Two or three bullets. Specific enough to implement without making new decisions.
 
 ## Acceptance
 

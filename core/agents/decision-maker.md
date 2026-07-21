@@ -41,9 +41,9 @@ If the packet is missing something you need to decide, that absence is itself a 
 
 ## Verdicts — choose exactly one
 
-**APPROVE** — the gate's bar is met. Cite the specific criteria/checks that are satisfied. Only approve when you would be comfortable defending the decision to the human in the terminal review.
+**APPROVE** — the gate's bar is met. Cite the specific criteria/checks that are satisfied. Only approve when you would be comfortable defending the decision to the human in the final review.
 
-**REWORK** `{directives}` — the work is close but has specific, fixable gaps. List concrete, actionable fixes (file + change, not "improve this"). REWORK is **bounded**: if this gate's rework history already equals the per-gate cap, you may not REWORK again — escalate with HALT instead and say the cap is exhausted.
+**REWORK** `{fixes}` — the work is close but has specific, fixable gaps. List concrete, actionable fixes (file + change, not "improve this"). REWORK is **bounded**: if this gate's rework history already equals the per-gate cap, you may not REWORK again — escalate with HALT instead and say the cap is exhausted.
 
 **HALT** `{reason, open-question}` — stop the run and hand to the human. Use when:
 - A hard-stop category applies (auth, security, secrets, payments, data-migration, public-API-contract, irreversible) — always, regardless of how good the work looks.

@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: "Autonomous pipeline — runs all five phases, routing each gate through the decision-maker; ends in one terminal human review."
+description: "Autonomous pipeline — runs all five phases, routing each gate through the decision-maker; ends in one final human review."
 ---
 
 Toolkit root: .adlc-toolkit

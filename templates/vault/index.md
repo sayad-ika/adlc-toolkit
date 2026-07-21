@@ -1,6 +1,6 @@
 # Vault Index
 
-Content-oriented catalog. Claude reads this when answering "what do we know about X" — it's faster than walking every file.
+A table of contents for the vault. Claude reads this when answering "what do we know about X" — it's faster than walking every file.
 
 ## How this file is maintained
 
@@ -24,7 +24,7 @@ _(REQ pages by id, with a one-line summary)_
 
 ## Concepts
 
-Patterns, invariants, domain models.
+Patterns, rules that must always hold, domain models.
 
 | Page | One-line summary |
 |---|---|

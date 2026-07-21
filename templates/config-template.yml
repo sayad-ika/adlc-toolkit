@@ -197,7 +197,7 @@ workflow:
 #     - external-write       # posting/transitioning issues or PRs on a connected service
 #   notify:
 #     on_halt: true          # ping when the run halts and needs you
-#     on_complete: true      # ping when the terminal review is ready
+#     on_complete: true      # ping when the final review is ready
 
 # Repository layout. For single-repo projects, leave the `repos:` block out
 # entirely — skills fall back to single-repo behavior.

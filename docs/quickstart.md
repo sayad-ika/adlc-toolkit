@@ -4,7 +4,7 @@ The ADLC toolkit gives any AI coding assistant a **spec-driven pipeline with a h
 
 This page gets you from install to your first approved piece of work in four steps. For tool-specific detail, see the [per-tool install guides](install/).
 
-**Words this toolkit uses** — six terms everything else builds on:
+**Words this toolkit uses** — seven terms everything else builds on:
 
 - **REQ** — one tracked unit of work (a *requirement*), e.g. `REQ-014`. Bugs get `BUG-NNN`.
 - **gate** — a pause where the pipeline stops and waits for your approval before continuing.
@@ -12,6 +12,7 @@ This page gets you from install to your first approved piece of work in four ste
 - **phase** — one of five steps a REQ moves through: spec → architect → implement → review → wrap up.
 - **agent** — a focused sub-assistant (a reviewer, an explorer, an implementer) the pipeline dispatches.
 - **blast radius** — the full set of files and modules a change touches, directly or indirectly.
+- **ADR** — an *architecture decision record*: a short note capturing a decision, its context, and its consequences.
 
 ## How it fits together
 

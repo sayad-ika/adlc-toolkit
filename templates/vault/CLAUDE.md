@@ -35,7 +35,7 @@ You do not need to read every page in the vault. The index plus targeted lookups
 | Source | Authority |
 |---|---|
 | This file (`CLAUDE.md`) | The rules of the road |
-| `ETHOS.md` (toolkit-level) | The six principles |
+| `ETHOS.md` (toolkit-level) | The seven principles |
 | `config.yml` | Stack, paths, deploy config |
 | `context/*` | Project-wide architecture, conventions, overview |
 | `architecture/adr-*.md` (status: accepted) | Architectural decisions in effect |
