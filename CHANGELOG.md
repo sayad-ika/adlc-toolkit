@@ -4,6 +4,30 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.6] — 2026-07-21
+
+### Claude extras — statusline + gate notifications **[tooling]**
+
+- New optional **statusline** for Claude Code: a persistent terminal line showing the active REQ, its phase, and `GATE WAITING` when the pipeline is paused for you (`ADLC REQ-014 · phase 3 (implement) · GATE WAITING`; with several in flight, a count of waiting gates). Zero tokens; reads `.adlc/` pipeline state and the `.awaiting-approval` markers; prints nothing when there's nothing to say and stays silent on any error.
+- New optional **gate notification hook**: on Claude Code's `Notification` event, if a gate marker exists, emits an OSC 9 desktop toast (`ADLC gate ready: REQ-014 (review)`) — supported by Windows Terminal, iTerm2, WezTerm, Ghostty. Look away during long phases; the gate finds you.
+- Both live in `core/extras/claude/` with a plain-language setup README (two `settings.json` snippets) and are passed through to `adapters/claude/extras/` by the build — which previously wiped anything hand-placed in `adapters/`. `local/extras/` overrides work like everywhere else. Claude-only by nature; other tools lose nothing.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`), then follow `adapters/claude/extras/README.md` to wire the two snippets into `~/.claude/settings.json` if you want them.
+
+## [1.3.5] — 2026-07-21
+
+### Model discipline — the right model for every job **[protocol]**
+
+- **No more silent inline fallback.** Skills must dispatch agents by exact registered name; if an agent isn't installed (stale sync), they stop and say so instead of quietly doing the work in the main session. That fallback was how a haiku-priced exploration became an opus-priced one — and how review lost its independence (the context that wrote the code was reviewing it). New rule in ETHOS §3 and at every dispatch site; `/autopilot` HALTs on a missing agent. The one deliberate exception stays: `pipeline-runner` reviews inline in sprint mode by design, and now labels its review sections accordingly.
+- **Every agent report says who wrote it.** First line: `Written by: <agent-name> (tier: <tier>)` — with an explicit note when running inline instead of as a sub-agent. `verification.md` carries a reviewer roster line, so a model-tier leak is visible at the gate instead of on the invoice.
+- **Current model IDs baked into the adapters** (verified 2026-07-21; `tierVerified` in the manifest, re-verify quarterly): Codex agents get `gpt-5.4-mini` / `gpt-5.3-codex` / `gpt-5.5` per tier plus a new `model_reasoning_effort` line (low/medium/high); Gemini's fast-tier agents get `gemini-3-flash-preview` in frontmatter (balanced/deep inherit the session default). Claude keeps `haiku`/`sonnet`/`opus` aliases on purpose — they track the latest models automatically. New optional `tierEffort` manifest block; `local/manifest.json` can override everything as before.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`) — Codex and Gemini adapters change; verify the Codex model IDs against your Codex version before relying on them.
+
 ## [1.3.4] — 2026-07-21
 
 ### Terminal-readable cards — structure over decoration **[protocol]**

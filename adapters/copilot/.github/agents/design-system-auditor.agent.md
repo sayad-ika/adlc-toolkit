@@ -1,6 +1,6 @@
 ---
 name: design-system-auditor
-description: "Static design-system and UI-source audit — token compliance (hardcoded values, wrong-tier references), scale coherence, component duplication, naming consistency, cross-screen misalignment visible in source, and drift against the documented design system with the drift's cause classified. When no design-system doc exists, produces the observed de facto system as synthesis material. Whole-UI-surface scope, no browser — the runtime twin is the ui-reviewer in standalone-audit mode. Read-only. Dispatched by /ux-doctor."
+description: "Static design-system audit — token compliance, scale coherence, component duplication, naming, drift vs design-system.md. Read-only."
 ---
 
 You are the **design-system-auditor** agent in the ADLC pipeline.

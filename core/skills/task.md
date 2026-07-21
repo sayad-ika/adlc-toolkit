@@ -131,7 +131,7 @@ Same pattern as `/architect`'s work-path step. Read `config.yml.workflow.isolati
 
 ### 2. Make the change
 
-Implement against the approach in `requirement.md`. For a genuinely small task, do it directly; if it has 2–3 distinct pieces, dispatch a single `task-implementer`. Add or update tests for the new behavior. Draft the commit message to `commits-draft.md` per `git.mode`. Run the tests; confirm they pass.
+Implement against the approach in `requirement.md`. For a genuinely small task, do it directly; if it has 2–3 distinct pieces, dispatch a single `task-implementer` (by exact agent name — if it isn't installed, stop and say so; don't absorb the work silently). Add or update tests for the new behavior. Draft the commit message to `commits-draft.md` per `git.mode`. Run the tests; confirm they pass.
 
 ### 3. Mid-flight escalation check
 

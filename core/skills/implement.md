@@ -56,7 +56,7 @@ Do NOT run any git mutation commands.
 Report when done.
 ```
 
-Dispatch all tier-0 tasks in a single message so they run concurrently.
+Dispatch all tier-0 tasks in a single message so they run concurrently. **Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
 
 ### 3. Wait for tier 0 to complete
 

@@ -116,6 +116,8 @@ This packet contains the diff with full file context, the REQ spec, the REQ arch
 
 ### 2. Dispatch the reviewers in parallel
 
+**Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
+
 In a single message, launch the four static reviewers — **plus the ui-reviewer when preflight step 6 said the change touches UI**:
 
 - **correctness-reviewer** (balanced)
@@ -179,6 +181,7 @@ Read `verification.md` after the reviewers finish. Build the **Consolidated by s
 For each finding across all reviewer sections (including UI/UX findings when the ui-reviewer ran):
 
 - Lead with a one-row-per-finding digest table (below) so the user can triage at a glance before reading any detail
+- Under the digest, one roster line — `Reviewed by: correctness (balanced) · quality (balanced) · architecture (balanced) · reflector (balanced)` (+ ui when it ran) — taken from each report's `Written by` line; flag any report that arrived without one
 - Give each finding a short ID (C1, M1, m1 by severity) — the gate card and `fix <ids>` replies use these
 - Deduplicate: if two reviewers flagged the same file + line + concern, merge into one entry citing both
 - Sort by severity (Critical > Major > Minor > Trivial)

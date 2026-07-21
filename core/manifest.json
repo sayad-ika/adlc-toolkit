@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.3.4",
+  "version": "1.3.6",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },
@@ -38,13 +38,18 @@
     { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Decides one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
   ],
   "tierToModel": {
-    "$comment": "Maps capability TIERS (fast | balanced | deep — not model names) to each assistant's actual model. Tiers keep the protocol tool-neutral; this table is the only place vendor model IDs live. Override via .adlc/config.yml. Strings are best-effort current IDs; tools that don't accept a model field ignore these.",
+    "$comment": "Maps capability TIERS (fast | balanced | deep — not model names) to each assistant's actual model. Tiers keep the protocol tool-neutral; this table is the only place vendor model IDs live. Override via .adlc/config.yml. 'default'/'default-fast' means inherit the tool's own session default (no model field emitted). IDs verified 2026-07-21 — models rotate, re-verify quarterly (see tierVerified). Claude uses aliases on purpose: they track the latest model automatically.",
     "claude": { "fast": "haiku", "balanced": "sonnet", "deep": "opus" },
     "cursor": { "fast": "default", "balanced": "default", "deep": "default" },
     "copilot": { "fast": "default", "balanced": "default", "deep": "default" },
-    "codex": { "fast": "default-fast", "balanced": "default", "deep": "default" },
-    "gemini": { "fast": "default-fast", "balanced": "default", "deep": "default" }
+    "codex": { "fast": "gpt-5.4-mini", "balanced": "gpt-5.3-codex", "deep": "gpt-5.5" },
+    "gemini": { "fast": "gemini-3-flash-preview", "balanced": "default", "deep": "default" }
   },
+  "tierEffort": {
+    "$comment": "Optional per-tool reasoning-effort per tier. Only emitted for tools whose agent format has an effort knob (codex: model_reasoning_effort). Verify values against the tool's current config reference.",
+    "codex": { "fast": "low", "balanced": "medium", "deep": "high" }
+  },
+  "tierVerified": "2026-07-21",
   "sources": {
     "$comment": "External systems a project can SEED artifacts from. Declared per project in .adlc/config.yml -> sources; this catalog tells /init what to offer and tells skills which phases may use each service, with what read/write capability, via which mechanisms (auto-resolved at runtime, first that works wins). Reads are default-on for a declared service; writes require the service in config sources.write and are always gated.",
     "kinds": {

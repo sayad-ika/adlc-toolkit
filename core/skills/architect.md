@@ -37,6 +37,8 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
 
 ### 1. Dispatch codebase-explorer
 
+**Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
+
 Launch the `codebase-explorer` agent (fast tier) with the following prompt:
 
 ```

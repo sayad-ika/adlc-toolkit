@@ -85,6 +85,8 @@ The plan file is the durable twin of this conversation — like a gate's `.await
 
 ### 3. System pass (once per audit), then the segment passes
 
+**Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
+
 **System pass.** Dispatch the `design-system-auditor` in its **system-pass** shape first — global inventory only: token source, scales, component inventory, top-level compliance patterns, and (if `design-system.md` is absent) the Observed system appendix. Output: `.adlc/audits/ux-system-YYYY-MM-DD.md`. It's cheap by design and every later pass builds on it.
 
 If `design-system.md` is absent, make the **gated synthesis offer now** — create `.adlc/context/design-system.md` from `templates/design-system-template.md`, seeded from the Observed system appendix, every seeded section under `STATUS: needs verification`, born minimal. Doing this *before* the segments means they audit against the contract instead of retro-fitting it. The user approves before the file is written; if they decline, segments audit for internal coherence only.

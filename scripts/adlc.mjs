@@ -44,7 +44,6 @@ import {
   renameSync,
   symlinkSync,
   realpathSync,
-  readlinkSync,
   chmodSync,
 } from 'node:fs';
 
@@ -121,20 +120,6 @@ const isSymlink = (p) => {
     return false;
   }
 };
-// True if the symlink at `p` points into this toolkit — judged from the link
-// TARGET itself (not by following it), so a dangling link whose target file was
-// already deleted is still correctly recognised as toolkit-owned.
-function linkPointsIntoToolkit(p) {
-  let raw;
-  try {
-    raw = readlinkSync(p);
-  } catch {
-    return false;
-  }
-  const abs = resolve(dirname(p), raw);
-  const under = (x) => x === ROOT_REAL || x.startsWith(ROOT_REAL + '/');
-  return under(abs) || under(realpathSafe(abs));
-}
 function ensureDir(d) {
   if (!DRY) mkdirSync(d, { recursive: true });
 }
@@ -209,6 +194,7 @@ function mergeManifest(core, local) {
   out.skills = mergeByName(core.skills, local.skills);
   out.agents = mergeByName(core.agents, local.agents);
   out.tierToModel = { ...(core.tierToModel || {}), ...(local.tierToModel || {}) };
+  out.tierEffort = { ...(core.tierEffort || {}), ...(local.tierEffort || {}) };
   out.sources = local.sources ? { ...(core.sources || {}), ...local.sources } : core.sources;
   return out;
 }
@@ -219,10 +205,10 @@ const localManifest = hasLocal('manifest.json')
 const manifest = mergeManifest(coreManifest, localManifest);
 
 function parseFrontmatter(text) {
-  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const m = text.match(/^---\n([\s\S]*?)\n---/);
   const fm = {};
   if (m) {
-    for (const line of m[1].split(/\r?\n/)) {
+    for (const line of m[1].split('\n')) {
       const mm = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
       if (mm) fm[mm[1]] = mm[2].trim();
     }
@@ -307,31 +293,18 @@ function buildModel(toolkitPath) {
       ro,
     ].join('\n');
   }
-  // Claude in Chrome MCP tools granted to browser-driving agents (manifest `browser: true`),
-  // so the ui-reviewer's tier-1 (Claude in Chrome, preferred) is actually reachable — it
-  // falls back to headless Playwright/Puppeteer via Bash, then a static checklist, on its own.
-  // These are Claude-specific; other adapters resolve a browser through their own means.
-  const CHROME_TOOLS = [
-    'mcp__claude-in-chrome__tabs_context_mcp',
-    'mcp__claude-in-chrome__tabs_create_mcp',
-    'mcp__claude-in-chrome__navigate',
-    'mcp__claude-in-chrome__read_page',
-    'mcp__claude-in-chrome__get_page_text',
-    'mcp__claude-in-chrome__computer',
-    'mcp__claude-in-chrome__find',
-    'mcp__claude-in-chrome__form_input',
-    'mcp__claude-in-chrome__read_console_messages',
-    'mcp__claude-in-chrome__read_network_requests',
-  ];
   const claudeTools = (a) =>
-    // all agents get Write; read-only agents write ONLY their own findings (role doc + ETHOS #3), never source.
-    // browser agents additionally get the Claude in Chrome tools; if the MCP isn't connected they simply
-    // aren't available and the agent degrades to Playwright/static per its own Step 1.
-    a.browser
-      ? `Read, Write, Edit, Grep, Glob, Bash, ${CHROME_TOOLS.join(', ')}`
-      : 'Read, Write, Edit, Grep, Glob, Bash';
+    'Read, Write, Edit, Grep, Glob, Bash'; // all agents get Write; read-only agents write ONLY their own findings (role doc + ETHOS #3), never source
   const model = (tool, tier) =>
     (manifest.tierToModel[tool] && manifest.tierToModel[tool][tier]) || 'default';
+  const effortLine = (tool, tier) => {
+    const e = manifest.tierEffort && manifest.tierEffort[tool] && manifest.tierEffort[tool][tier];
+    return e ? `model_reasoning_effort = ${tomlStr(e)}\n` : '';
+  };
+  const modelLineYaml = (tool, tier) => {
+    const m = model(tool, tier);
+    return m && m !== 'default' && m !== 'default-fast' ? `model: ${m}\n` : '';
+  };
 
   function memoryFile(toolLabel) {
     return [
@@ -405,6 +378,7 @@ function buildModel(toolkitPath) {
           `name = ${tomlStr(a.name)}\n` +
           `description = ${tomlStr(a.description)}\n` +
           `model = ${tomlStr(model('codex', a.tier))}\n` +
+          effortLine('codex', a.tier) +
           `read_only = false\n` +
           `instructions = """\n${agentBody(a)}\n"""\n`,
       }),
@@ -420,7 +394,7 @@ function buildModel(toolkitPath) {
       }),
       agent: (a) => ({
         path: `.gemini/agents/${a.name}.md`,
-        body: `---\nname: ${a.name}\ndescription: ${yamlStr(a.description)}\n---\n\n${agentBody(a)}\n`,
+        body: `---\nname: ${a.name}\ndescription: ${yamlStr(a.description)}\n${modelLineYaml('gemini', a.tier)}---\n\n${agentBody(a)}\n`,
       }),
       memory: { path: 'GEMINI.md', body: memoryFile('Gemini CLI') },
     },
@@ -457,6 +431,19 @@ function generate(tool, { toolkitPath, outRoot, clean = true } = {}) {
   }
   write(def.memory.path, def.memory.body);
   n++;
+  // Pass through hand-authored extras for this tool (statusline, hooks, docs).
+  // Sources live in core/extras/<tool>/ so the wipe-and-regenerate above can
+  // never eat them; local/extras/<tool>/ files override same-named ones.
+  const extraRoots = [join(ROOT, 'core/extras', tool), join(ROOT, 'local/extras', tool)];
+  const copyDir = (src, relBase) => {
+    for (const e of readdirSync(src, { withFileTypes: true })) {
+      const s = join(src, e.name);
+      const rel = relBase ? join(relBase, e.name) : e.name;
+      if (e.isDirectory()) copyDir(s, rel);
+      else { write(join('extras', rel), readFileSync(s, 'utf8')); n++; }
+    }
+  };
+  for (const root of extraRoots) if (existsSync(root)) copyDir(root, '');
   return { base, count: n, skills: skills.length, agents: agents.length };
 }
 
@@ -775,138 +762,18 @@ function cmdHooks() {
 }
 
 // ======================================================================
-// uninstall subcommand — receipt-driven removal of installed stubs
-// ======================================================================
-// The inverse of `sync`. Every `sync` writes a receipt of exactly what it
-// placed and where (per tool, per scope). `uninstall` reads those receipts and
-// removes each recorded destination, then deletes the receipt. It is a
-// reconciler, not a wrecking ball: a recorded LINK is only removed if it is
-// still a symlink that resolves back into this toolkit — a real file where we
-// expected a link, or a link that now points elsewhere, is left untouched and
-// reported. COPY/WRITE destinations match the receipt and are toolkit-owned, so
-// they are removed. Empty directories we emptied are then pruned.
-function listReceipts() {
-  const dir = join(HOME, '.adlc', 'receipts');
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith('.json'))
-    .map((f) => {
-      try {
-        return { file: join(dir, f), ...JSON.parse(readFileSync(join(dir, f), 'utf8')) };
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-}
-
-// Walk up from each touched directory, removing directories that are now empty.
-// Stops at HOME (never removes it) and at the first non-empty ancestor.
-function pruneEmptyDirs(dirs) {
-  for (let d of dirs) {
-    while (d && d !== HOME && d.startsWith(HOME + '/')) {
-      try {
-        if (existsSync(d) && !isSymlink(d) && readdirSync(d).length === 0) {
-          act('rmdir (empty)', tidy(d));
-          if (!DRY) rmSync(d, { force: true });
-          d = dirname(d);
-        } else break;
-      } catch {
-        break;
-      }
-    }
-  }
-}
-
-function cmdUninstall() {
-  DRY = !!args['dry-run'];
-  const keep = new Set(
-    String(args.keep || '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean),
-  );
-  const only = args.tool && args.tool !== 'all' ? String(args.tool) : null;
-
-  log('');
-  log(`${C.cyn}ADLC uninstall${C.rst}  ${C.dim}${only ? only : 'all tools'}${keep.size ? ' · keep: ' + [...keep].join(',') : ''}${DRY ? ' · DRY RUN' : ''}${C.rst}`);
-
-  const receipts = listReceipts();
-  if (!receipts.length) {
-    note(`no receipts under ${tidy(join(HOME, '.adlc', 'receipts'))} — nothing recorded to remove.`);
-    log('');
-    return;
-  }
-
-  let removed = 0;
-  let skipped = 0;
-  const touchedDirs = new Set();
-
-  for (const r of receipts) {
-    if (only && r.tool !== only) continue;
-    if (keep.has(r.tool)) {
-      note(`keep ${r.tool} (${r.scope}) — leaving ${(r.entries || []).length} entr${(r.entries || []).length === 1 ? 'y' : 'ies'} in place`);
-      continue;
-    }
-    log(`${C.cyn}▸ ${r.tool}${C.rst} ${C.dim}${r.scope}${C.rst}`);
-    for (const e of r.entries || []) {
-      const dest = e.dest;
-      if (!existsSync(dest) && !isSymlink(dest)) {
-        note(`gone ${tidy(dest)}`);
-        continue;
-      }
-      if (e.kind === 'link') {
-        if (!isSymlink(dest)) {
-          warn(`skip — expected a symlink, found a real file: ${tidy(dest)}`);
-          skipped++;
-          continue;
-        }
-        if (!linkPointsIntoToolkit(dest)) {
-          warn(`skip — symlink points outside the toolkit (→ ${tidy(realpathSafe(dest))}): ${tidy(dest)}`);
-          skipped++;
-          continue;
-        }
-        act('unlink', tidy(dest));
-        removeLink(dest);
-        removed++;
-        touchedDirs.add(dirname(dest));
-      } else {
-        // copy | write — recorded in the receipt, so toolkit-owned
-        act('remove', tidy(dest));
-        removeLink(dest);
-        removed++;
-        touchedDirs.add(dirname(dest));
-      }
-    }
-    act('remove receipt', tidy(r.file));
-    if (!DRY) removeLink(r.file);
-    log('');
-  }
-
-  pruneEmptyDirs(touchedDirs);
-
-  log(`${C.grn}done.${C.rst} ${removed} removed, ${skipped} skipped.`);
-  if (skipped) note(`skipped entries were not toolkit-owned links — left untouched; inspect them by hand if you want them gone.`);
-  log('');
-}
-
-// ======================================================================
 // dispatch
 // ======================================================================
 function usage() {
   log(`ADLC toolkit\n`);
-  log(`  node scripts/adlc.mjs sync      --tool=<${SUPPORTED.join('|')}|all> [--repo=<path>] [--pull] [--dry-run]`);
-  log(`  node scripts/adlc.mjs uninstall [--tool=<${SUPPORTED.join('|')}|all>] [--keep=<tool,...>] [--dry-run]`);
-  log(`  node scripts/adlc.mjs build     --tool=<...|all> [--mode=vendored|global] [--toolkit-path=<p>] [--out=<dir>]`);
-  log(`  node scripts/adlc.mjs hooks     (activate the pre-commit adapters/ rebuild)`);
+  log(`  node scripts/adlc.mjs sync  --tool=<${SUPPORTED.join('|')}|all> [--repo=<path>] [--pull] [--dry-run]`);
+  log(`  node scripts/adlc.mjs build --tool=<...|all> [--mode=vendored|global] [--toolkit-path=<p>] [--out=<dir>]`);
+  log(`  node scripts/adlc.mjs hooks    (activate the pre-commit adapters/ rebuild)`);
 }
 
 switch (SUB) {
   case 'sync':
     cmdSync();
-    break;
-  case 'uninstall':
-    cmdUninstall();
     break;
   case 'build':
     cmdBuild();

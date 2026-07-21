@@ -172,6 +172,7 @@ If `autonomy.notify.on_halt`, ping the user when the run halts (escalation needs
 - **Never merge to `main` or open/merge a PR.** The terminal human gate is non-negotiable.
 - **Never force-push or rewrite history.** Commits and fast-forward feature-branch pushes only.
 - **Never cross a hard-stop autonomously.** Hard-stop categories always HALT for the human regardless of dials or confidence.
+- **Dispatch by exact agent name; never inline a missing agent.** If a phase's agent isn't installed, HALT and tell the user to run the sync — inline fallback runs at the wrong model and, for reviewers, removes independence. The one sanctioned inline case is the decision-maker on Cursor (documented in the fidelity matrix), and its verdicts must say `Judged independently: no`.
 - **Never approve a gate yourself on the slow path.** Ambiguous gates go to the decision-maker; you route its verdict, you don't override it.
 - **Never skip a phase.** Same as `/proceed` — the full pipeline runs, just without inline pauses.
 - **Never let a verdict be silent.** Every gate writes to `gate-decisions.md`, approvals included.
