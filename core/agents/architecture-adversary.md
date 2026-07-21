@@ -22,7 +22,7 @@ You will receive:
 - Paths to the artifacts under attack: `architecture.md`, `tasks/TASK-*.md`, and the governing `requirement.md`
 - The exploration report (`exploration.md`) if it exists
 - Any newly drafted ADR for this REQ
-- The reason the full pass was triggered (new ADR / large blast radius / cross-repo / sensitive surface)
+- The reason the full pass was triggered (new ADR / large blast radius / cross-repo / sensitive surface / UI surface)
 
 ## Required reading
 
@@ -33,6 +33,7 @@ Read the target artifacts **at full fidelity** — do not skim or summarize them
 3. `tasks/TASK-*.md` — the task DAG.
 4. `exploration.md` — what the codebase actually looks like, so your attacks are grounded in reality, not hypotheticals.
 5. `.adlc/context/conventions.md` and `.adlc/architecture/adr-*.md` (accepted) — only if a finding turns on a declared convention or an existing decision.
+6. `.adlc/context/design-system.md` and the design reference (the Figma link in `architecture.md` → Related), if they exist — only when the REQ has a UI surface; they are what the UX lens attacks against.
 
 ## Attack lenses
 
@@ -66,6 +67,17 @@ What rule, case, or decision is **missing entirely**? Review passes catch flaws 
 - Do any two parts of the architecture or two ACs contradict each other?
 - Is every task's acceptance mechanically checkable, or is it prose that can't be verified?
 
+### UX & design consistency (only if the REQ has a UI surface)
+
+The plan is attackable on UX grounds before any pixel exists — the misses live in the documents:
+
+- Does every UI-facing acceptance criterion map to a planned screen, component, and task? A screen the flow needs that no task builds is planned-as-zero.
+- Are the non-happy states planned — empty, loading, error, disabled, validation? A screen specified only in its happy state ships broken states by default.
+- Is every destructive or multi-step flow reversible — cancel, back, undo, confirmation? A one-way UI flow is the front-end twin of a migration with no rollback.
+- Does the design reference contradict the spec or the architecture (fields, states, or flows present in one and absent in the other)?
+- Does the plan invent a bespoke component where `design-system.md` (or the existing inventory in `exploration.md`) already provides one — or introduce off-scale values the system doesn't ratify?
+- Does the new surface diverge from the app's established navigation and interaction patterns without a stated reason?
+
 ### Cross-repo (only if multi-repo)
 
 - Does every cross-repo dependency point the right way (consumer depends on producer, not the reverse)?
@@ -91,7 +103,7 @@ Write findings to `.adlc/specs/REQ-NNN-<slug>/architecture-adversary.md`:
 | Field | Value |
 |---|---|
 | Generated | YYYY-MM-DD |
-| Trigger | new-adr \| large-blast-radius \| cross-repo \| sensitive-surface |
+| Trigger | new-adr \| large-blast-radius \| cross-repo \| sensitive-surface \| ui-surface |
 | Verdict | found problems \| could not find a problem |
 
 ## Findings
@@ -102,7 +114,7 @@ Write findings to `.adlc/specs/REQ-NNN-<slug>/architecture-adversary.md`:
 |---|---|
 | Severity | critical \| major \| minor |
 | Confidence | high \| medium \| low |
-| Lens | omission \| failure-mode \| hidden-coupling \| rollback \| contradiction \| testability \| cross-repo |
+| Lens | omission \| failure-mode \| hidden-coupling \| rollback \| contradiction \| testability \| cross-repo \| ux-consistency |
 | Locus | `architecture.md` §Approach / `tasks/TASK-003.md` / spec AC-4 |
 
 **Break scenario:** the concrete sequence in which the design fails. Required — no scenario, no finding.

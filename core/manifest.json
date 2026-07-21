@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },
@@ -16,6 +16,7 @@
     { "name": "task",      "category": "pipeline",     "gate": true,  "agents": ["codebase-explorer", "task-implementer", "correctness-reviewer", "reflector", "ui-reviewer"], "summary": "Slim self-triaging pipeline for small changes; escalates to /proceed when large." },
     { "name": "analyze",   "category": "standalone",   "gate": false, "agents": ["health-auditor"],                                                          "summary": "Standalone codebase health audit." },
     { "name": "optimize",  "category": "standalone",   "gate": false, "agents": ["performance-scanner"],                                                     "summary": "Standalone performance/cost scan." },
+    { "name": "ux-doctor", "category": "standalone",   "gate": false, "agents": ["design-system-auditor", "ui-reviewer"],                                    "summary": "Standalone UX & design-system audit — static source pass + runtime browser pass, consolidated." },
     { "name": "status",    "category": "utility",      "gate": false, "agents": [],                                                                          "summary": "Show every active REQ and gate state." },
     { "name": "recover",   "category": "utility",      "gate": false, "agents": [],                                                                          "summary": "Reconcile pipeline-state with git reality; back-fill the vault." },
     { "name": "config",    "category": "utility",      "gate": false, "agents": [],                                                                          "summary": "View/change .adlc/config.yml settings via guided options; re-sync derived files." },
@@ -30,6 +31,7 @@
     { "name": "architecture-adversary","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Adversarial pre-gate attack on the design + task plan; hunts omissions, surfaces only self-refuted findings. Read-only." },
     { "name": "reflector",           "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Self-review against captured lessons. Read-only." },
     { "name": "ui-reviewer",         "tier": "balanced", "readonly": true,  "dispatchable": true,  "browser": true,  "role": "Runtime UI/UX review — runs the app in a browser to verify render, flows, and design match. Browser mechanism auto-resolves and degrades. Read-only re: source." },
+    { "name": "design-system-auditor","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Static design-system audit — token compliance, scale coherence, component duplication, naming, drift vs design-system.md. Read-only." },
     { "name": "health-auditor",      "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Codebase health audit for /analyze. Read-only." },
     { "name": "performance-scanner", "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "API cost + DB perf + latency for /optimize. Read-only." },
     { "name": "pipeline-runner",     "tier": "deep",     "readonly": false, "dispatchable": true,  "browser": true,  "role": "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR." },

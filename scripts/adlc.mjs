@@ -219,10 +219,10 @@ const localManifest = hasLocal('manifest.json')
 const manifest = mergeManifest(coreManifest, localManifest);
 
 function parseFrontmatter(text) {
-  const m = text.match(/^---\n([\s\S]*?)\n---/);
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   const fm = {};
   if (m) {
-    for (const line of m[1].split('\n')) {
+    for (const line of m[1].split(/\r?\n/)) {
       const mm = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
       if (mm) fm[mm[1]] = mm[2].trim();
     }

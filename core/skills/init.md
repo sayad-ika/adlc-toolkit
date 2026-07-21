@@ -194,6 +194,7 @@ Copy from `$TOOLKIT_PATH/templates/` (excluding the `vault/` subdir) to `.adlc/t
 - `adr-template.md`
 - `bug-template.md`
 - `assumption-template.md`
+- `design-system-template.md`
 - `config-template.yml` → also copy to `.adlc/config.yml`
 
 ### 7. Substitute placeholders
@@ -353,6 +354,7 @@ If `.gitignore` exists at the repo root, **propose** (don't auto-write) appendin
 .adlc/bugs/*/source-writeback.md
 .adlc/bugs/*/last-seen.json
 .adlc/sprints/*.json
+.adlc/ui-auth.env
 ```
 
 Notes on edge cases:
@@ -360,6 +362,7 @@ Notes on edge cases:
 - `tasks/` is committed; task plans serve as the "planned vs. shipped" trail.
 - `hot.md` is the shared activity log. It's **committed** and carries `merge=union` from `.adlc/.gitattributes`, so concurrent appends on different branches combine instead of conflicting — teams get a single shared history with no merge pain. (Newest-first ordering may interleave across a union merge, but every entry is dated, so the log stays readable.) `decisions.md` and `glossary.md` work the same way.
 - `now.md` is the **active-focus view** — small, mutable, edited in place, and therefore conflict-prone. It's gitignored and per-developer; `/status` and `/recover` regenerate the active-REQ picture from each REQ's `pipeline-state.json`, which is the real source of truth. Don't commit it.
+- `.adlc/ui-auth.env` holds local UI test credentials for the ui-reviewer (`ui.auth` in config) — per-developer, never committed.
 - Solo developers can additionally ignore `hot.md` if they don't want it in history; on a team, keep it committed for shared visibility — the union driver makes that safe.
 
 If the user replies `add`, append the block. If `add except <pattern>`, append the block minus the named lines. If `skip`, leave `.gitignore` untouched and surface a one-line reminder that pipeline-state files will appear as unstaged churn until they decide.

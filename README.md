@@ -160,6 +160,7 @@ The committed `adapters/` are built vendored (relative `.adlc-toolkit`) so they 
 | `task` | Slim self-triaging pipeline for small changes; escalates to `proceed` when large | Yes |
 | `analyze` | Standalone codebase health audit | No |
 | `optimize` | Standalone performance/cost scan | No |
+| `ux-doctor` | Standalone UX & design-system audit — static source pass + runtime browser pass; segments large apps into resumable phases | No |
 | `status` | Show every active REQ and gate state | No |
 | `recover` | Reconcile pipeline-state with git reality; back-fill the vault | No |
 | `config` | View/change `.adlc/config.yml` settings (git mode, isolation, autonomy…) via guided options | No |
@@ -177,6 +178,7 @@ The committed `adapters/` are built vendored (relative `.adlc-toolkit`) so they 
 | architecture-adversary | balanced | Adversarial pre-gate attack on the design + task plan; surfaces only self-refuted findings. Read-only. |
 | reflector | balanced | Self-review against captured lessons. Read-only. |
 | ui-reviewer | balanced | Runtime UI/UX review — drives a browser to verify render, flows, and design match. Read-only re: source. |
+| design-system-auditor | balanced | Static design-system audit: token compliance, scale coherence, duplication, drift. Read-only. |
 | health-auditor | balanced | Codebase health audit for `analyze`. Read-only. |
 | performance-scanner | balanced | API cost + DB perf + latency for `optimize`. Read-only. |
 | pipeline-runner | deep | Runs the full pipeline for one REQ in a worktree for `sprint`. No sub-agents. Git per `git.mode` (feature branch only). |

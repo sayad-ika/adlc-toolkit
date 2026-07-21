@@ -16,6 +16,7 @@ You are running a codebase health audit. This is **standalone work** — not par
 
 - Per-REQ review — that's `/review`'s job, scoped to a specific diff
 - Performance / cost issues — use `/optimize` instead (different agent, different findings shape)
+- UI/UX and design-system issues — use `/ux-doctor` instead (static + runtime passes over the UI, different agents)
 
 ## Inputs
 

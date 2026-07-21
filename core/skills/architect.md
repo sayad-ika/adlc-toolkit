@@ -143,8 +143,9 @@ The cost is proportional to the stakes — don't attack a trivial change.
 - The blast radius is large — roughly 8+ files, or it spans 3+ modules/layers.
 - The REQ is cross-repo (`config.yml` declares multiple `repos:` and tasks touch more than one).
 - The change touches a sensitive surface: auth, security, secrets, a data/schema migration, a public API contract, or anything irreversible.
+- The REQ has a significant **UI surface** — UI-facing acceptance criteria in the spec, frontend files in the blast radius, or a design reference resolved at preflight step 5.
 
-Otherwise run the **quick self-check** (no dispatch): you yourself ask the four sharpest questions of the plan — what acceptance criterion has no task, what failure mode is unhandled, what's the rollback story, what decision is implicit — and fix or note anything that surfaces. One short paragraph in the gate prompt; move on.
+Otherwise run the **quick self-check** (no dispatch): you yourself ask the sharpest questions of the plan — what acceptance criterion has no task, what failure mode is unhandled, what's the rollback story, what decision is implicit, and (when there's a UI) what screen state has no plan — and fix or note anything that surfaces. One short paragraph in the gate prompt; move on.
 
 **Full pass — dispatch the adversary.** Launch the `architecture-adversary` agent (read-only) with:
 
@@ -152,7 +153,7 @@ Otherwise run the **quick self-check** (no dispatch): you yourself ask the four 
 REQ: REQ-NNN-<slug>
 Work path: <workPath>
 Branch: <branch>
-Trigger: <new-adr | large-blast-radius | cross-repo | sensitive-surface>
+Trigger: <new-adr | large-blast-radius | cross-repo | sensitive-surface | ui-surface>
 Artifacts:
   - .adlc/specs/REQ-NNN-<slug>/requirement.md
   - .adlc/specs/REQ-NNN-<slug>/architecture.md

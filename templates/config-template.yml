@@ -88,6 +88,13 @@ stack:
 #     - /                       #   inferred from the changed components if omitted
 #     - /checkout
 #   browser: auto               # auto (default) | chrome | headless | static
+#   auth:                       # optional — app behind a login
+#     login_url: /login         #   route with the login form
+#     env_file: .adlc/ui-auth.env  # local dotenv: ADLC_UI_USER / ADLC_UI_PASS (+ extras).
+#                               #   Per-developer, gitignored, test creds only — values
+#                               #   never appear in reports, logs, or screenshots. The
+#                               #   chrome tier usually needs none of this: it drives
+#                               #   your real browser session, already signed in.
 
 # External sources — where this project's requirements and designs live, so the
 # pipeline can SEED an artifact from them instead of you retyping it. Optional:
