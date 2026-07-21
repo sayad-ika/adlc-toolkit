@@ -87,6 +87,18 @@ node scripts/adlc.mjs sync --tool=all --pull    # git pull the toolkit, then rec
 
 Re-running reconciles your install against what the toolkit currently ships: **new skills/agents get linked, removed ones get pruned, and renamed ones are cleaned up** — while anything *you* added to `~/.claude/skills` (etc.) is left untouched. Content edits flow through automatically because every stub is a thin pointer into `core/`. There is no separate "update" step to remember and no orphaned commands left behind when the skill set changes.
 
+### Uninstalling
+
+`uninstall` is the inverse of `sync` — it reads the same receipts (`~/.adlc/receipts/`) that record exactly what each `sync` placed and removes only those destinations:
+
+```bash
+node scripts/adlc.mjs uninstall --tool=all --dry-run   # preview what would be removed
+node scripts/adlc.mjs uninstall --tool=all             # remove installs across every tool
+node scripts/adlc.mjs uninstall --keep=claude          # remove all others, leave the Claude install
+```
+
+It removes a recorded link **only if it's still a symlink pointing back into this toolkit**; a real file where a link was expected, or a link you've since repointed elsewhere, is left in place and reported. Files the toolkit copied or wrote (memory files, rules) are removed because they match the receipt. Directories left empty by the removal are pruned, and each tool's receipt is deleted once its entries are cleared. Use `--tool=<name>` to scope to one tool or `--keep=<tool,...>` to spare specific ones. Always start with `--dry-run`.
+
 ### Or let your AI assistant install it
 
 Open this repo in your AI coding assistant (Claude Code, Copilot, Cursor, Codex, or Gemini CLI) and paste this prompt — it figures out the rest:

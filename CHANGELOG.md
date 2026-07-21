@@ -4,6 +4,24 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.2.2] — 2026-07-05
+
+### ui-reviewer: Claude in Chrome is actually reachable **[protocol]** **[tooling]**
+
+- The `ui-reviewer` (and `pipeline-runner`, which runs the UI lens inline for `/sprint`) documented a browser preference order — **Claude in Chrome → headless Playwright/Puppeteer → static checklist** — but on Claude the agent's tool grant was only `Read, Write, Edit, Grep, Glob, Bash`, so the `mcp__claude-in-chrome__*` tools were never available to the dispatched sub-agent and tier 1 could never fire. It always fell to Playwright.
+- Fixed data-driven: agents flagged `"browser": true` in `core/manifest.json` (`ui-reviewer`, `pipeline-runner`) now receive the Claude in Chrome MCP tools in the generated **Claude** adapter. When the connector is active the reviewer drives a real, visible browser (its preferred tier); when it isn't connected the tools don't resolve and it degrades to Playwright, then a static checklist — exactly as before. Only the Claude adapter carries these tools; the other assistants resolve a browser through their own means.
+
+### Update notes
+
+- Run `node scripts/adlc.mjs build --tool=all` (or `sync`) once to regenerate adapters — the two `browser: true` agents now carry the Chrome tools.
+- No change if you don't use the ui-reviewer, or never connect Claude in Chrome (behavior is identical: Playwright → static).
+
+## [1.2.1] — 2026-07-04
+
+### `uninstall` — receipt-driven removal **[tooling]**
+
+- New `node scripts/adlc.mjs uninstall [--tool=<…|all>] [--keep=<tool,…>] [--dry-run]` subcommand: the inverse of `sync`. It reads the same per-tool receipts (`~/.adlc/receipts/`) that record what each `sync` placed and removes only those destinations — a recorded link is removed **only if it's still a symlink resolving back into the toolkit** (judged from the link target, so dangling links are still recognised), copied/written files are removed because they match the receipt, and anything unexpected (a real file where a link was expected, or a link repointed elsewhere) is left in place and reported. Emptied directories are pruned and each tool's receipt is deleted once cleared. Use `--keep=claude` to clear every other tool while sparing the Claude install. Always dry-run first.
+
 ## [1.2.0] — 2026-07-02
 
 ### Visual layer — Mermaid diagrams **[protocol]**

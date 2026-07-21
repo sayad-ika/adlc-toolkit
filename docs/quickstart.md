@@ -64,6 +64,8 @@ Per-tool detail (exact locations, verification, caveats) lives in each install g
 > The installer builds machine-specific stubs (with an absolute path to the toolkit) into the gitignored `dist/` folder and symlinks from there, so the committed `adapters/` stays portable and your `git status` stays clean.
 >
 > **Updating is the same command.** Re-run `node scripts/adlc.mjs sync --tool=all --pull` to git-pull the toolkit and reconcile — added skills are linked, removed ones pruned, content changes flow through automatically. Or, from inside your assistant, run **`/toolkit-update`** for a guided pull that also flags any `local/` override shadowing a changed engine file.
+>
+> **Uninstalling** is the inverse: `node scripts/adlc.mjs uninstall --tool=all --dry-run` previews exactly what each `sync` placed (from `~/.adlc/receipts/`), then drop `--dry-run` to remove it. Add `--keep=claude` to clear every other tool but spare the Claude install. Only toolkit-owned symlinks and receipt-recorded files are touched.
 
 ### 3. Initialize a project
 

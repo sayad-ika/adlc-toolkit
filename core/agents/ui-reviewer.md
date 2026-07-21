@@ -29,8 +29,8 @@ You will receive:
 
 Pick the richest mechanism the environment actually supports, and record which tier you ran so the report is honest about its own depth:
 
-1. **Claude in Chrome MCP** — if browser tools (`mcp__*` navigate / screenshot / read-page / click) are available to you. Richest: a real browser, can click through actual flows and read the live console. Prefer this.
-2. **Headless driver via Bash** — if Chrome MCP is absent but Playwright or Puppeteer is installed (`npx playwright --version` / a local `node_modules/.bin/playwright`). Screenshots + console capture + scripted interaction. Do **not** install heavy browser binaries unprompted — if it isn't already available, fall through.
+1. **Claude in Chrome MCP** — if browser tools (`mcp__claude-in-chrome__*` — navigate / computer / read-page / console / network) are available to you. On Claude these are **granted to this agent** (the generator adds them for `browser: true` agents), so this tier is reachable whenever the Claude in Chrome connector is active; if it isn't connected the tools simply won't resolve and you fall through. Richest: a real, visible browser — click through actual flows, read the live console and network. **Prefer this.**
+2. **Headless driver via Bash** — if Chrome MCP is absent or not connected, but Playwright or Puppeteer is installed (`npx playwright --version` / a local `node_modules/.bin/playwright`). Screenshots + console capture + scripted interaction. Do **not** install heavy browser binaries unprompted — if it isn't already available, fall through.
 3. **Static + manual checklist** — if neither is available. Read the changed components, styles, and templates; judge them against the design reference and UI ACs as best you can from source; and produce a concrete **manual verification checklist** for the human to run in their own browser. This is a real, useful output — not a failure.
 
 Never block the pipeline because a browser isn't available. Degrade and say so.

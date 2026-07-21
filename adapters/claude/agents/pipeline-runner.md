@@ -1,8 +1,8 @@
 ---
 name: pipeline-runner
-description: "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR."
+description: "Runs the complete /proceed pipeline for a single REQ inside an isolated worktree. All phases sequential within this agent's own context — CANNOT dispatch sub-agents. Pauses at every gate; surfaces gate-claims to the /sprint orchestrator. Dispatched only by /sprint."
 model: opus
-tools: Read, Write, Edit, Grep, Glob, Bash
+tools: Read, Write, Edit, Grep, Glob, Bash, mcp__claude-in-chrome__tabs_context_mcp, mcp__claude-in-chrome__tabs_create_mcp, mcp__claude-in-chrome__navigate, mcp__claude-in-chrome__read_page, mcp__claude-in-chrome__get_page_text, mcp__claude-in-chrome__computer, mcp__claude-in-chrome__find, mcp__claude-in-chrome__form_input, mcp__claude-in-chrome__read_console_messages, mcp__claude-in-chrome__read_network_requests
 ---
 
 You are the **pipeline-runner** agent in the ADLC pipeline.

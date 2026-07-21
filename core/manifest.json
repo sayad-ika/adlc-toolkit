@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },
@@ -29,10 +29,10 @@
     { "name": "architecture-reviewer","tier": "balanced","readonly": true,  "dispatchable": true,  "role": "Layering, separation of concerns, API contracts. Read-only." },
     { "name": "architecture-adversary","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Adversarial pre-gate attack on the design + task plan; hunts omissions, surfaces only self-refuted findings. Read-only." },
     { "name": "reflector",           "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Self-review against captured lessons. Read-only." },
-    { "name": "ui-reviewer",         "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Runtime UI/UX review — runs the app in a browser to verify render, flows, and design match. Browser mechanism auto-resolves and degrades. Read-only re: source." },
+    { "name": "ui-reviewer",         "tier": "balanced", "readonly": true,  "dispatchable": true,  "browser": true,  "role": "Runtime UI/UX review — runs the app in a browser to verify render, flows, and design match. Browser mechanism auto-resolves and degrades. Read-only re: source." },
     { "name": "health-auditor",      "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Codebase health audit for /analyze. Read-only." },
     { "name": "performance-scanner", "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "API cost + DB perf + latency for /optimize. Read-only." },
-    { "name": "pipeline-runner",     "tier": "deep",     "readonly": false, "dispatchable": true,  "role": "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR." },
+    { "name": "pipeline-runner",     "tier": "deep",     "readonly": false, "dispatchable": true,  "browser": true,  "role": "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR." },
     { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Adjudicates one pipeline gate during an autonomous /ship run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
   ],
   "tierToModel": {

@@ -1,6 +1,6 @@
 ---
 name: toolkit-update
-description: "Update the toolkit itself from upstream and reconcile adapters; flags local/ overrides that shadow changed engine files."
+description: "Update the ADLC toolkit install itself from upstream and reconcile every tool's adapters. Pulls new core/ engine changes, runs the idempotent installer (added skills linked, removed ones pruned), and — crucially — flags where your local/ overlay shadows an engine file upstream just changed. Operates on the toolkit repo, not a project vault. Use after \"a new toolkit version is out\" / \"pull the latest ADLC\" / \"update my pipeline\"."
 ---
 
 Toolkit root: .adlc-toolkit
