@@ -293,7 +293,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body i
 Example shape:
 
 ```
-── Gate 5 of 5 · Wrap up · REQ-NNN-<slug> ──────────
+GATE 5/5 · Wrap up · REQ-NNN-<slug>
    PR + vault ready — run the checklist when you're set
 
 READY       PR: feat(pay): retry with backoff — pr-draft.md · 9 files, +240/-37

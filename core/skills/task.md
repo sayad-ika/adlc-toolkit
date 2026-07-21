@@ -108,7 +108,7 @@ Emit per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A task plan gate folds spec + ar
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (clear the gate; implement), **escalate** (hand to `/proceed`), **revise** (adjust goal/scope/approach), **abort** (discard the REQ).
 
 ```
-── Gate 1 of 2 · Plan · REQ-NNN-<slug>  (task) ──────────
+GATE 1/2 · Plan · REQ-NNN-<slug>  (task)
    small & low-risk — recommend approve
 
 READY    triage: TASK — localized, ~3 files, no sensitive surface
@@ -181,7 +181,7 @@ Emit per the gate protocol — one consolidated review + ship gate:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **fix** (`<ids>`, then re-verify), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-── Gate 2 of 2 · Wrap up · REQ-NNN-<slug>  (task) ──────────
+GATE 2/2 · Wrap up · REQ-NNN-<slug>  (task)
    clean — recommend approve
 
 READY    reviewers: correctness, reflector · UI: n/a — no UI surface

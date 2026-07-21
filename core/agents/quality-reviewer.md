@@ -100,6 +100,7 @@ Each finding:
 | Field | Value |
 |---|---|
 | Severity | critical \| major \| minor \| trivial |
+| Effort | small \| medium \| large — rough cost to fix |
 | File | `src/foo/bar.ts:42` |
 | Category | convention \| duplication \| naming \| test-coverage \| dead-code \| documentation |
 | Rule | <link to specific rule in conventions.md, if applicable> |

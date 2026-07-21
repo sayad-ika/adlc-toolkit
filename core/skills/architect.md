@@ -217,7 +217,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (the shared card format)
 Example shape (fill from the real REQ):
 
 ```
-── Gate 2 of 5 · Architect · REQ-014-payment-retries ──────────
+GATE 2/5 · Architect · REQ-014-payment-retries
    ready to review — 2 items need your call
 
 READY       architecture.md · 6 tasks in 3 stages · new decision ADR-007

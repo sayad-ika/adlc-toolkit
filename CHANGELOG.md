@@ -4,6 +4,17 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.4] — 2026-07-21
+
+### Terminal-readable cards — structure over decoration **[protocol]**
+
+- Gate cards no longer draw fixed-width rulers (`── … ──────`) — they break at narrow terminal widths. The header is now a short plain line (`GATE 2/5 · Architect · REQ-014-payment-retries`); user-facing lines stay at or under ~72 characters; cards target 20 lines or fewer, with long content offered on demand ("say `show findings` for the full list"). All example cards updated to match.
+- `verification.md` now leads with a **findings-at-a-glance table** — one row per finding with an ID (C1/M1/m1), severity, one-line summary, location, and fix effort — so triage happens before any detail. Review agents gained an `Effort: small | medium | large` field to feed it; `fix <ids>` replies use the IDs.
+- `/proceed --resume` **leads short**: a three-line catch-up plus the menu; the full breakdown (activity, changed files, drift checks) only on `details`. The person coming back from a break no longer gets a wall of text.
+- The implementer's out-of-scope stop now has a scripted, plain-words ask: "I need to touch `<file>`, which isn't in the plan, because `<reason>`. OK to proceed, or should I find another way?"
+- `pipeline-runner` must pair every machine tag with a human sentence (`gate-blocked:review` + "Review finished: 2 major findings — waiting for your call"). On Claude, each gate option's consequence now rides in its `AskUserQuestion` description.
+- `/spec` asks its 2–3 highest-impact clarifying questions first, not a questionnaire; `/init`'s discovered-docs list is grouped by destination in short lines instead of a 118-character-wide table.
+
 ## [1.3.3] — 2026-07-21
 
 ### Plain-language pass 2 — gate-card examples and queues **[protocol]**

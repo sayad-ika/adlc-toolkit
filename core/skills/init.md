@@ -101,7 +101,7 @@ Scan the repo for known documentation patterns. **Read-only.** Don't modify any 
 
 ### 3. Surface findings to the user
 
-Build a proposed mapping. Each row: source path → vault destination, with a confidence tag.
+Build a proposed mapping. Each row: source path → vault destination, with a confidence tag. When presenting it, group by destination with short indented lines (example below) — a wide three-column table wraps badly in chat; keep lines under ~72 characters.
 
 - **high** — well-shaped doc that fits the target directly (a README → project-overview, a well-formatted ADR file)
 - **medium** — partial match; some synthesis required (a `docs/architecture/` subpage that might be a component, or a lint config with project-specific custom rules)
@@ -112,18 +112,22 @@ Display in chat:
 ```
 Discovered documentation:
 
-  Source                                              → Vault destination                                Confidence
-  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-  README.md                                           → context/project-overview.md                       high
-  docs/architecture/overview.md                       → context/architecture.md                           high
-  docs/architecture/services.md                       → knowledge/components/services.md                  medium
-  CONTRIBUTING.md                                     → context/conventions.md  (workflow)                high
-  .eslintrc.json                                      → context/conventions.md  (naming, errors)          high
-  .prettierrc                                         → context/conventions.md  (formatting)              medium
-  .editorconfig                                       → context/conventions.md  (formatting)              medium
-  docs/adr/0001-record-architecture-decisions.md      → architecture/adr-001-record-architecture-decisions.md  high
-  docs/adr/0002-database-choice.md                    → architecture/adr-002-database-choice.md           high
-  GLOSSARY.md                                         → glossary.md                                       high
+  context/project-overview.md
+    ← README.md  (high)
+  context/architecture.md
+    ← docs/architecture/overview.md  (high)
+  context/conventions.md
+    ← CONTRIBUTING.md  (workflow — high)
+    ← .eslintrc.json  (naming, errors — high)
+    ← .prettierrc  (formatting — medium)
+    ← .editorconfig  (formatting — medium)
+  knowledge/components/services.md
+    ← docs/architecture/services.md  (medium)
+  architecture/adr-001, adr-002
+    ← docs/adr/0001-record-architecture-decisions.md  (high)
+    ← docs/adr/0002-database-choice.md  (high)
+  glossary.md
+    ← GLOSSARY.md  (high)
 
 Skipped (not imported — let me know if any should be reconsidered):
   CHANGELOG.md         — release history, not vault content

@@ -130,7 +130,7 @@ When phase 5 completes and the decision-maker (or fast path) APPROVEs the ship g
 5. Emit the terminal review — a `RUN SUMMARY` card per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Unlike a phase gate it's a **handoff, not an approve/revise choice**: the autonomous run is done and the merge decision is now the human's. Keep the spine — what's done → what's left for you → your read.
 
 ```
-── Ship complete · REQ-NNN-<slug>  (autonomous) ──────────
+RUN COMPLETE · REQ-NNN-<slug>  (autonomous)
    <n> commits on <branch> · nothing merged — ready for your review
 
 RUN SUMMARY   decisions: <a> approve / <r> rework / <h> halt

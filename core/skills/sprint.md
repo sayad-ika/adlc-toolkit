@@ -111,7 +111,7 @@ Update the sprint registry's `currentGateQueue` with all REQs in `awaiting` stat
 When a gate becomes available (or the user asks for an update), surface the unified queue:
 
 ```
-── Sprint gate queue · SPRINT-... ──
+SPRINT GATE QUEUE · SPRINT-...
 
 3 REQs in flight. 2 gates awaiting your decision:
 

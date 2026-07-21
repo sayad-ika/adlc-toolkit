@@ -116,6 +116,7 @@ Each finding:
 | Field | Value |
 |---|---|
 | Severity | critical \| major \| minor \| trivial |
+| Effort | small \| medium \| large — rough cost to fix |
 | Route / flow | `/checkout` — submit step |
 | Lens | render \| flow \| interaction-state \| design-match \| responsive \| a11y \| heuristic \| consistency |
 | Evidence | `ui-evidence/checkout-submit.png`; console: `TypeError: cannot read 'id' of undefined` |

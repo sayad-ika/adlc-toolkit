@@ -12,14 +12,14 @@ The card is the chat-facing twin of the `.awaiting-approval` file marker. The ma
 2. **Always recommend.** State the option you'd pick and one line of why, even when it's "approve — nothing flagged."
 3. **The decision is last, and it is the only imperative.** Everything above orients; the final line asks.
 4. **Every option states its consequence.** Never a bare `approve · revise · abort` — each option carries a short clause saying what happens next: `approve — moves on to implementation`, `abort — stops this REQ; nothing is committed`.
-5. **On Claude, deliver the decision as an `AskUserQuestion`** with that gate's real options (`approve` / `revise` / `abort`, or whatever the gate defines), the recommended one marked *(Recommended)*. Other assistants render an inline menu. The card is the context; the question is the ask.
-6. **Text-first.** The card must read in a plain terminal — compact text, never a raw Mermaid code block (it shows as source-noise where nothing renders it). Detail lives in the artifact files; name a file where the user would go to look, but don't pad the card with pointer lines for their own sake.
-7. **Keep it short.** The card orients; it is not a report.
+5. **On Claude, deliver the decision as an `AskUserQuestion`** with that gate's real options (`approve` / `revise` / `abort`, or whatever the gate defines), the recommended one marked *(Recommended)*, and each option's consequence clause (invariant 4) in that option's `description`. Other assistants render an inline menu. The card is the context; the question is the ask.
+6. **Text-first.** The card must read in a plain terminal — compact text, never a raw Mermaid code block (it shows as source-noise where nothing renders it). Detail lives in the artifact files; name a file where the user would go to look, but don't pad the card with pointer lines for their own sake. Keep user-facing lines at or under ~72 characters — longer lines wrap badly in a narrow terminal. Never draw fixed-width rulers or boxes (`──────`); they break the moment the terminal is narrower than the card. A short plain header line (`GATE 2/5 · …`) is enough.
+7. **Keep it short.** The card orients; it is not a report. Target 20 lines or fewer. When there is more to show (a long findings list, a full task plan), keep it in the artifact file and offer it on demand — "say `show findings` for the full list" — instead of inlining it.
 
 ## The base skeleton (adapt per gate)
 
 ```
-── Gate <n> of <N> · <Phase> · <REQ> — <short title> ────
+GATE <n>/<N> · <Phase> · <REQ> — <short title>
    <verdict — one line: what's ready, and whether anything needs a call>
 
 <WHAT'S DONE>     terse, FYI — the artifacts / counts this phase produced

@@ -68,7 +68,7 @@ Emit per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (loaded at preflight). A bug-repo
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ investigate), **revise** (refine the report), **reframe** (convert to a feature REQ — calls `/spec`), **abort** (discard).
 
 ```
-── Gate 1 of 5 · Bug report · BUG-NNN-<slug> ──────────
+GATE 1/5 · Bug report · BUG-NNN-<slug>
    report ready — recommend approve
 
 CHECKS   ✓ symptom concise · ✓ repro runnable · ✓ expected vs actual · ✓ environment
@@ -132,7 +132,7 @@ Emit per the gate protocol:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ fix), **revise** (refine diagnosis/approach), **reframe** (scope too big → feature REQ), **abort** (halt; cleanup worktree).
 
 ```
-── Gate 2 of 5 · Investigation · BUG-NNN-<slug> ──────────
+GATE 2/5 · Investigation · BUG-NNN-<slug>
    root cause found — recommend approve
 
 READY    cause: src/pay/retry.ts:88 — retry re-enters before the guard clears
@@ -185,7 +185,7 @@ Emit per the gate protocol:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ verify), **revise** (adjust the fix), **abort**.
 
 ```
-── Gate 3 of 5 · Fix · BUG-NNN-<slug> ──────────
+GATE 3/5 · Fix · BUG-NNN-<slug>
    fixed, regression test green — recommend approve
 
 READY    3 files · regression test retry_guard_test — fails without the
@@ -219,7 +219,7 @@ Emit per the gate protocol — findings-led like `/review`, but only two reviewe
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ ship), **fix** (`<ids>`), **revise**, **abort**.
 
 ```
-── Gate 4 of 5 · Review · BUG-NNN-<slug> ──────────
+GATE 4/5 · Review · BUG-NNN-<slug>
    clean — no findings, recommend approve
 
 FINDINGS  (none)
@@ -270,7 +270,7 @@ Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **revise**, **merged** (finalize after you merge), **abort**.
 
 ```
-── Gate 5 of 5 · Wrap up · BUG-NNN-<slug> ──────────
+GATE 5/5 · Wrap up · BUG-NNN-<slug>
    PR + vault ready — run the checklist
 
 READY       PR: bug-fix-pr-draft.md · merge-checklist.md

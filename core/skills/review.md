@@ -178,12 +178,21 @@ Read `verification.md` after the reviewers finish. Build the **Consolidated by s
 
 For each finding across all reviewer sections (including UI/UX findings when the ui-reviewer ran):
 
+- Lead with a one-row-per-finding digest table (below) so the user can triage at a glance before reading any detail
+- Give each finding a short ID (C1, M1, m1 by severity) — the gate card and `fix <ids>` replies use these
 - Deduplicate: if two reviewers flagged the same file + line + concern, merge into one entry citing both
 - Sort by severity (Critical > Major > Minor > Trivial)
 - Tag with originating reviewer(s)
 - Group by file
 
 ```markdown
+## Findings at a glance
+
+| ID | Severity | Finding (one line) | Where | Effort |
+|----|----------|--------------------|-------|--------|
+| C1 | critical | double-charge path on retry | src/pay/retry.ts:88 | small |
+| M1 | major | duplicated retry helper; extract it | src/pay/retry.ts | small |
+
 ## Consolidated by severity
 
 ### Critical (<count>)
@@ -272,7 +281,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads w
 Example shape:
 
 ```
-── Gate 4 of 5 · Review · REQ-NNN-<slug> ──────────
+GATE 4/5 · Review · REQ-NNN-<slug>
    3 findings — 1 needs a call
 
 FINDINGS    critical · correctness — double-charge path on retry

@@ -51,7 +51,16 @@ These three flags branch out of preflight step 4. Each owns its own flow — the
 
 Use after a break, a session crash, or any time you want context before pressing the gate forward. Differs from bare `/proceed REQ-NNN-<slug>` (which just re-emits the pending gate prompt and waits) by producing a richer pre-flight that surfaces drift before you commit to continuing.
 
-Build and emit the dossier:
+**Lead short.** The person returning after a break is exactly the person who shouldn't get a wall of text. Emit this three-line catch-up, then the menu — the full breakdown only if they ask:
+
+```
+RESUME — REQ-NNN-<slug>
+  Phase <N> (<name>) · gate: <awaiting / cleared> · last activity <X ago>
+  Pending: <the gate question compressed to one line — or "none">
+  <only when a drift check is non-clean: ⚠ <what> — consider /recover>
+```
+
+The full breakdown (emitted only on `details`):
 
 ```
 RESUME — REQ-NNN-<slug>
@@ -82,13 +91,14 @@ Drift checks:
 
 If any drift check returns a non-clean state, name it explicitly. If the worktree or branch is missing, or the vault has been edited outside the pipeline, recommend `/recover` before continuing — the drift may need reconciliation rather than just resumption.
 
-If the gate has been open for more than 24 hours, add a one-line "you've been away" note at the top of the dossier so the user notices.
+If the gate has been open for more than 24 hours, add a one-line "you've been away" note at the top of the catch-up so the user notices.
 
 Then emit the menu:
 
 ```
 Choose:
-  continue           — proceed with the pending gate (same as bare /proceed)
+  continue           — show the full gate card and proceed
+  details            — full catch-up: activity, changed files, drift checks
   revert~1 / 2 / 3   — walk back N phases (runs --revert~N)
   cancel             — abandon this REQ (runs --cancel)
   switch             — list other in-flight REQs to attend to
@@ -98,6 +108,7 @@ Choose:
 Dispatch on the user's reply:
 
 - `continue` → fall back into the standard phase walk at preflight step 5
+- `details` → emit the full breakdown above, then re-emit this menu
 - `revert~N` → invoke the `--revert~N` protocol below
 - `cancel` → invoke the `--cancel` protocol below
 - `switch` → list active REQs from `now.md` and `.adlc/specs/`; ask which to switch to; then re-run `--resume` against that REQ

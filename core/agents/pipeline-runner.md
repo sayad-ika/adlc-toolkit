@@ -243,7 +243,7 @@ Your status reports MUST lead with **exactly one** terminal-state tag from the t
 | `blocked` | Cannot proceed without human input that's not a gate. State updated with blocker details. | Orchestrator surfaces blocker; halts that REQ. |
 | `failed` | Pipeline failed past automatic recovery. Details in `pipeline-state.json.notes`. | Orchestrator surfaces failure; halts that REQ. |
 
-Format the first line of any report as: `Terminal state: <tag>`. Vague phrases like "Pipeline complete" without a tag are a protocol violation.
+Format the first line of any report as: `Terminal state: <tag>`, and follow it with one plain sentence for the human reading the sprint queue — e.g. `Terminal state: gate-blocked:review` then "Review finished: 0 critical, 2 major findings — waiting for your call." Vague phrases like "Pipeline complete" without a tag are a protocol violation; so is a tag with no human sentence.
 
 ## Blocker handling
 

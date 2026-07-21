@@ -107,6 +107,7 @@ Each finding:
 | Field | Value |
 |---|---|
 | Severity | critical \| major \| minor \| trivial |
+| Effort | small \| medium \| large — rough cost to fix |
 | File | `src/foo/bar.ts:42` |
 | Category | layering \| separation \| contract \| pattern \| test-arch \| mocks |
 | Rule broken | <ADR / concept / convention reference> |

@@ -95,6 +95,7 @@ Each finding:
 | Field | Value |
 |---|---|
 | Severity | critical \| major \| minor \| trivial |
+| Effort | small \| medium \| large — rough cost to fix |
 | File | `src/foo/bar.ts:42` |
 | Category | logic \| concurrency \| error-handling \| security \| input-validation |
 

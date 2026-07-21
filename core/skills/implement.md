@@ -149,7 +149,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. Map this phase's conten
 Example shape:
 
 ```
-── Gate 3 of 5 · Implement · REQ-NNN-<slug> ──────────
+GATE 3/5 · Implement · REQ-NNN-<slug>
    all tasks done, tests pass — 1 item to clean first
 
 READY       6 tasks in 3 stages · tests 41 passed / 5 added · 6 commits drafted
@@ -203,7 +203,7 @@ If `abort`:
 ## Constraints
 
 - **Commits follow `git.mode`** (`.adlc/config.yml`, default `manual`). In `manual`, Claude does not commit — it writes `commits-draft.md` and the user commits after the gate clears. In `commit`/`commit+push`, Claude commits the approved work on the REQ's feature branch using `commits-draft.md` as the message (and pushes it, ff-only, in `commit+push`) once the gate clears — never a protected branch.
-- **Edits stay inside the blast radius** (`config.yml.workflow.edits`, default `confirm-out-of-scope`). Free editing is confined to the work path and the files the tasks name. Crossing the edge — an unnamed file, a new top-level dependency, a schema/migration, or auth/security/secrets — is a **stop-and-surface**, never a silent reach. This reduces in-phase friction without weakening the phase gate; the gate still owns the boundary.
+- **Edits stay inside the blast radius** (`config.yml.workflow.edits`, default `confirm-out-of-scope`). Free editing is confined to the work path and the files the tasks name. Crossing the edge — an unnamed file, a new top-level dependency, a schema/migration, or auth/security/secrets — is a **stop-and-ask**, never a silent reach. The ask is scripted; use plain words, not toolkit jargon: "I need to touch `<file>`, which isn't in the plan, because `<reason>`. OK to proceed, or should I find another way?" Then wait. This reduces in-phase friction without weakening the phase gate; the gate still owns the boundary.
 - **Tier discipline.** Don't dispatch tier N+1 until tier N is fully complete.
 - **Halt on first failure.** Don't paper over a failed task to keep the pipeline moving. The whole point of explicit gates is catching failures early.
 - **Honor task scope.** If a task-implementer reports scope creep or a deviation, surface it to the user — don't approve it autonomously.

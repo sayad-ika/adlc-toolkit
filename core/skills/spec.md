@@ -58,7 +58,7 @@ Fill the content sections based on the user's description:
 - **Out of scope (for now)** — tempting adjacencies that are filed but separate.
 - **Flow (optional)** — a small Mermaid diagram, but only when it earns its place: the behavior has user-visible states or branches that are hard to hold in the head from prose (a multi-step journey, a status machine, a decision with several outcomes). Skip it for plain CRUD or a single happy path. Keep it at the *what* level — user-visible states and transitions — and leave components and sequencing to `/architect`. The template carries an example; delete the section if it doesn't help.
 
-If the user's description is too thin to fill any section, **ask follow-up questions in chat** rather than guessing. Don't proceed to validation until you have enough.
+If the user's description is too thin to fill any section, **ask follow-up questions in chat** rather than guessing — but ask the 2–3 highest-impact questions first, not a questionnaire; follow up only if the answers open real gaps. Don't proceed to validation until you have enough.
 
 ### 2. Vault consultation
 
@@ -133,7 +133,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A spec gate is one of t
 Example shape:
 
 ```
-── Gate 1 of 5 · Spec · REQ-NNN-<slug> ──────────
+GATE 1/5 · Spec · REQ-NNN-<slug>
    clean — nothing flagged, recommend approve
 
 CHECKS   ✓ criteria testable · ✓ goal specific · ✓ assumptions explicit · ✓ no design · ✓ non-goals present
