@@ -78,7 +78,7 @@ Recent audits:
 
 Suggested next actions:
   - Gate to clear: <REQ at awaiting> → /proceed REQ-NNN-<slug>
-  - Gate to clear, last activity > 24h ago: → /proceed REQ-NNN-<slug> --resume (gets you a decision dossier with drift checks before continuing)
+  - Gate to clear, last activity > 24h ago: → /proceed REQ-NNN-<slug> --resume (shows a catch-up summary first)
   - Want to walk back the most recent phase: → /proceed REQ-NNN-<slug> --revert~1
   - Want to abandon a REQ deliberately: → /proceed REQ-NNN-<slug> --cancel
   - New work: ready to start (no gates pending)

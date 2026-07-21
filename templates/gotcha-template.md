@@ -12,7 +12,7 @@ This is the shape of a single entry to append to `.adlc/knowledge/gotchas.md`. D
 | REQ | {{REQ_ID}} |
 | Component | {{COMPONENT}} |
 | Status | confirmed \| `STATUS: needs verification` |
-| Severity | trivia \| careful \| trap \| landmine |
+| Severity | trivia (good to know) \| careful (check before touching) \| trap (will bite a normal change) \| landmine (can cause an outage) |
 
 **What:** One sentence describing the surprising behavior.
 

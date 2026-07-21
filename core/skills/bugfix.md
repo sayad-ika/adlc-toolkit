@@ -20,7 +20,7 @@ If during investigation the bug turns out to be larger than expected, **stop and
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at every gate below.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at every gate below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/conventions.md`, `context/architecture.md`.
 3. **Assign the BUG ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), applied to the `BUG` namespace: `sequential` (`BUG-NNN`, scan `.adlc/bugs/` for max+1, pad to 3), `prefixed` (`BUG-<req.prefix>-NNN`), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`, e.g. `BUG-842`; else fall back to prefixed/sequential, noting it). Throughout, `BUG-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Create the bug folder:** `.adlc/bugs/BUG-NNN-<slug>/`.

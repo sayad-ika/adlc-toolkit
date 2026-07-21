@@ -10,7 +10,7 @@
 | REQ | {{REQ_ID}} |
 | Component | {{COMPONENT}} |
 | Tags | {{TAGS}} |
-| Severity | nice-to-know \| guideline \| trap \| critical |
+| Severity | nice-to-know \| guideline (a rule to follow) \| trap (cost real time before) \| critical (must never repeat) |
 
 ## The lesson
 

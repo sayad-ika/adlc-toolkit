@@ -18,7 +18,7 @@ You are running Phase 1 of the ADLC pipeline: drafting and validating a requirem
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md` and `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
+1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md`, `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`, and `$TOOLKIT_PATH/core/VOICE.md` into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
 2. **Read the vault basics.** Load `.adlc/CLAUDE.md`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries), `.adlc/config.yml`, `.adlc/context/project-overview.md`, `.adlc/context/conventions.md`.
 3. **Determine the REQ ID.** Read `config.yml` → `req.id_scheme` (default `sequential` if absent) and `req.prefix`.
    - If the user passed an explicit ID, use it; verify it doesn't collide with an existing folder in `.adlc/specs/`.

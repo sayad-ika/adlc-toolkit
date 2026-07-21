@@ -26,7 +26,7 @@ The defining feature: `/task` is **self-triaging**. Small work runs here; work t
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at both gates below.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at both gates below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Assign the REQ ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), exactly as `/spec` preflight does — `sequential` (`REQ-NNN`, max+1), `prefixed` (`REQ-<req.prefix>-NNN`), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`; else fall back to prefixed/sequential, noting it). `/task` uses the **same ID namespace and `.adlc/specs/` location as `/spec`** — this is what makes escalation to `/proceed` a clean handoff rather than a migration. Throughout, `REQ-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Determine the slug.** Short kebab-case, ≤40 chars.
@@ -39,7 +39,7 @@ This single phase does triage, a lightweight spec, and a short approach — the 
 
 ### 1. Quick recon
 
-A light pass, not a full blast-radius exploration: grep the area the change touches, identify the files likely involved, and check `hot.md` / `gotchas.md` / `lessons/` for anything relevant. If the change is non-trivial to scope, you may dispatch `codebase-explorer` for one focused recon pass — but if you reach for it, that's already a signal the work may belong in `/proceed`.
+A light pass, not a full blast-radius exploration: grep the area the change touches, identify the files likely involved, and check `hot.md` / `gotchas.md` / `lessons/` for anything relevant. If the change is non-trivial to scope, you may dispatch `codebase-explorer` for one focused exploration pass — but if you reach for it, that's already a signal the work may belong in `/proceed`.
 
 ### 2. Triage — the escalation decision
 

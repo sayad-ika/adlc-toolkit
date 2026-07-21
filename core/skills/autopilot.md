@@ -27,7 +27,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the terminal review uses the shared card format.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the terminal review uses the shared card format.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
 4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → load `pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask.

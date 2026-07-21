@@ -13,7 +13,7 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
 ## Preflight
 
 1. **Verify spec gate cleared.** Read `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`. If `currentPhase < 1` or `gateState != "cleared"` for the spec phase, **stop** — direct the user to run `/spec` first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 10.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 10.
 3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `specs/REQ-NNN-<slug>/requirement.md`.
 4. **Establish the work path.** If `pipeline-state.json.workPath` is null:
 
@@ -45,7 +45,7 @@ Spec path: .adlc/specs/REQ-NNN-<slug>/requirement.md
 Work path: <work-path>
 Vault root: .adlc/
 
-Do a structured recon pass per your skill instructions. Write the report to:
+Do a structured exploration pass per your skill instructions. Write the report to:
   .adlc/specs/REQ-NNN-<slug>/exploration.md
 ```
 

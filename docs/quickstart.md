@@ -2,7 +2,16 @@
 
 The ADLC toolkit gives any AI coding assistant a **spec-driven pipeline with a human approval gate at every phase**. It works with Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI, on macOS, Windows, and Linux.
 
-This page gets you from zero to your first gated REQ in four steps. For tool-specific detail, see the [per-tool install guides](install/).
+This page gets you from install to your first approved piece of work in four steps. For tool-specific detail, see the [per-tool install guides](install/).
+
+**Words this toolkit uses** — six terms everything else builds on:
+
+- **REQ** — one tracked unit of work (a *requirement*), e.g. `REQ-014`. Bugs get `BUG-NNN`.
+- **gate** — a pause where the pipeline stops and waits for your approval before continuing.
+- **vault** — the `.adlc/` folder in your repo: the specs, decisions, and lessons the pipeline maintains.
+- **phase** — one of five steps a REQ moves through: spec → architect → implement → review → wrap up.
+- **agent** — a focused sub-assistant (a reviewer, an explorer, an implementer) the pipeline dispatches.
+- **blast radius** — the full set of files and modules a change touches, directly or indirectly.
 
 ## How it fits together
 
@@ -64,8 +73,6 @@ Per-tool detail (exact locations, verification, caveats) lives in each install g
 > The installer builds machine-specific stubs (with an absolute path to the toolkit) into the gitignored `dist/` folder and symlinks from there, so the committed `adapters/` stays portable and your `git status` stays clean.
 >
 > **Updating is the same command.** Re-run `node scripts/adlc.mjs sync --tool=all --pull` to git-pull the toolkit and reconcile — added skills are linked, removed ones pruned, content changes flow through automatically. Or, from inside your assistant, run **`/toolkit-update`** for a guided pull that also flags any `local/` override shadowing a changed engine file.
->
-> **Uninstalling** is the inverse: `node scripts/adlc.mjs uninstall --tool=all --dry-run` previews exactly what each `sync` placed (from `~/.adlc/receipts/`), then drop `--dry-run` to remove it. Add `--keep=claude` to clear every other tool but spare the Claude install. Only toolkit-owned symlinks and receipt-recorded files are touched.
 
 ### 3. Initialize a project
 

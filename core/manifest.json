@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },
@@ -23,19 +23,19 @@
     { "name": "toolkit-update", "category": "utility",  "gate": false, "agents": [],                                                                          "summary": "Update the toolkit itself from upstream and reconcile adapters; flags local/ overrides that shadow changed engine files." }
   ],
   "agents": [
-    { "name": "codebase-explorer",   "tier": "fast",     "readonly": true,  "dispatchable": true,  "role": "One structured recon pass: similar patterns, blast radius, integration points." },
+    { "name": "codebase-explorer",   "tier": "fast",     "readonly": true,  "dispatchable": true,  "role": "One exploration pass: similar existing code, what the change touches, where it hooks in." },
     { "name": "task-implementer",    "tier": "deep",     "readonly": false, "dispatchable": true,  "role": "Writes code for one task. No git operations." },
     { "name": "correctness-reviewer","tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Logic, race conditions, security. Read-only." },
     { "name": "quality-reviewer",    "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Conventions, naming, duplication, test coverage. Read-only." },
     { "name": "architecture-reviewer","tier": "balanced","readonly": true,  "dispatchable": true,  "role": "Layering, separation of concerns, API contracts. Read-only." },
-    { "name": "architecture-adversary","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Adversarial pre-gate attack on the design + task plan; hunts omissions, surfaces only self-refuted findings. Read-only." },
+    { "name": "architecture-adversary","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Stress-tests the design + task plan before the human reviews it; reports only problems that survived its own attempts to disprove them. Read-only." },
     { "name": "reflector",           "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Self-review against captured lessons. Read-only." },
     { "name": "ui-reviewer",         "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Runtime UI/UX review — runs the app in a browser to verify render, flows, and design match. Browser mechanism auto-resolves and degrades. Read-only re: source." },
     { "name": "design-system-auditor","tier": "balanced","readonly": true, "dispatchable": true,  "role": "Static design-system audit — token compliance, scale coherence, component duplication, naming, drift vs design-system.md. Read-only." },
     { "name": "health-auditor",      "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Codebase health audit for /analyze. Read-only." },
     { "name": "performance-scanner", "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "API cost + DB perf + latency for /optimize. Read-only." },
     { "name": "pipeline-runner",     "tier": "deep",     "readonly": false, "dispatchable": true,  "role": "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR." },
-    { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Adjudicates one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
+    { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Decides one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
   ],
   "tierToModel": {
     "$comment": "Maps capability TIERS (fast | balanced | deep — not model names) to each assistant's actual model. Tiers keep the protocol tool-neutral; this table is the only place vendor model IDs live. Override via .adlc/config.yml. Strings are best-effort current IDs; tools that don't accept a model field ignore these.",

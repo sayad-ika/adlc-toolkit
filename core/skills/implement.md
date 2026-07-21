@@ -13,7 +13,7 @@ You are running Phase 3 of the ADLC pipeline: implementing the tasks for a REQ.
 ## Preflight
 
 1. **Verify architecture gate cleared.** Read `pipeline-state.json`. If `currentPhase < 2` or `gateState != "cleared"` for the architect phase, **stop** — direct the user to run `/architect`.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 9.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 9.
 3. **Load context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/conventions.md`, `specs/REQ-NNN-<slug>/requirement.md`, `architecture.md`, `exploration.md`, all `tasks/TASK-*.md`.
 4. **Verify the work path exists.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. In `worktree` mode, also verify the worktree is still registered (`git -C <repo-path> worktree list`). In `branch` mode, verify the branch ref exists (`git -C <workPath> rev-parse --verify <branch>`). If anything is missing, stop and surface — `/architect` should have established the work path.
 5. **Confirm cwd discipline.** All Bash calls must use absolute paths or `git -C <workPath>` form. Shell cwd does not persist between Bash calls.

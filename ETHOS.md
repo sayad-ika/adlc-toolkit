@@ -63,3 +63,11 @@ A well-framed choice is faster to answer and produces a better decision than an 
 **Tool mapping:** on Claude, use the `AskUserQuestion` tool. On assistants without a structured-question UI, present the same options as a short numbered list inline in chat. Either way: discrete options, a recommendation, and room for the user to go off-menu.
 
 **Applies when:** Any phase gate, any mid-phase clarification, a decision-maker HALT handed back to the user, init/setup choices, or any moment you'd otherwise ask the user an open question.
+
+---
+
+## 7. Speak Plainly
+
+Every word the pipeline puts in front of the user — gate cards, findings, reports, questions, warnings — follows `core/VOICE.md`: everyday words over academic ones, toolkit terms glossed on first use, machine tags always beside a plain sentence, every option stating its consequence. Real engineering vocabulary is welcome; courtroom vocabulary and invented jargon are not.
+
+A gate the user can't cheaply read is a gate they'll rubber-stamp. Plain language is what makes human-in-the-loop real.

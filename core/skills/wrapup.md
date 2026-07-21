@@ -13,7 +13,7 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 ## Preflight
 
 1. **Verify verify gate cleared.** Read `pipeline-state.json`. `currentPhase >= 4`, `gateState: "cleared"` for verify.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 8.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 8.
 3. **Load context.** Everything for this REQ: `requirement.md`, `architecture.md`, `tasks/*.md`, `exploration.md`, `verification.md`, `commits-draft.md`. Plus vault navigation files: `now.md`, `hot.md`, `index.md`, `decisions.md`, `glossary.md`.
 4. **Verify the commits exist.** Read `pipeline-state.json.workPath` and `.branch`. `git -C <workPath> log <base-branch>..<branch> --oneline` should show all the drafted commits actually committed by the user. If any draft isn't in the log, halt and ask the user to finish committing.
 

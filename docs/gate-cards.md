@@ -53,4 +53,4 @@ Note the task DAG is shown as **compact text**, not a rendered picture: the card
 
 ## Markers
 
-Cards use one small, consistent vocabulary (no emoji): `✓` pass · `⚠` needs attention · `?` open question · severities as `crit` / `maj` / `min`. The full list lives in `core/GATE-PROTOCOL.md`.
+Cards use one small, consistent vocabulary (no emoji): `✓` pass · `⚠` needs attention · `?` open question · severities spelled out (`critical` / `major` / `minor`; trivial shown only as a count). The full list lives in `core/GATE-PROTOCOL.md`.

@@ -4,6 +4,32 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.2] — 2026-07-21
+
+### Plain-language layer — `core/VOICE.md` **[protocol]**
+
+- New **`core/VOICE.md`**: the rules for every word the pipeline puts in front of the user — everyday words over academic ones (decide, not adjudicate), toolkit terms glossed on first use, machine tags always beside a plain sentence, every gate option stating its consequence, concrete over abstract, short sentences in cards. Loaded at preflight by all nine gate-bearing skills; every agent carries a short Voice digest. New ETHOS principle 7 — **Speak Plainly**: a gate the user can't cheaply read is a gate they'll rubber-stamp.
+- Findings vocabulary made plain: `Locus` → `Where`, `Authority` → `Rule broken`, `Surviving refutation` → `Why this holds up`, `Escalation tolerance` → `Caution level`, `Independence` → `Judged independently (yes/no)`, `Directives` → `Fixes requested`, `Evidence considered` / `Rationale` → `What I looked at` / `Why`. One severity scale everywhere: `critical | major | minor | trivial`, spelled out on cards (no more `crit`/`maj`/`min`), trivial shown as a count.
+- "Reconnaissance/recon" → **exploration** everywhere (now matches the artifact name `exploration.md`); "decision dossier" → "catch-up summary"; the shared Packet-gap instruction rewritten in plain words.
+- New gate-card invariant: **every option states its consequence** (`approve — moves on to implementation`), never a bare `approve · revise · abort`.
+- `docs/quickstart.md` now opens with a six-term glossary (REQ finally expanded to "requirement"); gotcha/lesson severity words defined inline in their templates.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`) so agent/skill descriptions pick up the new wording.
+
+## [1.3.1] — 2026-07-21
+
+### Renames — `/ship` → `/autopilot`, phase labels match skill names **[protocol]** **[breaking]**
+
+- **`/ship` is now `/autopilot`.** "Ship" is the word users reach for when they mean "finish this piece of work" (which is `/wrapup`'s job) — typing it launched the autonomous pipeline instead. `/autopilot` says what it is, and no longer collides with the `workflow.isolation: auto` config value. Its final artifact is `run-report.md` (was `ship-report.md`). Machine state values are unchanged (`currentPhaseGate: "ship"` and friends), so in-flight REQs, `/status`, and `/recover` keep working.
+- Phase display labels now match the skills that run them: Phase 4 gates read **Review** (was "Verify"), Phase 5 **Wrap up** (was "Ship").
+- Doc accuracy fixes: vault README no longer claims "Claude never runs git" (it contradicted `git.mode`); SDLC → ADLC in three files; spec-template's phase row matches the real pipeline; "status machine" → "state machine"; broken sentence in `now.md`.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`) — the `ship` adapters are replaced by `autopilot` ones.
+
 ## [1.3.0] — 2026-07-20
 
 ### UX layer — `/ux-doctor`, design-system-auditor, UX adversary lens **[protocol]**
@@ -20,24 +46,6 @@ Labels used below: **[breaking]** needs action on update, **[protocol]** changes
 
 - Run `node scripts/adlc.mjs build --tool=all` (or `sync`) once to generate the new skill/agent adapters.
 - In each active project, `/config templates` picks up `design-system-template.md`.
-
-## [1.2.2] — 2026-07-05
-
-### ui-reviewer: Claude in Chrome is actually reachable **[protocol]** **[tooling]**
-
-- The `ui-reviewer` (and `pipeline-runner`, which runs the UI lens inline for `/sprint`) documented a browser preference order — **Claude in Chrome → headless Playwright/Puppeteer → static checklist** — but on Claude the agent's tool grant was only `Read, Write, Edit, Grep, Glob, Bash`, so the `mcp__claude-in-chrome__*` tools were never available to the dispatched sub-agent and tier 1 could never fire. It always fell to Playwright.
-- Fixed data-driven: agents flagged `"browser": true` in `core/manifest.json` (`ui-reviewer`, `pipeline-runner`) now receive the Claude in Chrome MCP tools in the generated **Claude** adapter. When the connector is active the reviewer drives a real, visible browser (its preferred tier); when it isn't connected the tools don't resolve and it degrades to Playwright, then a static checklist — exactly as before. Only the Claude adapter carries these tools; the other assistants resolve a browser through their own means.
-
-### Update notes
-
-- Run `node scripts/adlc.mjs build --tool=all` (or `sync`) once to regenerate adapters — the two `browser: true` agents now carry the Chrome tools.
-- No change if you don't use the ui-reviewer, or never connect Claude in Chrome (behavior is identical: Playwright → static).
-
-## [1.2.1] — 2026-07-04
-
-### `uninstall` — receipt-driven removal **[tooling]**
-
-- New `node scripts/adlc.mjs uninstall [--tool=<…|all>] [--keep=<tool,…>] [--dry-run]` subcommand: the inverse of `sync`. It reads the same per-tool receipts (`~/.adlc/receipts/`) that record what each `sync` placed and removes only those destinations — a recorded link is removed **only if it's still a symlink resolving back into the toolkit** (judged from the link target, so dangling links are still recognised), copied/written files are removed because they match the receipt, and anything unexpected (a real file where a link was expected, or a link repointed elsewhere) is left in place and reported. Emptied directories are pruned and each tool's receipt is deleted once cleared. Use `--keep=claude` to clear every other tool while sparing the Claude install. Always dry-run first.
 
 ## [1.2.0] — 2026-07-02
 

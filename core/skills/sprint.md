@@ -27,7 +27,7 @@ A reasonable upper bound is **5 concurrent REQs**. Beyond that, gate triage beco
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — each per-REQ gate in the queue renders as a gate card.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — each per-REQ gate in the queue renders as a gate card.
 2. **Load vault.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`.
 3. **Validate input.** For each argument:
    - If it's a REQ ID, verify `.adlc/specs/REQ-NNN-*/` exists and has a `requirement.md`. If not, surface and ask: should we create it via `/spec` first?

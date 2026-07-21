@@ -13,7 +13,7 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
 ## Preflight
 
 1. **Verify implement gate cleared and code is committed.** Read `pipeline-state.json` (`currentPhase >= 3`, `gateState: "cleared"` for implement). Check that `git -C <workPath> log <base-branch>..<branch> --oneline` shows commits — if the branch has no commits past the base, **stop and remind** the user to run the commits first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **and the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`) — the shared gate-card format used at step 9.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 9.
 3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `specs/REQ-NNN-<slug>/requirement.md`, `architecture.md`, `commits-draft.md`.
 4. **Verify the work path and branch.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. Verify the branch ref exists: `git -C <workPath> rev-parse --verify <branch>`. (In `branch` mode, HEAD may be on a different branch — that's fine; comparisons below use `<branch>` by name.)
 5. **Identify the diff.** Determine the base branch from `config.yml` (default `main`). Capture the list of changed files: `git -C <workPath> diff --name-only <base-branch>...<branch>`.
@@ -93,7 +93,7 @@ Shape:
 `````markdown
 # REQ-NNN-<slug> — Review Packet
 
-This packet contains the diff with full file context, the REQ spec, the REQ architecture, and the prior codebase reconnaissance. **Do not re-read these via Read — cite this packet.** If you Read anything beyond this packet — vault content (gotchas, lessons, ADRs, conventions, concepts) or an off-diff code collaborator — add a `**Packet-gap:**` line in your section: `**Packet-gap:** <path> — <why the packet didn't cover it>`, whether or not it produced a finding. That list is how we tighten the packet from real data.
+This packet contains the diff with full file context, the REQ spec, the REQ architecture, and the earlier codebase exploration report. **Do not re-read these via Read — cite this packet.** If you Read anything beyond this packet — vault content (gotchas, lessons, ADRs, conventions, concepts) or a related source file outside the diff — add a `**Packet-gap:**` line in your section: `**Packet-gap:** <path> — <why the packet didn't cover it>`, whether or not it produced a finding. These notes are how future packets improve.
 
 ## Diff with full context (vs <base-branch>)
 
@@ -109,7 +109,7 @@ This packet contains the diff with full file context, the REQ spec, the REQ arch
 
 <verbatim architecture.md>
 
-## Codebase reconnaissance
+## Codebase exploration
 
 <verbatim exploration.md, or "_(no exploration report)_">
 `````
@@ -136,7 +136,7 @@ Packet: .adlc/specs/REQ-NNN-<slug>/review-packet.md
 Output file: .adlc/specs/REQ-NNN-<slug>/verification.md
 Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md
 
-Read the packet first. It contains the diff with full file context, the REQ spec and architecture, and the prior codebase reconnaissance. Do not re-read those files. If you Read anything beyond the packet, add a `**Packet-gap:**` line in your section so we can tighten the packet.
+Read the packet first. It contains the diff with full file context, the REQ spec and architecture, and the earlier codebase exploration report. Do not re-read those files. If you Read anything beyond the packet, add a `**Packet-gap:**` line in your section so we can tighten the packet.
 
 Append your findings under your section heading in the output file.
 Append any lesson candidates to the candidates file per your skill instructions (bar: when in doubt, surface).
@@ -310,7 +310,7 @@ If `fix: <ids>` (or `fix: all-major`):
    Apply the fix. Append a commit message to commits-draft.md (new section: "Fix commits").
    Run tests, verify they pass.
    ```
-2. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and reconnaissance sections are unchanged — leave them alone.
+2. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
 3. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed).
 4. Re-emit the gate prompt with updated counts.
 

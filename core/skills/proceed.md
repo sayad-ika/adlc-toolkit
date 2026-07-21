@@ -15,7 +15,7 @@ Invocation patterns:
 - `/proceed` — pick up the active REQ from `now.md` if there's one in flight; otherwise ask the user.
 - `/proceed REQ-NNN-<slug>` — resume the named REQ from wherever its pipeline-state left off.
 - `/proceed <free-text feature description>` — start a new REQ from scratch.
-- `/proceed [REQ-NNN-<slug>] --resume` — produce a decision dossier (drift checks, recent activity, gate question re-rendered, menu) before continuing. Use after a break, a session crash, or any time you want context before pressing forward.
+- `/proceed [REQ-NNN-<slug>] --resume` — show a catch-up summary (what changed while you were away, recent activity, the pending gate question, a menu) before continuing. Use after a break, a session crash, or any time you want context before pressing forward.
 - `/proceed [REQ-NNN-<slug>] --revert~1` / `--revert~2` / `--revert~3` — walk back N completed phases via a `revert-plan.md` you approve. N is capped at 3; further walkbacks usually mean `--cancel` and re-running is cleaner.
 - `/proceed [REQ-NNN-<slug>] --cancel` — abandon the REQ; writes a `cancelled.md` tombstone with a user-provided reason, frees the worktree (worktree mode), and drafts branch cleanup commands for the user to run.
 
@@ -47,7 +47,7 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 
 These three flags branch out of preflight step 4. Each owns its own flow — they do not run the standard phase walk. All three require an in-sync `pipeline-state.json`; if state has drifted from git reality, run `/recover` first.
 
-### `--resume` — decision dossier before continuing
+### `--resume` — catch-up summary before continuing
 
 Use after a break, a session crash, or any time you want context before pressing the gate forward. Differs from bare `/proceed REQ-NNN-<slug>` (which just re-emits the pending gate prompt and waits) by producing a richer pre-flight that surfaces drift before you commit to continuing.
 
