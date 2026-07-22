@@ -163,10 +163,23 @@ workflow:
   isolation: auto
   edits: confirm-out-of-scope
 
-# Autonomy — used only by /autopilot (the autonomous pipeline). /proceed ignores this
-# block and always pauses at every gate. If this block is absent, /autopilot falls back
-# to safe defaults (gates: assisted, git: read-only, escalation: cautious) and
-# tells you it's doing so. Uncomment and tune to opt into more autonomy.
+# Autonomy — used by /autopilot (the autonomous pipeline) and by /sprint's gate
+# queue. /proceed ignores this block and always pauses at every gate.
+#
+# /sprint reads `gates` (plus escalation, the rework caps, confidence_floor,
+# packet_max_bytes, hard_stops) to decide who clears each runner's gate:
+#   manual   — you triage every gate yourself (sprint's default when this
+#              block is absent)
+#   assisted — every gate still comes to you, with the decision-maker's
+#              recommendation and confidence attached
+#   auto     — the decision-maker clears routine gates; you see only the
+#              exceptions (hard-stops, critical/major findings, HALTs,
+#              exhausted rework caps, blocked runners) and every REQ's
+#              final review. Merges are yours in every mode.
+#
+# If this block is absent, /autopilot falls back to safe defaults (gates:
+# assisted, git: read-only, escalation: cautious) and tells you it's doing so;
+# /sprint falls back to manual. Uncomment and tune to opt into more autonomy.
 #
 # autonomy:
 #   gates: auto              # manual | assisted | auto   (who clears each gate)

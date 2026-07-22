@@ -324,7 +324,7 @@ When the user replies at a gate, route the response:
 
 - **`approve`** → the phase skill handles cleanup (delete marker, set `gateState: "cleared"`, log to hot.md). You advance to the next phase.
 - **`revise: <text>`** → the phase skill handles revision. You stay in the same phase, re-emit the gate prompt after revision.
-- **`fix: <ids>`** (verify phase only) → the verify skill dispatches task-implementer for the fixes. You stay in the verify phase, re-emit gate prompt after fixes.
+- **`fix: <all|all-major|ids>`** (verify phase only) → the verify skill dispatches task-implementer for the resolved set — `all` is every actionable finding; needs-decision findings come back named on the re-emitted card. You stay in the verify phase, re-emit gate prompt after fixes.
 - **`merged`** (ship phase) → the wrapup skill finalizes state. You exit the loop with a "REQ complete" summary.
 - **`abort`** → the phase skill rolls back its work. You exit the loop. The REQ is not deleted (unless the user explicitly confirms), but `pipeline-state.json` reflects the aborted state.
 

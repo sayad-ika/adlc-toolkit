@@ -1,6 +1,6 @@
 ---
 name: decision-maker
-description: "Decides one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt."
+description: "Decides one pipeline gate during an autonomous run (/autopilot, or /sprint’s adjudicated queue) — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt."
 model: opus
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---

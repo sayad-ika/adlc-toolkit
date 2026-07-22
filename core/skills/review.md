@@ -186,15 +186,17 @@ For each finding across all reviewer sections (including UI/UX findings when the
 - Deduplicate: if two reviewers flagged the same file + line + concern, merge into one entry citing both
 - Sort by severity (Critical > Major > Minor > Trivial)
 - Tag with originating reviewer(s)
+- Mark each finding's disposition: **actionable** (a code change a task-implementer can apply) or **needs-decision** — a reflector `vault-stale` (the vault should change, not the code), an `adr-conflict`, a proposed new ADR, or an open design question. `fix all` acts on the actionable set only; needs-decision findings are the user's by definition — an implementer "fixing" one would be making the decision for them.
 - Group by file
 
 ```markdown
 ## Findings at a glance
 
-| ID | Severity | Finding (one line) | Where | Effort |
-|----|----------|--------------------|-------|--------|
-| C1 | critical | double-charge path on retry | src/pay/retry.ts:88 | small |
-| M1 | major | duplicated retry helper; extract it | src/pay/retry.ts | small |
+| ID | Severity | Finding (one line) | Where | Effort | Fix |
+|----|----------|--------------------|-------|--------|-----|
+| C1 | critical | double-charge path on retry | src/pay/retry.ts:88 | small | yes |
+| M1 | major | duplicated retry helper; extract it | src/pay/retry.ts | small | yes |
+| m1 | minor | ADR-009 conflict: retry lives outside gateway | src/pay/retry.ts | — | your call |
 
 ## Consolidated by severity
 
@@ -275,11 +277,11 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads w
 
 - **Header** — `Gate 4 of 5 · Review · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "`<total>` findings — `<k>` need a call", or "clean — no findings, recommend approve".
-- **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. This block *is* the `NEEDS YOU` for this gate.
+- **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. Suffix needs-decision findings with `— your call`, so the scope of `fix all` is visible on the card. This block *is* the `NEEDS YOU` for this gate.
 - **READY** (brief) — `<4 or 5>` reviewers ran; `<total>` possible lessons noted (you decide what to keep at `/wrapup`); how the UI was checked + counts (or "UI check skipped — nothing visual changed"; omit entirely when the project has no frontend); when any doc is now out of date, name it ("docs now stale: docs/auth.md — update it in this branch before merging").
 - **CHECKS** — the acceptance-criteria check as one compact `✓ / ⚠` line; call out any special item (a reflector `vault-stale` finding, an `adr-conflict`, an architecture "new ADR needed") on its own line since those need deliberate handling.
 - **MY READ** — recommendation + one-line why. **Never recommend approve while a Critical is unaddressed** — that's a `fix` or `revise`.
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (accept findings as-is → `/wrapup`), **fix** (`<ids>` or `all-major` — dispatch task-implementer for them), **revise** (other changes to the review), **abort** (escalate; halt). Mark the recommended one per `MY READ`.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (accept findings as-is → `/wrapup`), **fix all** (every actionable finding gets fixed, affected reviewers re-run, gate comes back — needs-decision findings return named), **fix** (`<ids>` or `all-major` — same loop, scoped), **revise** (other changes to the review), **abort** (escalate; halt). `fix all` is always offered whenever at least one actionable finding exists. Mark the recommended one per `MY READ`.
 
 Example shape:
 
@@ -300,8 +302,9 @@ CHECKS      ✓ criteria 1–2 met · ⚠ criterion 3 — safe-retry not verifie
 
 MY READ     fix — the critical finding must be fixed before this ships
 
-Decision →  approve (accept as-is) · fix <ids|all-major> (I fix, then
-            re-check) · revise <what> · abort
+Decision →  approve (accept as-is) · fix all (every actionable
+            finding; I fix, then re-check) · fix <ids|all-major> ·
+            revise <what> · abort
 ```
 
 ## Gate clearance
@@ -313,9 +316,10 @@ If `approve` (no fixes needed):
 3. Append to `hot.md`: `## [DATE] verify-gate-cleared | REQ-NNN-<slug> | findings: C<critical>/M<major>/m<minor>`.
 4. Tell the user: ready for `/wrapup`.
 
-If `fix: <ids>` (or `fix: all-major`):
+If `fix: <ids>`, `fix: all-major`, or `fix: all`:
 
-1. For each finding to fix, dispatch a `task-implementer` agent scoped to that fix:
+1. **Resolve the set.** `<ids>` — as listed. `all-major` — every critical and major. `all` — every **actionable** finding, all severities. Needs-decision findings (`vault-stale`, `adr-conflict`, a proposed ADR, an open question) are never in the set, whatever was asked — they're decisions, not patches. If the resolved set excluded any, the re-emitted card must name them: `fixed 6 of 8 — 2 need your call: m1, m3`.
+2. For each finding in the set, dispatch a `task-implementer` agent scoped to that fix:
    ```
    Fix: <finding-id>
    Source: verification.md
@@ -325,9 +329,9 @@ If `fix: <ids>` (or `fix: all-major`):
    Apply the fix. Append a commit message to commits-draft.md (new section: "Fix commits").
    Run tests, verify they pass.
    ```
-2. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
-3. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed).
-4. Re-emit the gate prompt with updated counts.
+3. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
+4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed).
+5. Re-emit the gate prompt with updated counts — and, when the set excluded needs-decision findings, carry those into `NEEDS YOU` by ID.
 
 If `abort`:
 

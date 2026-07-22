@@ -1,6 +1,6 @@
 # Codex custom agent. Verify key names against your Codex version's schema.
 name = "decision-maker"
-description = "Decides one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt."
+description = "Decides one pipeline gate during an autonomous run (/autopilot, or /sprint’s adjudicated queue) — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt."
 model = "gpt-5.5"
 model_reasoning_effort = "high"
 read_only = false

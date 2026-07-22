@@ -4,6 +4,25 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.3.9] — 2026-07-22
+
+### Sprint gets an adjudicated gate queue **[protocol]**
+
+- `/sprint`'s queue now follows `autonomy.gates` — the same dial `/autopilot` reads; `--gates=<manual|assisted|auto>` overrides it per sprint. `manual` is exactly today's behavior. `assisted` attaches the decision-maker's recommendation and confidence to every gate — you still clear each one, but a clean gate is one keystroke. `auto` turns the queue into an **exception queue**: the orchestrator fast-paths clean gates (no agent call), sends the ambiguous middle to the decision-maker on a size-capped packet, routes REWORK back to the runner under the rework caps, and surfaces only what needs a human — hard-stops, critical/major findings, HALTs and confidence-floor trips, exhausted caps, blocked runners, and every REQ's final review. Merges stay yours in every mode.
+- **Runners are untouched.** `pipeline-runner` still pauses at every gate; what changed is who clears it. The decision-maker runs as a true sub-agent of the orchestrator (`Judged independently: yes`) — the only fresh pair of eyes in sprint mode, since runners review inline by design.
+- Auto-cleared gates render as a no-reply **ledger** in the queue view (`CLEARED FOR YOU`), and every verdict — approvals included — lands in that REQ's `gate-decisions.md`. Visibility without interruption.
+- The "approve all is not a valid command" rule holds in every mode, and the old "you're using the wrong tool" answer is gone — the right tool for queue overwhelm is the `gates` dial.
+
+### The review gate learns `fix all` **[protocol]**
+
+- The verify gate's fix vocabulary is now `fix all` · `fix all-major` · `fix <ids>` — in `/review`, `/proceed`'s routing, and the sprint queue (`fix <N>: all`). `fix all` dispatches a task-implementer for every **actionable** finding at any severity, re-runs the affected reviewers, and brings the gate back. It's always offered when at least one actionable finding exists.
+- Findings are now classified **actionable** vs **needs-decision** (a reflector `vault-stale`, an `adr-conflict`, a proposed ADR, an open question). `fix all` never touches the latter — an implementer "fixing" an ADR conflict would be making your decision for you. Excluded findings come back named on the re-emitted card ("fixed 6 of 8 — 2 need your call: m1, m3"), and the findings table gains a `Fix` column (`yes` / `your call`) so the scope is visible before you reply.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`).
+- To opt a sprint into the adjudicated queue, set `autonomy.gates` in `.adlc/config.yml` or pass `--gates=assisted|auto`. With no `autonomy` block, `/sprint` behaves exactly as before.
+
 ## [1.3.8] — 2026-07-21
 
 ### Review sweep — closing the gaps the series left **[tooling]**

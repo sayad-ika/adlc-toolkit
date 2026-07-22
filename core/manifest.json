@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.3.8",
+  "version": "1.3.9",
   "vaultDir": ".adlc",
   "skills": [
     { "name": "init",      "category": "setup",        "gate": false, "agents": [],                                                                          "summary": "Bootstrap the .adlc/ vault in a new repo." },
@@ -11,7 +11,7 @@
     { "name": "wrapup",    "category": "phase",  "phase": 5, "gate": true,  "agents": [],                                                                          "summary": "Draft PR + lessons + vault updates + git checklist. Phase 5." },
     { "name": "proceed",   "category": "orchestrator", "gate": false, "agents": ["codebase-explorer", "architecture-adversary", "task-implementer", "correctness-reviewer", "quality-reviewer", "architecture-reviewer", "reflector", "ui-reviewer"], "summary": "Run all five phase skills with gates between." },
     { "name": "autopilot",      "category": "orchestrator", "gate": false, "agents": ["codebase-explorer", "architecture-adversary", "task-implementer", "correctness-reviewer", "quality-reviewer", "architecture-reviewer", "reflector", "ui-reviewer", "decision-maker"], "summary": "Autonomous pipeline — runs all five phases, routing each gate through the decision-maker; ends in one final human review." },
-    { "name": "sprint",    "category": "orchestrator", "gate": false, "agents": ["pipeline-runner"],                                                         "summary": "Parallel multi-REQ orchestrator (gate-pause)." },
+    { "name": "sprint",    "category": "orchestrator", "gate": false, "agents": ["pipeline-runner", "decision-maker"],                                       "summary": "Parallel multi-REQ orchestrator (gate-pause; queue adjudication via autonomy.gates)." },
     { "name": "bugfix",    "category": "pipeline",     "gate": true,  "agents": ["codebase-explorer", "task-implementer"],                                   "summary": "Slimmer pipeline for bugs." },
     { "name": "task",      "category": "pipeline",     "gate": true,  "agents": ["codebase-explorer", "task-implementer", "correctness-reviewer", "reflector", "ui-reviewer"], "summary": "Slim self-triaging pipeline for small changes; escalates to /proceed when large." },
     { "name": "analyze",   "category": "standalone",   "gate": false, "agents": ["health-auditor"],                                                          "summary": "Standalone codebase health audit." },
@@ -35,7 +35,7 @@
     { "name": "health-auditor",      "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "Codebase health audit for /analyze. Read-only." },
     { "name": "performance-scanner", "tier": "balanced", "readonly": true,  "dispatchable": true,  "role": "API cost + DB perf + latency for /optimize. Read-only." },
     { "name": "pipeline-runner",     "tier": "deep",     "readonly": false, "dispatchable": true,  "role": "Runs the full pipeline for one REQ in a worktree for /sprint. No sub-agents. Git per git.mode — feature branch only, never main/force/PR." },
-    { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Decides one pipeline gate during an autonomous /autopilot run — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
+    { "name": "decision-maker",      "tier": "deep",     "readonly": true,  "dispatchable": true,  "role": "Decides one pipeline gate during an autonomous run (/autopilot, or /sprint’s adjudicated queue) — APPROVE / REWORK / HALT with confidence + cited evidence. Conservative by default; escalates on doubt." }
   ],
   "tierToModel": {
     "$comment": "Maps capability TIERS (fast | balanced | deep — not model names) to each assistant's actual model. Tiers keep the protocol tool-neutral; this table is the only place vendor model IDs live. Override via .adlc/config.yml. 'default'/'default-fast' means inherit the tool's own session default (no model field emitted). IDs verified 2026-07-21 — models rotate, re-verify quarterly (see tierVerified). Claude uses aliases on purpose: they track the latest model automatically.",
