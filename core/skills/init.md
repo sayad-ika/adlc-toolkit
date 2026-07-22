@@ -362,7 +362,7 @@ If `.gitignore` exists at the repo root, **propose** (don't auto-write) appendin
 ```
 
 Notes on edge cases:
-- `requirement.md`, `architecture.md`, `exploration.md`, `verification.md`, `cancelled.md`, `revert-plan.md`, and `code-revert-plan.md` inside each REQ folder are **committed** — they're the why-trail and the audit record.
+- `requirement.md`, `architecture.md`, `exploration.md`, `verification.md`, `review-log.md`, `cancelled.md`, `revert-plan.md`, and `code-revert-plan.md` inside each REQ folder are **committed** — they're the why-trail and the audit record.
 - `tasks/` is committed; task plans serve as the "planned vs. shipped" trail.
 - `hot.md` is the shared activity log. It's **committed** and carries `merge=union` from `.adlc/.gitattributes`, so concurrent appends on different branches combine instead of conflicting — teams get a single shared history with no merge pain. (Newest-first ordering may interleave across a union merge, but every entry is dated, so the log stays readable.) `decisions.md` and `glossary.md` work the same way.
 - `now.md` is the **active-focus view** — small, mutable, edited in place, and therefore conflict-prone. It's gitignored and per-developer; `/status` and `/recover` regenerate the active-REQ picture from each REQ's `pipeline-state.json`, which is the real source of truth. Don't commit it.

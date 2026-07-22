@@ -87,7 +87,7 @@ claude
 
 - `/help` (or the command picker) lists `init`, `spec`, `architect`, … `recover`.
 - After `/init`, `.adlc/` exists with `context/`, `knowledge/`, `specs/`, `config.yml`.
-- During `/review`, the reviewer sub-agents are read-only on your code: they may write only their findings into `.adlc/` (e.g. `verification.md`, `lesson-candidates.md`), never source files. After a review pass, `git status` should show only `.adlc/` changes — never edits to your source or repo files.
+- During `/review`, the reviewer sub-agents are read-only on your code: they may write only their findings into `.adlc/` (e.g. `review-log.md`, `lesson-candidates.md`), never source files. After a review pass, `git status` should show only `.adlc/` changes — never edits to your source or repo files.
 
 ## Notes
 

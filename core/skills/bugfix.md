@@ -205,7 +205,7 @@ Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector`
 
 The user commits before this runs — same as `/proceed`'s Phase 4 protocol.
 
-When dispatching, pass `Candidates file: .adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder). Tags from those agents remain `review-corr` and `review-reflect`.
+When dispatching, pass `Candidates file: .adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/bugs/BUG-NNN-<slug>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`.
 
 ### Findings
 

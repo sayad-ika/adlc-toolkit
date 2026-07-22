@@ -31,7 +31,7 @@ A reasonable upper bound is **5 concurrent REQs**. Beyond that, gate triage beco
 1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — each per-REQ gate in the queue renders as a gate card.
 2. **Load vault.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`. From `config.yml → autonomy`, read `gates` (plus `escalation`, the rework caps, `confidence_floor`, `packet_max_bytes`, `hard_stops`) — apply any `--gates` flag override. Absent `autonomy` block ⇒ `manual`.
 3. **Validate input.** For each argument:
-   - If it's a REQ ID, verify `.adlc/specs/REQ-NNN-*/` exists and has a `requirement.md`. If not, surface and ask: should we create it via `/spec` first?
+   - If it's a REQ ID, verify `.adlc/specs/REQ-NNN-*/` exists and has a `requirement.md`. If it exists only under `specs/_archive/`, it's completed and archived — say so and drop it from the sprint list; don't offer to re-create it. If it exists nowhere, surface and ask: should we create it via `/spec` first?
    - If it's free text, treat as a new feature and call `/spec` for each, sequentially (or interactively).
 4. **Check global REQ counter.** REQ IDs must be unique across all in-flight work. Read `~/.adlc/.global-next-req` (a global atomic counter). Increment for each new REQ created during this sprint setup. Honor the lock — concurrent sprints across projects share this counter.
 5. **Check for collisions.**

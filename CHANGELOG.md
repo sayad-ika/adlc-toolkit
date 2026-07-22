@@ -4,6 +4,16 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.4.4] — 2026-07-22
+
+### Review sweep — closing the gaps the v1.4.x series left **[tooling]**
+
+- **Slim pipelines declare their single file.** `/task` and `/bugfix` reviews stay in one `verification.md` (two or three reviewers don't need a verdict/narrative split), but the reviewer agents' own instructions now default to `review-log.md` — so both skills' dispatch prompts state "single-file review, write to the output file" explicitly. Without this, a dispatched reviewer could follow its skill default into a file the slim pipeline never reads.
+- **ETHOS principle 3 caught up with 1.4.0**: reviewers' findings artifact is "a section of `review-log.md`" now, not `verification.md`. Same fix in the Claude install guide and the fidelity matrix.
+- **`/init`'s committed-files list gains `review-log.md`** — it's the narrative why-trail; it belongs in history alongside the verdict.
+- **Archived REQs are recognized, not "missing."** `/sprint` drops an archived REQ from the launch list with a one-line explanation instead of offering to re-create it; `/proceed` reports an archived REQ's final state and stops instead of failing the existence check. Both close loose ends of 1.4.3's archive step.
+- Verified clean in the same sweep: budget numbers agree everywhere (5KB rulebook · 8KB context/verdict · 60KB/30-lesson trigger); `/config`'s `### Git policy` sync target survived the rulebook diet; the generated per-tool memory files never referenced the split files; README, quickstart, gate-cards, and GATE-PROTOCOL carry no stale references; `pipeline-runner`'s static-tier UI checklist stays in the verdict file on purpose (the user must run it).
+
 ## [1.4.3] — 2026-07-22
 
 ### Merged REQs move out of the way **[protocol]** **[vault-format]**

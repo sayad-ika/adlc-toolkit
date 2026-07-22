@@ -159,7 +159,7 @@ Dispatch a **reduced reviewer set**, not the full five:
 - **ui-reviewer** — only when the change touches UI directly or via a consumed API contract (the same evidence-driven trigger `/review` uses). A task that changes a button or an API a screen calls still gets its UI verified.
 - Skip quality and architecture reviewers unless the diff introduced significant new code or moved layering — if it did, that's also a hint it should have been `/proceed`.
 
-Pass `Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md`. Consolidate findings into `verification.md` with the same severity shape as `/review`, with only the dispatched reviewers' sections.
+Pass `Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` — and pass `Output file: .adlc/specs/REQ-NNN-<slug>/verification.md`, stating in the dispatch prompt: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The reviewer agents' own instructions default to `review-log.md` because the full `/review` splits verdict from narrative; a `/task` review is small enough that one file *is* the verdict.) Consolidate findings in place with the same severity shape as `/review`, with only the dispatched reviewers' sections.
 
 ### 2. Wrapup-lite — capture knowledge
 

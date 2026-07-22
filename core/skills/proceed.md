@@ -28,7 +28,7 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 1. **Read the toolkit ETHOS.**
 2. **Read `.adlc/CLAUDE.md`** for the per-project schema doc, and the navigation files: `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Determine REQ identity.** Strip any `--resume`, `--revert~N`, or `--cancel` tokens out of the argument list before parsing the rest — flags are not REQ IDs and not free-text descriptions.
-   - If a REQ ID was given, verify it exists; load its `pipeline-state.json`.
+   - If a REQ ID was given, verify it exists; load its `pipeline-state.json`. If it exists only under `specs/_archive/`, it's completed and archived — report its final state in one line and stop; archived REQs are read-only history (a follow-up change is a new REQ).
    - If a free-text description was given (and no flag was set), treat as a brand-new REQ — skip ahead to Phase 1 via `/spec`.
    - If only a flag was given, or no argument at all:
      - Check `now.md`'s active-REQ table. If exactly one REQ is in flight, use it.
