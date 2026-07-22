@@ -168,7 +168,7 @@ Each phase of `/proceed` creates or updates artifacts:
 | 1. `/spec` | `specs/REQ-xxx/requirement.md` |
 | 2. `/architect` | `specs/REQ-xxx/architecture.md`, `tasks/TASK-*.md` |
 | 3. `/implement` | Code in the repo (uncommitted); `commits-draft.md` |
-| 4. `/review` | `specs/REQ-xxx/verification.md` |
+| 4. `/review` | `specs/REQ-xxx/verification.md` (compact verdict) + `review-log.md` (full narratives) |
 | 5. `/wrapup` | `pr-draft.md`, `merge-checklist.md`; updates to `lessons/`, `gotchas.md`, `concepts/`, `components/`, `index.md`, `decisions.md`, `hot.md` |
 
 After every phase, Claude pauses at a gate. Two signals fire:

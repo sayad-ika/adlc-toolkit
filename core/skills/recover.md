@@ -65,7 +65,7 @@ For each REQ/BUG/sprint, gather signals.
 
 **From the REQ folder:**
 
-Inventory which artifact files exist: `requirement.md`, `architecture.md`, `tasks/`, `exploration.md`, `verification.md`, `commits-draft.md`, `pr-draft.md`, `merge-checklist.md`.
+Inventory which artifact files exist: `requirement.md`, `architecture.md`, `tasks/`, `exploration.md`, `verification.md`, `review-log.md`, `commits-draft.md`, `pr-draft.md`, `merge-checklist.md`. A REQ with a single large `verification.md` and no `review-log.md` is the pre-1.4.0 shape — valid history, not corruption; don't try to split it retroactively.
 
 ### 2. Classify each candidate
 

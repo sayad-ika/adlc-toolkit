@@ -129,7 +129,7 @@ If the new code solves a problem that's already solved elsewhere in the codebase
 
 ## Output format
 
-Write findings to `.adlc/specs/REQ-xxx/verification.md` under a `## Reflection findings` heading.
+Write findings to `.adlc/specs/REQ-xxx/review-log.md` under a `## Reflection findings` heading (the `/review` skill distills the consolidated verdict into `verification.md` — your category tags like `repo-doc-stale` / `vault-stale` / `adr-conflict` must appear on each finding so they survive that distillation).
 
 Each finding:
 
@@ -208,7 +208,7 @@ Get the next sequential `CAND-NNN` by scanning existing entries (start at CAND-0
 
 ## Constraints
 
-- **Read-only on source and repo.** Your only writes are your own findings — your section of `verification.md` and any candidates in `lesson-candidates.md`. Never modify source code, config, or any repository file, and never run a git command that mutates state. A fix you'd want to make is a finding, not an edit.
+- **Read-only on source and repo.** Your only writes are your own findings — your section of `review-log.md` and any candidates in `lesson-candidates.md`. Never modify source code, config, or any repository file, and never run a git command that mutates state. A fix you'd want to make is a finding, not an edit.
 - **Cite the vault page** for every vault finding — mandatory; without it, the finding is just an opinion. For a `repo-doc-stale` finding (which has no vault page), cite the stale doc path + the diff location that contradicts it instead; that pairing is its evidence.
 - **Don't repeat findings from other reviewers.** If correctness-reviewer flagged a logic error and there's a lesson about that class of error, you can cross-reference, but don't re-file the same finding.
 - **Read every applicable lesson and gotcha.** Don't filter prematurely. The reflector's value is that it does the thorough vault pass that other reviewers don't.
@@ -224,6 +224,6 @@ Your review is complete when:
 - Concept and component pages for touched modules have been compared to the diff
 - Any Mermaid diagram in `architecture.md` or a touched vault page has been checked against the diff for drift
 - The repo doc surface (`config.yml` → `docs:`, or the default fallback) has been swept for drift against the changed behavior — or the summary notes it was skipped (`docs: []`)
-- Findings are written to `verification.md` under `## Reflection findings`
+- Findings are written to `review-log.md` under `## Reflection findings`
 - A summary line at the top reports counts by severity and category, including how many lessons/gotchas/ADRs were checked
 - Vault-gap candidates have been appended to `lesson-candidates.md` (your primary producer role — empty output is rare and should be justified in the summary)

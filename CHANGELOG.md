@@ -4,6 +4,21 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.4.0] — 2026-07-22
+
+### The review verdict and the review narrative part ways **[protocol]** **[vault-format]**
+
+- `/review` now writes two files. `verification.md` becomes the compact **verdict file** — digest table, consolidated findings, summary, acceptance-criteria check; target ≤8KB. A new `review-log.md` holds the full per-finding narratives, re-review threads, and packet-gap notes.
+- Why: the verdict file is what `/wrapup` and the gate packets actually load. On a real REQ, `verification.md` ran to 40KB, of which the acted-on part was ~7KB — the other 33KB is useful history that now lives **off the load path** instead of being re-read at every wrap-up. First shipped piece of the long-run vault maintenance plan.
+- All five reviewer agents write their sections to the log; the `/review` orchestrator distills the verdict (reflector's `repo-doc-stale` / `vault-stale` / `adr-conflict` tags survive the distillation — wrap-up's doc-staleness backstop keys off them). `pipeline-runner` does the same split inline in sprint mode.
+- `fix` loops unchanged: re-run reviewers append to the log, the verdict's digest and counts refresh, the gate card re-emits.
+- `/recover` and `/proceed` know both files. **No migration:** an old REQ with one fat `verification.md` and no log is recognized as the pre-1.4.0 shape and left alone.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`).
+- Nothing to change in existing vaults; the split applies from the next `/review` onward.
+
 ## [1.3.9] — 2026-07-22
 
 ### Sprint gets an adjudicated gate queue **[protocol]**

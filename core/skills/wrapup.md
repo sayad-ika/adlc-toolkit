@@ -14,7 +14,7 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 
 1. **Verify verify gate cleared.** Read `pipeline-state.json`. `currentPhase >= 4`, `gateState: "cleared"` for verify.
 2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 8.
-3. **Load context.** Everything for this REQ: `requirement.md`, `architecture.md`, `tasks/*.md`, `exploration.md`, `verification.md`, `commits-draft.md`. Plus vault navigation files: `now.md`, `hot.md`, `index.md`, `decisions.md`, `glossary.md`.
+3. **Load context.** Everything for this REQ: `requirement.md`, `architecture.md`, `tasks/*.md`, `exploration.md`, `verification.md`, `commits-draft.md`. Plus vault navigation files: `now.md`, `hot.md`, `index.md`, `decisions.md`, `glossary.md`. Do **not** load `review-log.md` — the verdict file carries everything wrap-up needs; open the log only when a specific finding's detail is genuinely required.
 4. **Verify the commits exist.** Read `pipeline-state.json.workPath` and `.branch`. `git -C <workPath> log <base-branch>..<branch> --oneline` should show all the drafted commits actually committed by the user. If any draft isn't in the log, halt and ask the user to finish committing.
 
 ## Steps
@@ -109,7 +109,7 @@ Knowledge capture happens in two halves: candidates were surfaced upstream (duri
 
 #### Process candidates
 
-1. **Read `lesson-candidates.md`.** If the file doesn't exist, do a sweep over `verification.md` and `commits-draft.md` asking "did anything recurring or instructive surface that should become a candidate?" Append any to `lesson-candidates.md`, then continue. A complete REQ that genuinely produced zero candidates is rare — the more common cause of an empty file is missed capture upstream.
+1. **Read `lesson-candidates.md`.** If the file doesn't exist, do a sweep over `verification.md` and `commits-draft.md` asking "did anything recurring or instructive surface that should become a candidate?" (Open `review-log.md` only if a verdict entry lacks the detail to judge.) Append any to `lesson-candidates.md`, then continue. A complete REQ that genuinely produced zero candidates is rare — the more common cause of an empty file is missed capture upstream.
 
 2. **For each candidate, issue exactly one verdict:**
    - **`promote`** — write a full lesson. See "Lessons" below.

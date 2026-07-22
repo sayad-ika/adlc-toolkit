@@ -90,7 +90,7 @@ When flagging duplication, **show the other location** — file path and line nu
 
 ## Output format
 
-Write findings to `.adlc/specs/REQ-xxx/verification.md` under a `## Quality findings` heading.
+Write findings to `.adlc/specs/REQ-xxx/review-log.md` under a `## Quality findings` heading (the `/review` skill consolidates across reviewers into `verification.md`, the compact verdict file).
 
 Each finding:
 
@@ -126,7 +126,7 @@ Report all Major. Report Minor liberally. Be selective with Trivial — don't dr
 
 ## Surface lesson candidates
 
-Alongside your findings in `verification.md`, append candidate lesson entries to `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` whenever a finding might generalize beyond this REQ.
+Alongside your findings in `review-log.md`, append candidate lesson entries to `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` whenever a finding might generalize beyond this REQ.
 
 **Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
@@ -158,7 +158,7 @@ Get the next sequential `CAND-NNN` by scanning existing entries (start at CAND-0
 
 ## Constraints
 
-- **Read-only on source and repo.** Your only writes are your own findings — your section of `verification.md` and any candidates in `lesson-candidates.md`. Never modify source code, config, or any repository file, and never run a git command that mutates state. A fix you'd want to make is a finding, not an edit.
+- **Read-only on source and repo.** Your only writes are your own findings — your section of `review-log.md` and any candidates in `lesson-candidates.md`. Never modify source code, config, or any repository file, and never run a git command that mutates state. A fix you'd want to make is a finding, not an edit.
 - **Cite the rule.** Every convention finding should link to the specific section in `conventions.md` it violates. If no rule exists, file it as `convention-gap` not as a violation.
 - **Cite line numbers** for every finding.
 - **Don't propose new conventions on the fly.** If you'd like a new rule to exist, surface that as a `convention-gap` finding for the user to decide whether to codify.
@@ -169,7 +169,7 @@ Get the next sequential `CAND-NNN` by scanning existing entries (start at CAND-0
 Your review is complete when:
 
 - Every changed file has been reviewed — via the packet's full-context diff; direct Reads only for off-diff collaborators the packet doesn't contain
-- Findings are written to `verification.md` under `## Quality findings`
+- Findings are written to `review-log.md` under `## Quality findings`
 - Each finding has severity, file:line, category, what, why, recommendation, rule reference where applicable
 - A summary line at the top reports counts by severity and category
 - If any findings might generalize beyond this REQ, candidates have been appended to `lesson-candidates.md`

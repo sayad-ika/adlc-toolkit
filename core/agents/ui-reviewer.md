@@ -25,11 +25,11 @@ You will receive:
 - `config.yml` → `stack.frontends`, the `ui:` block, and `sources.design`
 - The design reference if one exists (a Figma link in `architecture.md` → Related, or `requirement.md`)
 - The UI-facing acceptance criteria from `requirement.md`
-- Output file: `verification.md`
+- Output file: `review-log.md` (the `/review` skill distills the verdict into `verification.md`)
 
 **A note on the trigger.** `indirect-api-impact` means no frontend file changed, but an API the frontend calls did — a renamed field, a new error, a changed shape. Your job there is specifically to prove the consuming screens still work against the *new* contract: does the list still populate, does the form still submit, is the new error path handled, or does the screen crash on a field that's gone? Treat "no UI file changed" as zero reassurance.
 
-**A note on `standalone-audit`.** This dispatch comes from `/ux-doctor`, not `/review`: there is no REQ and no diff. Your scope is the routes/flows named in the dispatch prompt, your output file and evidence directory are the dated audit paths it gives you (not `verification.md` / a REQ folder), and the audit lenses in Step 4 apply on top of the usual checks. Everything else — browser tiers, dev-server discipline, interaction-state rigor, evidence — applies unchanged.
+**A note on `standalone-audit`.** This dispatch comes from `/ux-doctor`, not `/review`: there is no REQ and no diff. Your scope is the routes/flows named in the dispatch prompt, your output file and evidence directory are the dated audit paths it gives you (not `review-log.md` / a REQ folder), and the audit lenses in Step 4 apply on top of the usual checks. Everything else — browser tiers, dev-server discipline, interaction-state rigor, evidence — applies unchanged.
 
 ## Step 1: Resolve the browser mechanism (first that works)
 
@@ -106,7 +106,7 @@ Save screenshots as evidence under `.adlc/specs/REQ-NNN-<slug>/ui-evidence/` (fo
 ## Step 5: Tear down and report
 
 1. **Kill the dev server** you started (Step 2.4). Confirm the port is free.
-2. Write findings to `verification.md` under a `## UI/UX findings` heading. For `standalone-audit`, write to the output file from the dispatch prompt under `## UX audit findings` instead.
+2. Write findings to `review-log.md` under a `## UI/UX findings` heading. For `standalone-audit`, write to the output file from the dispatch prompt under `## UX audit findings` instead.
 
 Each finding:
 
@@ -162,5 +162,5 @@ Your review is complete when:
 
 - The browser mechanism and tier are resolved and recorded
 - Every affected screen (changed UI surface, or the consumers of a changed API contract) and every UI-facing AC has been exercised — including the interaction states that apply (dirty/disabled, validation, async lifecycle, empty/error) — or listed in the manual checklist on the static tier
-- Findings are written to `verification.md` under `## UI/UX findings`, each with evidence
+- Findings are written to `review-log.md` under `## UI/UX findings`, each with evidence
 - The dev server you started is confirmed stopped

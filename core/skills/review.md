@@ -22,11 +22,13 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
    - **(b) Direct UI change** — the diff touches a UI surface: component / page / view / route / style / template files (`*.jsx/tsx/vue/svelte`, `*.css/scss/less`, paths under `components/`, `pages/`, `views/`, `app/`, `routes/`, `public/`, `templates/`), or the spec has UI-facing acceptance criteria implicated by the change.
    - **(c) Indirect UI impact — an API/contract change the frontend consumes.** A back-end-only diff is *not* automatically safe. If the change alters an API the frontend calls — a changed response shape, a renamed/removed field, a new required request param, a new error or status code, a changed default, a modified shared DTO/type or GraphQL schema/OpenAPI spec — then a screen that consumes it can break (crash on a missing field, mis-render, swallow a new error) even though no frontend file changed. **Check for the coupling:** take the endpoints/paths/fields/types the diff changed and grep the frontend for references (its API client, fetch/axios/RTK-Query/react-query calls, shared types package, generated client) — and consult `exploration.md`'s integration points. If any frontend code consumes the changed contract, the condition holds.
 
-   If (a) holds and (b) or (c) does, dispatch the ui-reviewer. Pass it the **trigger reason** and the relevant surface: for (b), the changed UI files; for (c), the changed endpoints/contracts **and** the frontend call sites that consume them, so the reviewer knows which screens to exercise against the new contract. If only (a) holds (a truly back-end-internal change with no frontend consumer — e.g. an API purely for outside consumers), do **not** dispatch; record in `verification.md`'s UI section that no direct or indirect UI surface was present, and note the coupling check was run.
+   If (a) holds and (b) or (c) does, dispatch the ui-reviewer. Pass it the **trigger reason** and the relevant surface: for (b), the changed UI files; for (c), the changed endpoints/contracts **and** the frontend call sites that consume them, so the reviewer knows which screens to exercise against the new contract. If only (a) holds (a truly back-end-internal change with no frontend consumer — e.g. an API purely for outside consumers), do **not** dispatch; record in `review-log.md`'s UI section that no direct or indirect UI surface was present, and note the coupling check was run (the Summary in `verification.md` carries the one-line version).
 
 ## Steps
 
-### 1. Initialize verification.md
+### 1. Initialize verification.md and review-log.md
+
+The review writes **two files** with different jobs. `verification.md` is the **verdict file** — the digest, consolidated findings, summary, and acceptance-criteria check. It's what `/wrapup`, the gate packets, and every later reader load, so keep it lean (target ≤8KB). `review-log.md` is the **narrative log** — the reviewers' full sections, re-review threads, and packet-gap notes. Nothing downstream loads it; it exists for the human and for on-demand archaeology.
 
 Create or truncate `.adlc/specs/REQ-NNN-<slug>/verification.md`:
 
@@ -43,11 +45,32 @@ Create or truncate `.adlc/specs/REQ-NNN-<slug>/verification.md`:
 | Commits | <count> |
 | Base | <base-branch> |
 
+Full reviewer narratives: `review-log.md` — not loaded by later phases; open on demand.
+
 ## Summary
 
 _(populated after reviewers complete)_
 
----
+## Findings at a glance
+
+_(populated after all reviewers complete)_
+
+## Consolidated by severity
+
+_(populated after all reviewers complete)_
+
+## Acceptance criteria check
+
+_(populated at the acceptance-criteria cross-check)_
+```
+
+And create or truncate `.adlc/specs/REQ-NNN-<slug>/review-log.md`:
+
+```markdown
+# REQ-NNN-<slug> — Review log
+
+Full reviewer narratives. The consolidated verdict lives in `verification.md` —
+read that first; come here for the long form behind a finding ID.
 
 ## Correctness findings
 
@@ -68,12 +91,6 @@ _(written by reflector)_
 ## UI/UX findings
 
 _(written by ui-reviewer — only when the change touches a UI surface; otherwise "_(no UI surface in this change — ui-reviewer not dispatched)_")_
-
----
-
-## Consolidated by severity
-
-_(populated after all reviewers complete)_
 ```
 
 ### 1.5. Build the review packet
@@ -135,7 +152,7 @@ Branch: <branch>
 Files changed: <list>
 Base branch: <base-branch>
 Packet: .adlc/specs/REQ-NNN-<slug>/review-packet.md
-Output file: .adlc/specs/REQ-NNN-<slug>/verification.md
+Output file: .adlc/specs/REQ-NNN-<slug>/review-log.md
 Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md
 
 Read the packet first. It contains the diff with full file context, the REQ spec and architecture, and the earlier codebase exploration report. Do not re-read those files. If you Read anything beyond the packet, add a `**Packet-gap:**` line in your section so we can tighten the packet.
@@ -168,7 +185,7 @@ packet (you run the app and read config); reading those is expected, not a gap.
 
 ### 3. Wait for all reviewers to complete
 
-Each reviewer writes its findings to its section of `verification.md`. Collect terminal claims from each:
+Each reviewer writes its findings to its section of `review-log.md`. Collect terminal claims from each:
 
 - All dispatched reviewers (four, or five with the ui-reviewer) return findings → proceed to consolidation
 - Any reviewer fails (tool error, timeout) → halt and surface
@@ -176,7 +193,7 @@ Each reviewer writes its findings to its section of `verification.md`. Collect t
 
 ### 4. Consolidate findings
 
-Read `verification.md` after the reviewers finish. Build the **Consolidated by severity** section:
+Read `review-log.md` after the reviewers finish. Build the **Findings at a glance** and **Consolidated by severity** sections **in `verification.md`** — the distillation step. Keep each consolidated entry to the digest row plus a compact What / Recommendation block; the long form stays in the log, findable by finding ID and reviewer section:
 
 For each finding across all reviewer sections (including UI/UX findings when the ui-reviewer ran):
 
@@ -235,7 +252,7 @@ Edit the **Summary** section at the top of `verification.md`:
 
 ### 6. Cross-check against acceptance criteria
 
-Re-read the spec's acceptance criteria. For each one, verify it's met by the implemented code. Add to `verification.md`:
+Re-read the spec's acceptance criteria. For each one, verify it's met by the implemented code. Fill in `verification.md`'s `## Acceptance criteria check` section:
 
 ```markdown
 ## Acceptance criteria check
@@ -269,6 +286,7 @@ REQ: REQ-NNN-<slug>
 Awaiting: review the findings, decide which to fix.
 Files:
   - .adlc/specs/REQ-NNN-<slug>/verification.md
+  - .adlc/specs/REQ-NNN-<slug>/review-log.md (full narratives — open on demand)
 ```
 
 ### 9. Emit the gate card
@@ -330,8 +348,8 @@ If `fix: <ids>`, `fix: all-major`, or `fix: all`:
    Run tests, verify they pass.
    ```
 3. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
-4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed).
-5. Re-emit the gate prompt with updated counts — and, when the set excluded needs-decision findings, carry those into `NEEDS YOU` by ID.
+4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed). Their re-review sections append to `review-log.md`, same as the first pass.
+5. Refresh `verification.md` — digest rows, consolidated entries, summary counts — from the updated log, then re-emit the gate prompt with updated counts — and, when the set excluded needs-decision findings, carry those into `NEEDS YOU` by ID.
 
 If `abort`:
 
@@ -345,11 +363,13 @@ If `abort`:
 - **Don't apply fixes during the review pass.** Fixes happen only after the user approves them at the gate.
 - **Deduplicate honestly.** Two reviewers flagging the same issue from different angles is a strong signal — don't lose that by collapsing too aggressively.
 - **Surface vault-stale findings.** Reflector findings recommending the vault (not the code) change need special attention — the user decides whether to update the lesson/gotcha/ADR.
+- **`verification.md` is the verdict file — keep it lean.** Target ≤8KB. Every later reader (`/wrapup`, the gate packets, `/status`) loads the verdict file and only that; per-finding essays belong in `review-log.md`. If the consolidated section starts reading like the log, you're writing in the wrong file.
 - **Review applies code fixes but does not itself commit.** Committing follows `git.mode` (`.adlc/config.yml`, default `manual`) and happens at the implement/wrapup gate boundaries — never here, and never on a protected branch.
 
 ## Output artifacts
 
-- `.adlc/specs/REQ-NNN-<slug>/verification.md` (consolidated review)
+- `.adlc/specs/REQ-NNN-<slug>/verification.md` (the compact verdict file — digest, consolidated findings, summary, AC check; target ≤8KB)
+- `.adlc/specs/REQ-NNN-<slug>/review-log.md` (full reviewer narratives and re-review threads; on no later phase's load path)
 - `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` (appended to by the four reviewers; persists for /wrapup to verdict)
 - Updates to `pipeline-state.json` (findings counts, gateState)
 - Updates to `commits-draft.md` if fixes were applied

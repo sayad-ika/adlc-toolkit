@@ -107,7 +107,7 @@ When the user clears the implement gate, proceed.
 
 Run the **review checklists inline** (you cannot dispatch reviewer agents). Use the checklists in the "Inline review checklists" section below. Always run correctness, quality, architecture, and reflection. **Also run the UI checklist** when `config.yml` → `stack.frontends` is set and **either** this REQ's diff touches a UI surface (components/pages/views/styles/templates) **or** it changes an API the frontend consumes (grep the frontend for the changed endpoints/fields/types — a changed contract can break a screen with no UI file touched). Skip it only for changes with no frontend or no frontend consumer.
 
-Write `verification.md` with findings consolidated by severity (Critical / Major / Minor / Trivial). Deduplicate where checklists overlap.
+Write your full per-checklist findings to `review-log.md`, then distill `verification.md` — the compact verdict file later phases load (target ≤8KB): digest table, findings consolidated by severity (Critical / Major / Minor / Trivial), summary, acceptance-criteria check. Deduplicate where checklists overlap.
 
 As you run each checklist, also surface lesson candidates to `lesson-candidates.md` per the "Surface lesson candidates" section below — use the source tag matching the lens (`review-corr` / `review-qual` / `review-arch` / `review-reflect`).
 
