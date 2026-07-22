@@ -22,7 +22,7 @@ You are surfacing the current state of work in the vault. Read-only, no gates, n
 
 ### 2. Walk active REQs
 
-For each REQ folder under `.adlc/specs/`:
+For each REQ folder under `.adlc/specs/` (skip `specs/_archive/` entirely — archived REQs are done by definition):
 
 - Read `pipeline-state.json` if it exists
 - Skip REQs where `prState == "merged"` and `mergedAt` is more than 7 days old (they're done)

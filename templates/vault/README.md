@@ -20,6 +20,7 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 | `knowledge/components/` | One page per major module |
 | `architecture/` | High-level architecture + ADRs |
 | `specs/REQ-xxx/` | All artifacts for a single requirement |
+| `specs/_archive/` | Merged REQs, moved here whole at wrap-up (offered at `merged`; IDs stay reserved) |
 | `templates/` | Per-project copies of toolkit templates |
 | `config.yml` | Stack config — deploy targets, repo layout |
 
@@ -30,6 +31,7 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 - **`STATUS: needs verification`** flags provisional content — never silently assume it's confirmed
 - **Field table at the top** of every spec, ADR, concept, and component page
 - **"Related" and "Backlinks" sections** at the bottom of substantive pages
+- **Obsidian tip:** add `specs/_archive` to Settings → Files & Links → *Excluded files* so search and graph stay focused on active work (the files remain openable)
 
 ## Size budgets
 

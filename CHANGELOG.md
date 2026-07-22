@@ -4,6 +4,15 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.4.3] — 2026-07-22
+
+### Merged REQs move out of the way **[protocol]** **[vault-format]**
+
+- `/wrapup`'s `merged` step now offers to move the finished REQ folder to **`specs/_archive/`** — whole, nothing deleted, `index.md` repointed, one `req-archived` line in `hot.md`. Declining is fine; `/analyze`'s vault-health re-surfaces it as an archive candidate after 30 days.
+- Why: old REQ folders are write-once, read-never — they cost no tokens, but they crowd `specs/`, Obsidian search, and `/status`. The active surface of `specs/` now stays roughly one folder per REQ in flight, however old the project gets.
+- **The co-ship that makes it safe:** `/spec` and `/task` mint IDs by scanning `specs/` **and** `specs/_archive/` (sequential and prefixed schemes; explicit IDs collision-check both) — without this, archiving REQ-007 would eventually re-mint REQ-007. `/status` and `/recover` skip the archive; a named archived REQ is read-only history.
+- Archived folders are never auto-deleted — git history is the deep archive, `_archive/` is the browsable one. The vault README gains the `_archive/` layout row and an Obsidian *Excluded files* tip.
+
 ## [1.4.2] — 2026-07-22
 
 ### The vault learns to watch its own weight **[protocol]**

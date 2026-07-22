@@ -35,7 +35,7 @@ Zero or more REQ/BUG IDs as arguments.
 2. **Load vault basics:** `.adlc/CLAUDE.md`, `.adlc/config.yml`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries).
 3. **Determine scope:**
    - If IDs were provided, verify each exists in `specs/`, `bugs/`, or `sprints/`. If any are unknown, halt and ask.
-   - If no IDs, walk `.adlc/specs/`, `.adlc/bugs/`, and `.adlc/sprints/`. Collect every entry that isn't `prState: "merged"` with `mergedAt` older than 7 days. Skip any REQ that already has `recoveredAt` set unless the user invoked it by name.
+   - If no IDs, walk `.adlc/specs/`, `.adlc/bugs/`, and `.adlc/sprints/` — skipping `specs/_archive/`: an archived REQ is terminal by definition. Collect every entry that isn't `prState: "merged"` with `mergedAt` older than 7 days. Skip any REQ that already has `recoveredAt` set unless the user invoked it by name. If the user names an archived REQ explicitly, treat it as read-only history — surface its state, don't recover it.
 
 ## Steps
 

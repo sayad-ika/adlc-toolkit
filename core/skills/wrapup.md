@@ -330,7 +330,8 @@ If `merged`:
 2. Update `pipeline-state.json`: `prState: "merged"`, `mergedAt: <timestamp>`, terminal status.
 3. Append to `hot.md`: `## [DATE] req-merged | REQ-NNN-<slug>`.
 4. Update `now.md`: remove this REQ from active focus.
-5. Clean up: ask the user if they want to delete the REQ folder's ephemeral files (`.awaiting-approval` if any, the worktree path can be removed since it's likely already gone).
+5. **Offer to archive.** One question: move `specs/REQ-NNN-<slug>/` → `specs/_archive/REQ-NNN-<slug>/`? Archiving keeps `specs/` showing only active work and keeps Obsidian search and graph focused; the folder moves **whole** — verdict, log, drafts, state — nothing is deleted, and git history keeps every prior path. On yes: move the folder, repoint this REQ's `index.md` rows at the `_archive/` path, and append `## [DATE] req-archived | REQ-NNN-<slug>` to `hot.md`. On no: leave it — `/analyze`'s vault-health lists it as an archive candidate after 30 days, so the offer comes back. (Archived REQs keep their IDs; `/spec` and `/task` scan `_archive/` when minting, so numbers are never reused.)
+6. Clean up: ask the user if they want to delete the REQ folder's ephemeral files (`.awaiting-approval` if any, the worktree path can be removed since it's likely already gone).
 
 If `abort`:
 
@@ -352,4 +353,5 @@ If `abort`:
 - `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` (now includes the `## Candidate verdicts` table appended at the bottom; retained after wrapup as decision history)
 - `.adlc/specs/REQ-NNN-<slug>/source-writeback.md` (only when `sources.write` is configured and a write-back was drafted at step 5a)
 - New / updated vault files: `lessons/`, `gotchas.md`, `concepts/`, `components/`, `architecture/`, `index.md`, `decisions.md`, `hot.md`, `now.md`, `glossary.md`
+- On `merged` + user approval: the REQ folder moved to `specs/_archive/REQ-NNN-<slug>/` (whole, nothing deleted) with `index.md` repointed
 - Updates to `pipeline-state.json`
