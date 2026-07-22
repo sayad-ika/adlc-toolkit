@@ -4,6 +4,30 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.4.2] — 2026-07-22
+
+### The vault learns to watch its own weight **[protocol]**
+
+- `/analyze` gains a **Vault health** section, run by the health-auditor alongside its usual audit: files over their size budget, lessons no exploration or verification has cited in the last 5 REQs ("still earning its place?" — the user decides), gotchas whose file no longer exists, `STATUS: needs verification` older than 30 days, superseded ADRs still wikilinked as if in effect, and merged REQ folders sitting under `specs/` past 30 days.
+- The report now carries a **footprint readout** — bytes and estimated tokens per vault layer — plus the distance to the tiered-loading trigger, so growth is a number you watch, not a surprise.
+- Size budgets are documented in the vault README ("Size budgets"): CLAUDE.md 5KB · context files 8KB each · now.md 1KB · hot.md 500 lines · verification.md 8KB per REQ · knowledge/ 60KB soft trigger. Soft — flagged by `/analyze`, never enforced silently. No config key for now; the defaults live in one place on purpose.
+- New `docs/adr-tiered-vault-loading.md` (**proposed**, trigger-armed): when `knowledge/` crosses 60KB or 30 lessons, the reflector and architect switch to a ledger-first read. Deliberately **not** implemented now — the reflector's unfiltered pass is its value; the ADR exists so the flip is a planned decision with the trade written down.
+
+## [1.4.1] — 2026-07-22
+
+### The vault rulebook goes on a diet **[vault-format]**
+
+- `templates/vault/CLAUDE.md` drops from ~11KB to under 5KB. It's loaded at every phase entry — it was the single highest-frequency file in the vault, and more than half of it restated what the running skill already enforces.
+- Gone as tables, kept as pointers: the three-mode git matrix (the skill enforces `git.mode`; the rulebook keeps the one-paragraph summary and the full **never** list), the isolation-mode explainer (three sentences now), and the phase-by-phase artifact map (each phase skill and the vault README carry it).
+- Kept in full: identity, read order, the authority table and contradiction rule, provisional-content rules, file conventions, capture triggers, when-in-doubt rules, and the per-project tail.
+- `/config`'s derived-file sync is untouched: the `### Git policy` section survives as the sync target, and its canonical body still comes from this template.
+- Existing vaults keep their current CLAUDE.md until refreshed — run `/config templates` (gated, per-file, shows the diff) to adopt the slim rulebook.
+
+### Update notes
+
+- Re-run `node scripts/adlc.mjs build --tool=all` (or `sync`).
+- Existing repos: `/config migrate` then accept the CLAUDE.md template refresh if you want the slim rulebook; skip it to keep your current file.
+
 ## [1.4.0] — 2026-07-22
 
 ### The review verdict and the review narrative part ways **[protocol]** **[vault-format]**

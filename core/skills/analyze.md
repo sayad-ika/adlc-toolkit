@@ -51,7 +51,7 @@ Write the report to: .adlc/audits/health-YYYY-MM-DD.md
 
 ### 2. Wait for the report
 
-The auditor agent writes the dated report. Verify it exists and has the expected sections (Summary, Findings by severity, Detailed findings, Trends, Recommendations).
+The auditor agent writes the dated report. Verify it exists and has the expected sections (Summary, Findings by severity, Detailed findings, Vault health, Trends, Recommendations).
 
 If the agent reports an error or empty findings, surface that — don't fake content.
 
@@ -105,6 +105,11 @@ Top 3 things worth fixing first (biggest payoff for the effort):
   1. <finding> (effort: <small/medium/large>)
   2. <finding>
   3. <finding>
+
+Vault health:
+  Footprint: hot path <N>KB · knowledge <N>KB · active specs <N>KB
+  Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons
+  <over-budget / stale / dead-reference findings, one line each — or "all within budget">
 
 Trends since last audit (YYYY-MM-DD):
   Better:  <count> findings resolved

@@ -31,6 +31,19 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 - **Field table at the top** of every spec, ADR, concept, and component page
 - **"Related" and "Backlinks" sections** at the bottom of substantive pages
 
+## Size budgets
+
+The hot-path files are loaded at every phase entry — their size is a recurring token tax, so each has a soft budget. `/analyze`'s vault-health section flags files over budget; nothing enforces them silently.
+
+| File | Budget |
+|---|---|
+| `CLAUDE.md` | 5KB |
+| each `context/*.md` | 8KB |
+| `now.md` | 1KB |
+| `hot.md` | 500 lines (20 newest visible) |
+| each REQ's `verification.md` | 8KB (verdict only — narrative goes in `review-log.md`) |
+| `knowledge/` total | 60KB / 30 lessons — soft trigger for the toolkit's tiered-vault-loading ADR |
+
 ## How the pipeline writes here
 
 Each phase of `/proceed` creates or updates artifacts in this vault:
@@ -38,7 +51,7 @@ Each phase of `/proceed` creates or updates artifacts in this vault:
 1. `/spec` → `specs/REQ-xxx/requirement.md`
 2. `/architect` → `specs/REQ-xxx/architecture.md`, `tasks/TASK-*.md`
 3. `/implement` → code changes (in your repo, not the vault) + `commits-draft.md`
-4. `/review` → `specs/REQ-xxx/verification.md`
+4. `/review` → `specs/REQ-xxx/verification.md` (compact verdict) + `review-log.md` (full narratives)
 5. `/wrapup` → `pr-draft.md`, updates to `lessons/`, `gotchas.md`, `concepts/`, `index.md`, `hot.md`
 
 By default you commit everything yourself (`git.mode: manual`). You can let the assistant commit or push on the feature branch — see `config.yml` → Git policy.

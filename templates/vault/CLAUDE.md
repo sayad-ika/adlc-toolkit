@@ -1,10 +1,8 @@
 # Instructions for Claude (how this vault works)
 
-This file is the **rulebook** for the `.adlc/` vault in this repo. Claude reads it at the start of every session before doing anything else. It tells Claude what's authoritative, what the conventions are, what's allowed, and what's forbidden.
+This file is the **rulebook** for the `.adlc/` vault: what's authoritative, the vault's conventions, and the lines never crossed. The running skill carries each phase's full protocol — this file doesn't repeat it.
 
-Edit this file when project-wide rules change. Don't edit it in response to a single REQ.
-
----
+Edit it when project-wide rules change, never for a single REQ. Budget: under 5KB — it loads at every phase entry.
 
 ## Identity
 
@@ -12,23 +10,9 @@ You are operating as Claude inside the ADLC pipeline for **{{PROJECT_NAME}}**. Y
 
 The user is **{{USER_NAME}}** ({{USER_EMAIL}}). They make every decision. You do the legwork between decisions.
 
----
-
 ## Read order at session start
 
-Before any other work, read these files in this order:
-
-1. **`now.md`** — what's actively in flight. Tells you which REQ, which phase, what's blocked.
-2. **`hot.md`** — last 20 entries. Recent activity context.
-3. **`config.yml`** — stack, repo layout, deploy targets.
-4. **`context/project-overview.md`** — what this project is.
-5. **`context/conventions.md`** — rules the reviewers enforce.
-6. **`context/architecture.md`** — system shape.
-7. **`index.md`** — only if you need to find a specific concept/component/lesson page.
-
-You do not need to read every page in the vault. The index plus targeted lookups is faster and cheaper.
-
----
+`now.md` (what's in flight) → `hot.md` (last 20 entries) → `config.yml` → `context/project-overview.md`, `context/conventions.md`, `context/architecture.md` → `index.md` only to find a specific page. Don't read every vault page — the index plus targeted lookups is faster and cheaper.
 
 ## What's authoritative
 
@@ -36,189 +20,54 @@ You do not need to read every page in the vault. The index plus targeted lookups
 |---|---|
 | This file (`CLAUDE.md`) | The rules of the road |
 | `ETHOS.md` (toolkit-level) | The seven principles |
-| `config.yml` | Stack, paths, deploy config |
+| `config.yml` | Stack, paths, git/autonomy dials |
 | `context/*` | Project-wide architecture, conventions, overview |
-| `architecture/adr-*.md` (status: accepted) | Architectural decisions in effect |
+| `architecture/adr-*.md` (status: accepted) | Decisions in effect |
 | `knowledge/*` | Lessons, gotchas, concepts, components |
 | `specs/REQ-xxx/*` (status: validated and later) | The contract for that REQ |
 
-When two sources disagree, **stop and surface the contradiction** to the user. Do not silently choose one over the other.
-
----
-
-## What's provisional
-
-Anything marked `STATUS: needs verification` is provisional. Do not build on it as if it were confirmed. If a downstream task requires resolving a provisional fact, surface the assumption and ask the user before proceeding.
-
-ADRs with status `proposed` or `superseded` are not in effect — don't follow their decisions. Only `accepted` ADRs apply.
-
----
+When two sources disagree, **stop and surface the contradiction**. Never silently pick one. Anything marked `STATUS: needs verification` is provisional — don't build on it without asking. ADRs with status `proposed` or `superseded` are not in effect.
 
 ## Hard constraints
 
 ### Git policy
 
-How much git Claude may run is set by `config.yml` → `git.mode` (default **`manual`**):
+`config.yml` → `git.mode` sets how much git Claude runs — default **`manual`**: drafts only, the user runs every git command. `commit` adds feature-branch commits after gate approval; `commit+push` adds a fast-forward push of that branch. The running skill enforces the full mode rules, and the drafts (`commits-draft.md`, `pr-draft.md`, `merge-checklist.md`) are always written whatever the mode.
 
-| `git.mode` | Claude may also run |
-|---|---|
-| `manual` (default) | nothing below — drafts only (see "always drafts") |
-| `commit` | `git add` + `git commit` on the REQ's feature branch, **after that phase's gate is approved**, using `commits-draft.md` as the message |
-| `commit+push` | the above **plus** `git push` of the REQ's feature branch (fast-forward only) |
+**Never, in any mode:** commit or push to a `git.protect` branch (default `main`, `master`, `release/*`); force-push or any history rewrite (rebase, amend published commits, `reset --hard` that drops commits); branch deletes; `gh pr create` / `gh pr merge`; `--no-verify`.
 
-Claude **always may** run (every mode): `git status`, `git diff`, `git log`, `git show` (observation); `git worktree add` (isolated REQ worktree at REQ start); `git checkout -b` (the REQ's feature branch); `git worktree list`, `git worktree remove --force` (worktree lifecycle).
+### Isolation
 
-Claude **never** runs, in **any** mode: commit or push to a `git.protect` branch (default `main`, `master`, `release/*`); `git push --force` / `--force-with-lease`; `git rebase`; `git commit --amend` on published commits; `git reset --hard` that drops commits; `git branch -D` / any branch delete; `gh pr create`; `gh pr merge`; tag deletion; `--no-verify`; any history rewrite.
+`config.yml` → `workflow.isolation` picks `branch` (work on your checkout; tree must be clean to start) or `worktree` (isolated folder; your checkout untouched). `/sprint` and cross-repo REQs always force `worktree`. `pipeline-state.json` records the choice in `isolation` and the working location in `workPath` — every `git -C` call and every agent dispatch uses `workPath`.
 
-Claude **always drafts** (writes to files in `specs/REQ-xxx/`), so you have them whatever the mode:
+### Forbidden paths / read-only sources
 
-- `commits-draft.md` — suggested commit messages per logical chunk
-- `pr-draft.md` — PR title, body, change summary, lesson references
-- `merge-checklist.md` — the git/gh commands you run to finish a REQ (push if `manual`, then PR create + merge)
-
-In `manual` mode the user runs every commit, push, PR creation, and merge. In `commit`/`commit+push` mode Claude handles the feature-branch commits (and push), and the user still opens and merges the PR.
-
-### Isolation modes
-
-REQs run in one of two isolation modes. `config.yml`'s `workflow.isolation` picks the default.
-
-- **`branch` mode.** Claude runs `git checkout -b <branch-name>` on your current checkout. Your editor stays open on the same folder. The trade is that your working tree must be clean before `/architect` or `/bugfix` Phase 2 starts — Claude refuses to proceed if `git status --porcelain` is non-empty. Abort cleanup is yours to run (`git checkout <base>`, `git restore .`, `git clean -fd`, `git branch -D <branch>`) because Claude is not permitted to run those mutations.
-- **`worktree` mode.** Claude runs `git worktree add <repo>/.worktrees/REQ-NNN-<slug> -b <branch>`. The REQ lives in an isolated folder; your main checkout is untouched. Abort cleanup is a single `git worktree remove --force` (Claude may run this) plus a branch delete (you run that). The trade is that your editor needs to point at the worktree folder to see or edit the REQ's code.
-
-Two cases force `worktree` mode regardless of config: `/sprint` (multiple concurrent REQs cannot share a checkout) and cross-repo REQs (one isolated checkout per touched repo).
-
-`pipeline-state.json` records the chosen mode in `isolation` and the path Claude reads from and writes to in `workPath`. Every `git -C` call and every agent dispatch uses `workPath`; the `worktree` field is set only when isolation is `worktree`.
-
-### Forbidden paths
-
-Anything listed under `forbidden_paths:` in `config.yml`. Don't read, don't write, don't reference.
-
-### Read-only sources
-
-Anything listed under `read_only_sources:` in `config.yml` is read-only. May be read for verification; never written to.
-
----
+`config.yml` → `forbidden_paths:` — don't read, write, or reference. `read_only_sources:` — read for verification only, never write.
 
 ## File conventions
 
-### Wikilinks
-
-Cross-reference with `[[target]]` syntax. Examples:
-
-- `[[concepts/idempotency]]`
-- `[[knowledge/gotchas#^g05|G05]]`
-- `[[architecture/adr-003-realtime-signalr]]`
-- `[[specs/REQ-042/requirement]]`
-
-### Block anchors
-
-Use stable block anchors for content that's referenced from elsewhere:
-
-- Lessons: `^L##` at the lesson title
-- Gotchas: `^g##` at each gotcha entry
-- ADRs: `^ADR-##` at the ADR title
-
-Heading anchors are not stable across renames; block anchors are. Always prefer block anchors for cross-referenced content.
-
-### `STATUS:` markers
-
-Mark provisional content explicitly:
-
-- `STATUS: needs verification` — assumed but not confirmed
-- `STATUS: deprecated` — historical; do not build on this
-- `STATUS: superseded by X` — replaced; X is the new source of truth
-
-### Field tables
-
-Every spec, ADR, concept, and component page starts with a small field table:
-
-```markdown
-| Field | Value |
-|---|---|
-| Status | drafting \| validated \| ... |
-| Created | YYYY-MM-DD |
-| ...    | ...                       |
-```
-
-### Related and Backlinks sections
-
-Substantive pages end with:
-
-```markdown
-## Related
-
-- Concepts: [[concepts/...]]
-- Components: [[components/...]]
-- Lessons: [[knowledge/lessons/...]]
-
-## Backlinks
-
-_(pages that reference this one)_
-```
-
----
+- **Wikilinks** for cross-references: `[[concepts/idempotency]]`, `[[knowledge/gotchas#^g05|G05]]`, `[[specs/REQ-042/requirement]]`.
+- **Block anchors** for anything referenced from elsewhere: `^L##` (lessons), `^g##` (gotchas), `^ADR-##` (ADRs). Prefer block anchors over heading anchors — they survive renames.
+- **`STATUS:` markers**: `needs verification` (assumed, not confirmed) · `deprecated` (don't build on) · `superseded by X` (X is the new truth).
+- **Field table** at the top of every spec, ADR, concept, and component page; **Related / Backlinks** sections at the bottom of substantive pages.
 
 ## How the pipeline writes here
 
-Each phase of `/proceed` creates or updates artifacts:
-
-| Phase | Writes |
-|---|---|
-| 0. Setup | `pipeline-state.json` (per-REQ), creates worktree |
-| 1. `/spec` | `specs/REQ-xxx/requirement.md` |
-| 2. `/architect` | `specs/REQ-xxx/architecture.md`, `tasks/TASK-*.md` |
-| 3. `/implement` | Code in the repo (uncommitted); `commits-draft.md` |
-| 4. `/review` | `specs/REQ-xxx/verification.md` (compact verdict) + `review-log.md` (full narratives) |
-| 5. `/wrapup` | `pr-draft.md`, `merge-checklist.md`; updates to `lessons/`, `gotchas.md`, `concepts/`, `components/`, `index.md`, `decisions.md`, `hot.md` |
-
-After every phase, Claude pauses at a gate. Two signals fire:
-
-1. A chat prompt asking for approval
-2. A file marker: `specs/REQ-xxx/.awaiting-approval` is created. It contains the phase name and what's waiting on user action.
-
-When the user approves, Claude deletes the marker and proceeds.
-
-### Cross-phase operations
-
-In addition to the per-phase artifacts above, `/proceed` supports three out-of-band operations on a REQ. Each writes its own artifact:
-
-| Operation | Writes | When |
-|---|---|---|
-| `/proceed --resume` | `specs/REQ-xxx/last-seen.json` (timestamp only) | When the user wants a catch-up summary before continuing |
-| `/proceed --revert~N` | `specs/REQ-xxx/revert-plan.md` (always); `code-revert-plan.md` (if Phase 3 is being walked back) | When the user wants to undo the last N completed phases |
-| `/proceed --cancel` | `specs/REQ-xxx/cancelled.md` (tombstone with reason) | When the user wants to abandon the REQ deliberately |
-
-Pipeline-state fields written by these operations: `revertedAt`, `revertedFrom`, `revertCount` (revert); `cancelledAt`, `cancelReason`, `terminal: "cancelled"` (cancel). Lessons and notes written by /wrapup are **kept, not deleted** when work is reverted — each gets a notice on top saying it was retracted — they remain in the vault with a retraction banner.
-
----
+Each phase writes its artifacts under `specs/REQ-xxx/` and pauses at a gate: a chat prompt plus a `.awaiting-approval` marker in the REQ folder (deleted on approval). Full artifact map: each phase skill and the vault [[README]]. On `/proceed --revert`, captured lessons are kept with a retraction banner, never deleted.
 
 ## When to write to the vault
 
-| Trigger | What to write |
-|---|---|
-| Wrapping up any REQ | A `hot.md` entry, an `index.md` update for new artifacts |
-| Discovered a non-obvious code quirk | A `knowledge/gotchas.md` entry with a new `^g##` anchor |
-| Encountered something worth remembering for future REQs | A `knowledge/lessons/LESSON-NN.md` file |
-| Established a reusable pattern or invariant | A `knowledge/concepts/<name>.md` page |
-| Touched a new major module for the first time | A `knowledge/components/<name>.md` page (skeleton if nothing else) |
-| Made a significant architectural decision | An `architecture/adr-NN-<slug>.md` (status: proposed → reviewed by user → accepted) |
-| Bet on an unverified fact | An `assumption/ASSUMPTION-NN.md` with `STATUS: needs verification` |
-
-When in doubt, ask the user whether to capture. Don't over-capture (a vault full of trivial notes is worse than a small vault of good ones).
-
----
+Code quirk → gotcha (`^g##`). Worth remembering across REQs → lesson. Reusable pattern → concept page. First touch of a major module → component page. Significant decision → ADR (proposed → user reviews → accepted). Unverified bet → assumption, `STATUS: needs verification`. Every wrapped REQ → `hot.md` entry + `index.md` rows. In doubt? Ask — don't over-capture.
 
 ## When in doubt
 
-- Don't pattern-match across REQs. Two REQs that look similar may have different acceptance criteria or touch different files. Open the specific spec.
-- If a vault page is missing a detail you need, **ask the user** — do not silently extrapolate.
-- If two vault pages contradict, **stop and surface the contradiction** to the user. Never silently pick one — that is not allowed here.
-- If the user's request would violate a hard constraint, **refuse and explain**. The constraint takes precedence.
-
----
+- Don't pattern-match across REQs — open the specific spec.
+- Missing detail → **ask the user**; don't extrapolate.
+- Contradiction between pages → **stop and surface it**.
+- A request that violates a hard constraint → **refuse and explain**.
 
 ## Per-project additions
 
-Anything else specific to this project's vault — naming conventions, special folders, integration points — goes below this line. Edit freely.
+Anything else specific to this project's vault goes below this line. Edit freely.
 
 ---

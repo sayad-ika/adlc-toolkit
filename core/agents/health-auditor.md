@@ -93,9 +93,21 @@ For each rule in `conventions.md`, find existing code that violates it. The most
 - Concept pages that no longer match how the codebase implements the concept
 - Lessons that have been ignored by recent REQs
 
+### Vault health (size, staleness, dead references)
+
+The vault has a size discipline: the hot-path files are loaded at every phase entry, so oversized files are a per-REQ token tax. Budgets live in the vault [[README]] ("Size budgets"); check each:
+
+- **Files over budget** — `CLAUDE.md` (5KB), each `context/*.md` (8KB), `now.md` (1KB), `hot.md` (500 lines), each REQ's `verification.md` (8KB — the verdict file; the narrative belongs in `review-log.md`). Report actual vs. budget.
+- **Uncited lessons** — a lesson no `exploration.md` or `verification.md` has referenced in the last 5 completed REQs. Not a deletion order — a "still earning its place?" question for the user (merge, demote to gotcha, or keep).
+- **Dead gotcha anchors** — gotchas whose named file no longer exists in the repo.
+- **Stale provisional marks** — `STATUS: needs verification` older than 30 days.
+- **Superseded-but-referenced ADRs** — ADRs with status `superseded` that other pages still wikilink as if in effect.
+- **Merged REQ folders still under `specs/`** — REQs merged more than 30 days ago whose folders sit alongside active work (archive candidates).
+- **Footprint report** — bytes and estimated tokens (bytes ÷ 4) per layer: hot path (`CLAUDE.md` + `config.yml` + nav files + `context/`), knowledge (`knowledge/` + accepted ADRs), active `specs/` folders. Include the tiered-loading trigger readout: `knowledge/ at <N>KB of 60KB · <N> of 30 lessons` (the trigger is defined in the toolkit's tiered-vault-loading ADR — when either bound is crossed, say so on its own line and point the user at that ADR).
+
 ## Output format
 
-Write the audit report to `.adlc/audits/health-YYYY-MM-DD.md`:
+Write the audit report to `.adlc/audits/health-YYYY-MM-DD.md`. Include a `## Vault health` section carrying the footprint report, the trigger readout, and any size/staleness/dead-reference findings (they take normal HLT-NNN IDs and severities like everything else):
 
 ```markdown
 # Codebase Health Audit — YYYY-MM-DD
@@ -144,6 +156,18 @@ Each finding:
 **Why it matters:** ...
 
 **Recommendation:** Concrete next step. If the fix is "delete file X," say that. If it's "add tests to function Y," say that.
+
+## Vault health
+
+| Layer | Bytes | Est. tokens |
+|---|---|---|
+| Hot path (CLAUDE.md, config, nav, context/) | <N> | <N> |
+| Knowledge (knowledge/ + accepted ADRs) | <N> | <N> |
+| Active specs/ | <N> | <N> |
+
+Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons.
+
+Over-budget files, uncited lessons, dead anchors, stale STATUS marks, archive candidates — as findings above.
 
 ## Trends
 
