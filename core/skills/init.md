@@ -199,6 +199,8 @@ Copy from `$TOOLKIT_PATH/templates/` (excluding the `vault/` subdir) to `.adlc/t
 - `bug-template.md`
 - `assumption-template.md`
 - `design-system-template.md`
+- `pr-template.md`
+- `merge-checklist-template.md`
 - `config-template.yml` → also copy to `.adlc/config.yml`
 
 ### 7. Substitute placeholders

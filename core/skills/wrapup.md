@@ -14,7 +14,9 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 
 1. **Verify verify gate cleared.** Read `pipeline-state.json`. `currentPhase >= 4`, `gateState: "cleared"` for verify.
 2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 8.
-3. **Load context.** Everything for this REQ: `requirement.md`, `architecture.md`, `tasks/*.md`, `exploration.md`, `verification.md`, `commits-draft.md`. Plus vault navigation files: `now.md`, `hot.md`, `index.md`, `decisions.md`, `glossary.md`. Do **not** load `review-log.md` — the verdict file carries everything wrap-up needs; open the log only when a specific finding's detail is genuinely required.
+3. **Load only what the steps below actually read.** `requirement.md` (goal + acceptance criteria), `verification.md` (reflector findings, follow-ups), and `architecture.md`'s **blast-radius section only**. `commits-draft.md` is step 2's input — but run the git-log check (next item) first; if the commit subjects plus `--stat` already tell the change story, don't open the draft. Do **not** load `tasks/*.md`, `exploration.md`, or `review-log.md`: no step below reads them, and `exploration.md` is usually the largest file in the REQ folder. If a step turns out to need one, open it *at that step* and add a `**Packet-gap:**` line to the gate card so this list gets tightened.
+
+   **Do not pre-load the vault write targets.** `hot.md`, `index.md`, `now.md`, `decisions.md`, and `glossary.md` are step 4's *outputs*, and a typical REQ touches two of them. Open each at the step that writes it, and read only the section being edited. Pre-loading the set costs the same tokens on every REQ and grows as the vault does — exactly backwards: wrap-up must not get more expensive the better the vault gets.
 4. **Verify the commits exist.** Read `pipeline-state.json.workPath` and `.branch`. `git -C <workPath> log <base-branch>..<branch> --oneline` should show all the drafted commits actually committed by the user. If any draft isn't in the log, halt and ask the user to finish committing.
 
 ## Steps
@@ -37,71 +39,15 @@ Surface any findings. The gate prompt will ask the user to clean before merging.
 
 ### 2. Draft the PR
 
-Write `.adlc/specs/REQ-NNN-<slug>/pr-draft.md`:
+Write `.adlc/specs/REQ-NNN-<slug>/pr-draft.md` from `.adlc/templates/pr-template.md` — read the template *here*, not at preflight. (Fall back to `$TOOLKIT_PATH/templates/pr-template.md` if this vault predates it; `/config templates` adds the vault copy.)
 
-```markdown
-# PR Draft — REQ-NNN-<slug>
+Filling notes the template can't carry:
 
-| Field | Value |
-|---|---|
-| Branch | <branch> |
-| Base | <base-branch> |
-| REQ | REQ-NNN-<slug> |
-| Commits | <count> |
-| Files changed | <count> |
-| Insertions / deletions | +<N> / -<N> |
-
-## Title
-
-`<type>(<scope>): <description> [REQ-NNN-<slug>]`
-
-Match the project's commit/PR title format from `context/conventions.md`. If the project uses Conventional Commits, use that. If not, mirror the project's existing PR style (check recent merged PRs if available).
-
-## Body
-
-### Summary
-
-One-paragraph what-and-why. Pull from the spec's Goal section, rewritten in past tense.
-
-### Acceptance criteria
-
-Reproduce the checklist from the spec, with each item marked ✓ as verified during /review.
-
-- [✓] Criterion 1 — short note on how it was verified
-- [✓] Criterion 2 — short note
-
-### Changes
-
-By module / file group. Not a file-by-file diff — a structural summary.
-
-- **`src/auth/`** — added new password validation; updated session creation to enforce
-- **`tests/auth/`** — coverage for valid/invalid password paths, session edge cases
-- **`docs/auth.md`** — updated with new validation rules
-
-### Risk / impact
-
-What this could affect that's worth flagging for the reviewer.
-
-### Lessons captured
-
-Links to any new lesson, gotcha, ADR, or concept page created during this REQ.
-
-- [[knowledge/lessons/LESSON-NNN]] — short title
-- [[knowledge/gotchas#^gNN|GNN]] — short title
-- [[architecture/adr-NNN-...]] — newly accepted
-
-### Vault references consulted
-
-Lessons / gotchas / ADRs that informed this REQ.
-
-### Test plan
-
-How the reviewer can verify locally. Specific commands.
-
-### Follow-ups filed
-
-Out-of-scope work spotted but not bundled. Each linked to a tracking task or REQ-stub.
-```
+- **Title** — match the project's commit/PR title convention from `context/conventions.md`. Conventional Commits if the project uses it; otherwise mirror recent merged PRs.
+- **Summary** — the spec's Goal, rewritten in past tense.
+- **Acceptance criteria** — reproduce the spec's checklist, each item marked ✓ with a short note on how `/review` verified it.
+- **Changes** — grouped by module or file group; structural, not a file-by-file diff.
+- **Lessons captured / Vault references consulted** — leave until after step 3; the verdicts don't exist yet.
 
 ### 3. Update the vault — knowledge
 
@@ -133,15 +79,15 @@ Knowledge capture happens in two halves: candidates were surfaced upstream (duri
 
 - For each `promote` verdict, draft a new `.adlc/knowledge/lessons/LESSON-NNN-<slug>.md` from `templates/lesson-template.md`.
 - Use the **minimum required fields only** — title, metadata table, "The lesson", "Saw it in". The optional sections are filled when the lesson recurs in a future REQ, per the template's "born minimal, grown on demand" instruction.
-- Get the next sequential ID by scanning existing lesson files. Fill in the `^L##` anchor.
-- Add to the index `.adlc/index.md` under Lessons.
+- Get the next sequential ID from a **directory listing** (`ls .adlc/knowledge/lessons/`) — never by reading the lesson files. Fill in the `^L##` anchor.
+- Add a row to `.adlc/index.md` under Lessons (open that file at step 4, at its Lessons section only).
 
 If the verify phase produced reflector findings tagged `vault-stale`, draft updates to existing lessons (don't auto-apply — show them to the user as part of the gate prompt).
 
 #### Gotchas
 
 - For each `demote-to-gotcha` verdict, **plus** any "non-obvious codebase behavior we discovered or preserved" that emerged this REQ (even if not in `lesson-candidates.md`), append a new entry to `.adlc/knowledge/gotchas.md`.
-- Get the next sequential `^g##` anchor by scanning the file.
+- Get the next `^g##` anchor by grepping anchors only — `grep -o '\^g[0-9]\+' .adlc/knowledge/gotchas.md | tail -1` — not by reading the file. `gotchas.md` is consolidated and grows forever; reading it whole makes wrap-up cost more with every REQ it succeeds at.
 - Use the shape from `templates/gotcha-template.md`.
 
 #### Concepts
@@ -163,6 +109,8 @@ If the verify phase produced reflector findings tagged `vault-stale`, draft upda
 
 #### `.adlc/hot.md`
 
+**Never load the whole file.** Entries go at the top, so read at most its first few lines to match the format — the body below is never needed to write a new entry.
+
 Append:
 
 ```markdown
@@ -182,11 +130,11 @@ Maintain the 20-entry-visible rule by truncation only when the file gets unwield
 
 #### `.adlc/index.md`
 
-Add rows for new specs, ADRs, lessons, concepts, components.
+Add rows for new specs, ADRs, lessons, concepts, components. Open it here, and read only the sections you're adding rows to.
 
 #### `.adlc/decisions.md`
 
-Update if ADR statuses changed.
+Update if ADR statuses changed — most REQs change none, in which case never open it.
 
 #### `.adlc/now.md`
 
@@ -194,59 +142,11 @@ If this was the focus, update the "Active focus" line. If multiple REQs are in f
 
 #### `.adlc/glossary.md`
 
-If new project-specific terms emerged that aren't in the glossary, add them. Mark provisional definitions with `STATUS: needs verification`.
+If new project-specific terms emerged, add them — test each candidate term with `grep` rather than reading the file to find out. Mark provisional definitions with `STATUS: needs verification`.
 
 ### 5. Draft the merge checklist
 
-Write `.adlc/specs/REQ-NNN-<slug>/merge-checklist.md`. Substitute all `<placeholder>` with real values from `pipeline-state.json` and `config.yml`, and include only the post-merge cleanup block matching `pipeline-state.isolation`. Template (showing both alternative cleanup blocks):
-
-```markdown
-# Merge checklist — REQ-NNN-<slug>
-
-You run these. Claude does not.
-
-## Pre-merge
-
-- [ ] Push the branch:
-      `git -C <workPath> push -u origin <branch>`
-- [ ] Open the PR (paste title/body from pr-draft.md):
-      `gh pr create --base <base-branch> --head <branch> --title "<title>" --body-file .adlc/specs/REQ-NNN-<slug>/pr-draft.md`
-      (or use the web UI)
-- [ ] Wait for CI to pass
-- [ ] Request review (if applicable)
-- [ ] Address review feedback (if any)
-
-## Merge
-
-- [ ] Merge the PR:
-      `gh pr merge <pr-url> --squash --delete-branch`
-      (or use the web UI; match the project's merge strategy)
-
-## Post-merge cleanup — `worktree` mode
-
-- [ ] Remove the worktree:
-      `git -C <repo-path> worktree remove --force <workPath>`
-- [ ] Delete the local branch if `--delete-branch` didn't run it:
-      `git -C <repo-path> branch -D <branch>`
-- [ ] Pull latest base branch:
-      `git -C <repo-path> checkout <base-branch> && git pull`
-
-## Post-merge cleanup — `branch` mode
-
-- [ ] Switch back to base branch:
-      `git -C <repo-path> checkout <base-branch>`
-- [ ] Pull latest:
-      `git -C <repo-path> pull`
-- [ ] Delete the local branch if `--delete-branch` didn't run it:
-      `git -C <repo-path> branch -D <branch>`
-
-## Notify Claude (optional)
-
-When merge is complete, tell Claude in chat:
-`merged REQ-NNN-<slug>`
-
-This updates pipeline-state and adds a hot.md entry.
-```
+Write `.adlc/specs/REQ-NNN-<slug>/merge-checklist.md` from `.adlc/templates/merge-checklist-template.md` — read it *here*, not at preflight, same toolkit fallback as step 2. Substitute every `<placeholder>` with real values from `pipeline-state.json` and `config.yml`, and keep **only** the post-merge cleanup block matching `pipeline-state.isolation`: the template carries both `worktree` and `branch`, the written file carries one.
 
 ### 5a. Draft source write-back (optional, gated)
 

@@ -4,6 +4,18 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.5.0] — 2026-07-31
+
+### Wrap-up stops paying for what it doesn't read **[protocol]** **[vault-format]**
+
+- **The problem, from real usage:** `/wrapup` was burning ~11% of a session's tokens — against `/implement`'s 1% and `/review`'s 2%. Those two are thin dispatchers; their cost sits in subagent context that never lands in the main thread. `/wrapup` was the one heavy phase delegating nothing, doing agent-sized work at main-thread prices and holding it through every gate revise-loop.
+- **Preflight loads four things, not eleven.** `requirement.md`, `verification.md`, `architecture.md`'s blast-radius section, and the git log. `tasks/*.md` and `exploration.md` are no longer loaded at all — no step below reads them, and `exploration.md` is typically the largest file in the REQ folder. `commits-draft.md` is opened only if the commit subjects plus `--stat` don't already tell the change story.
+- **The vault write targets are opened at the step that writes them.** `hot.md`, `index.md`, `now.md`, `decisions.md`, `glossary.md` are step 4's *outputs*; a typical REQ touches two. Each sub-step now says to read only the section being edited — and `decisions.md` says to skip the file entirely when no ADR status changed.
+- **The two unbounded scans are bounded.** "Scan existing lesson files" for the next ID is now `ls .adlc/knowledge/lessons/`; "scan the file" for the next `^g##` is now a `grep -o … | tail -1`. Both targets grow forever, so the old wording made wrap-up cost *more* with every REQ — penalizing the vault for working. The reason is stated inline so it doesn't drift back.
+- **`pr-draft.md` and `merge-checklist.md` templates move out of the skill** into `templates/pr-template.md` and `templates/merge-checklist-template.md` — 113 lines that were paid on every invocation and are now read at their own step. They were the only two output shapes still inlined; every other template already lived in `templates/`. As a side effect both become per-project customizable (PR body shape, merge strategy).
+- **No new agent, no behavior change, no gate change.** If a cut file turns out to be needed, the skill opens it at that step and adds a `**Packet-gap:**` line to the gate card — the same signal `/review`'s packet already uses — so a wrong cut surfaces instead of silently degrading.
+- **On update:** existing vaults get the two new templates via `/config templates` (gated, per file). Until then `/wrapup` falls back to `$TOOLKIT_PATH/templates/`, so nothing breaks if you skip it. `/init` copies both for new vaults.
+
 ## [1.4.4] — 2026-07-22
 
 ### Review sweep — closing the gaps the v1.4.x series left **[tooling]**
