@@ -27,10 +27,10 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the final review uses the shared card format.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the final review uses the shared card format.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
-4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → load `pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask.
+4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → resolve its folder per `VAULT-LAYOUT.md`'s `resolve` rule and load `.adlc/<REQ_PATH>/pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask. `<REQ_PATH>` is vault-relative — no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`.
 5. **Confirm the run.** Before doing anything irreversible, emit a one-block summary of what this run may do on its own — which gates it decides itself, what git it may run, and how cautious the gate-keeper is (gates / git / escalation / caps) — plus the REQ, so the user sees the autonomy level. For `--dry-run`, skip straight to the plan.
 6. **Create the work surface:** feature branch (or worktree per `config.yml.workflow.isolation`), exactly as `/architect` would. Branch creation and worktree lifecycle are allowed git ops.
 
@@ -149,7 +149,7 @@ When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
 
 ## `run-report.md`
 
-The artifact that earns the autonomy. Write to `.adlc/specs/REQ-NNN-<slug>/autopilot-report.md`:
+The artifact that earns the autonomy. Write to `.adlc/<REQ_PATH>/autopilot-report.md`:
 
 - **Summary** — what was built, against which acceptance criteria.
 - **Decision log** — every gate verdict (from `gate-decisions.md`): phase, verdict, confidence, why, and whether it was judged independently.

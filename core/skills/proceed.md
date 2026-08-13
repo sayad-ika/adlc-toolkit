@@ -26,9 +26,10 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 ## Preflight
 
 1. **Read the toolkit ETHOS.**
+1a. **Read the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — the path grammar for `specs/`, `bugs/`, and `sprints/`. This skill resolves and lists work folders, and a vault may hold flat and bucketed folders at the same time. Never hard-code a path under those trees; use its `resolve` / `enumerate` rules.
 2. **Read `.adlc/CLAUDE.md`** for the per-project schema doc, and the navigation files: `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Determine REQ identity.** Strip any `--resume`, `--revert~N`, or `--cancel` tokens out of the argument list before parsing the rest — flags are not REQ IDs and not free-text descriptions.
-   - If a REQ ID was given, verify it exists; load its `pipeline-state.json`. If it exists only under `specs/_archive/`, it's completed and archived — report its final state in one line and stop; archived REQs are read-only history (a follow-up change is a new REQ).
+   - If a REQ ID was given, resolve its folder per VAULT-LAYOUT's `resolve` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-NNN-*'`, which covers flat, bucketed, and archived shapes in one pass. No hit: say so and stop. Two hits: show both and ask; never take the first. The hit minus the leading `.adlc/` is `<REQ_PATH>`, and every path below reads `.adlc/<REQ_PATH>/…`. Load `.adlc/<REQ_PATH>/pipeline-state.json`. If the only hit is under `specs/_archive/`, it's completed and archived — report its final state in one line and stop; archived REQs are read-only history (a follow-up change is a new REQ).
    - If a free-text description was given (and no flag was set), treat as a brand-new REQ — skip ahead to Phase 1 via `/spec`.
    - If only a flag was given, or no argument at all:
      - Check `now.md`'s active-REQ table. If exactly one REQ is in flight, use it.
@@ -75,7 +76,7 @@ Recent activity (last 5 hot.md entries for this REQ):
   …
 
 Files in this REQ folder touched since last pipeline activity:
-  <list .adlc/specs/REQ-NNN-<slug>/** with mtime > mtime of pipeline-state.json>
+  <list .adlc/<REQ_PATH>/** with mtime > mtime of pipeline-state.json>
   <if last-seen.json exists, also flag files with mtime > last-seen.json mtime as "since you last resumed">
 
 Repo files changed (Phase 3+ only):
@@ -111,12 +112,12 @@ Dispatch on the user's reply:
 - `details` → emit the full breakdown above, then re-emit this menu
 - `revert~N` → invoke the `--revert~N` protocol below
 - `cancel` → invoke the `--cancel` protocol below
-- `switch` → list active REQs from `now.md` and `.adlc/specs/`; ask which to switch to; then re-run `--resume` against that REQ
+- `switch` → list the REQs in flight: `now.md`'s active table, plus VAULT-LAYOUT's `enumerate(active)` scan of `specs/` (`find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'`), which matches on each folder's own name so bucketed vaults list too. Ask which to switch to; then re-run `--resume` against that REQ
 - `status` → delegate to `/status` (read-only); after it returns, re-emit this menu
 
 If invoked without a REQ ID, use `now.md`'s active REQ. If no active REQ, list all in-flight REQs and ask which.
 
-`--resume` writes nothing to disk except an optional `last-seen.json` timestamp under `.adlc/specs/REQ-NNN-<slug>/` that future drift checks can compare against. It is otherwise read-only.
+`--resume` writes nothing to disk except an optional `last-seen.json` timestamp under `.adlc/<REQ_PATH>/` that future drift checks can compare against. It is otherwise read-only.
 
 ### `--revert~1`, `--revert~2`, `--revert~3` — walk back N completed phases
 
@@ -126,7 +127,7 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
 
 1. **Confirm scope.** Read pipeline-state.json. Identify the N most recently completed phases. The set of completed phases is `pipeline-state.completedPhases`. If N exceeds the count of completed phases, halt with an explicit message — do not silently clamp. (Example: `currentPhase: 2`, `gateState: "cleared"` means phases 1 and 2 are completed; `--revert~3` is out of bounds; suggest `--cancel`.)
 
-2. **Build the revert plan.** Write `.adlc/specs/REQ-NNN-<slug>/revert-plan.md`. List, in reverse phase order, every phase being walked back. For each:
+2. **Build the revert plan.** Write `.adlc/<REQ_PATH>/revert-plan.md`. List, in reverse phase order, every phase being walked back. For each:
 
    | Phase | Artifacts to delete | Artifacts to tombstone (kept for memory) |
    |---|---|---|
@@ -149,7 +150,7 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
 5. **Pause for approval.** Emit:
 
    ```
-   Revert plan written to .adlc/specs/REQ-NNN-<slug>/revert-plan.md.
+   Revert plan written to .adlc/<REQ_PATH>/revert-plan.md.
    This will walk REQ-NNN-<slug> back from phase <old> to phase <new>.
    <If implement included:> A companion code-revert-plan.md was also written. Git operations are yours to run.
 
@@ -206,7 +207,7 @@ If the REQ is already `terminal: "merged"` or `terminal: "aborted"` or `terminal
 
    If the user replies anything but a non-empty reason or `no`, ask again.
 
-2. **Write the tombstone** at `.adlc/specs/REQ-NNN-<slug>/cancelled.md`:
+2. **Write the tombstone** at `.adlc/<REQ_PATH>/cancelled.md`:
 
    ```markdown
    # REQ-NNN-<slug> — Cancelled
@@ -269,7 +270,7 @@ If the REQ is already `terminal: "merged"` or `terminal: "aborted"` or `terminal
    ```
    REQ-NNN-<slug> cancelled.
      Reason: <reason>
-     Tombstone: .adlc/specs/REQ-NNN-<slug>/cancelled.md
+     Tombstone: .adlc/<REQ_PATH>/cancelled.md
      Worktree: <removed / n/a — branch mode>
      Branch cleanup: run the commands above to delete the branch.
    ```

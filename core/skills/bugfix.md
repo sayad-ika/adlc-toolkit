@@ -20,17 +20,17 @@ If during investigation the bug turns out to be larger than expected, **stop and
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at every gate below.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at every gate below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/conventions.md`, `context/architecture.md`.
-3. **Assign the BUG ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), applied to the `BUG` namespace: `sequential` (`BUG-NNN`, scan `.adlc/bugs/` for max+1, pad to 3), `prefixed` (`BUG-<req.prefix>-NNN`), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`, e.g. `BUG-842`; else fall back to prefixed/sequential, noting it). Throughout, `BUG-NNN` denotes the assigned ID in whatever form the scheme produced.
-4. **Create the bug folder:** `.adlc/bugs/BUG-NNN-<slug>/`.
+3. **Assign the BUG ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), applied to the `BUG` namespace, using the one scan from VAULT-LAYOUT's `mint` rule: `find .adlc/bugs -maxdepth 4 -type d -name 'BUG-*'` — depth 4 so it covers every month bucket and every author folder, not just yours. `sequential` takes max+1, padded to 3 (`BUG-NNN`); `prefixed` (`BUG-<req.prefix>-NNN`) narrows the `-name` to `BUG-<req.prefix>-*` and keeps the depth — scoped to your own author folder it would re-mint someone else's live IDs; `ticket` takes the issue key when invoked with an issue ref + `sources.issues` (e.g. `BUG-842`), else falls back to prefixed/sequential, noting it. Throughout, `BUG-NNN` denotes the assigned ID in whatever form the scheme produced.
+4. **Create the bug folder.** Read `config.yml` → `layout.partition`: `none` gives `bugs/BUG-NNN-<slug>`; `month-author` gives `bugs/<YYYY-MM>/<author>/BUG-NNN-<slug>`, where `<YYYY-MM>` is today's month (the month the bug folder is created — it never changes afterwards) and `<author>` is the first of `layout.author`, `req.prefix`, initials from `git config user.name`, or `_`. `mkdir -p` the parents, then create the folder. **That vault-relative path is `<BUG_PATH>` for the rest of this protocol** — it carries no `.adlc/` prefix, so every path below reads `.adlc/<BUG_PATH>/…`. Agent dispatch prompts get it written out in full — the agents resolve nothing.
 5. **Resolve a source reference (optional).** If invoked with an issue reference (e.g. `/bugfix #8`) or an issue URL, and `config.yml.sources.issues` is set (not `none`), resolve it with the same mechanism order as `/spec` (CLI such as `gh issue view <n> --json title,body,labels,comments,author,createdAt` first → MCP → URL fetch; default repo from `sources.repo`, a full URL overrides). This is the *same resolver* `/spec` uses. If a label indicates the issue is a feature rather than a defect, note it — the Phase 1 gate's `reframe` path will route it to `/spec`. If nothing resolves or no service is configured, print one line (`couldn't reach <service> for <ref> — drafting the report manually`) and continue; the seed is strictly additive.
 
 ## Phase 1 — Bug report (gate)
 
 ### Draft
 
-Copy `templates/bug-template.md` to `.adlc/bugs/BUG-NNN-<slug>/bug.md`. Substitute placeholders and fill content from the user's description — **or, if a source reference was resolved at preflight step 5, seed from the issue**:
+Copy `templates/bug-template.md` to `.adlc/<BUG_PATH>/bug.md`. Substitute placeholders and fill content from the user's description — **or, if a source reference was resolved at preflight step 5, seed from the issue**:
 
 - Symptom — issue title + body
 - Reproduction steps — issue body and **comments** (repro steps and stack traces usually live in the thread, not the opening post)
@@ -43,7 +43,7 @@ Seeded content is a **draft, not truth**. The gate's runnable-repro requirement 
 
 ### Initialize pipeline state
 
-`.adlc/bugs/BUG-NNN-<slug>/pipeline-state.json`:
+`.adlc/<BUG_PATH>/pipeline-state.json`:
 
 ```json
 {
@@ -95,7 +95,7 @@ Targeted recon — not blast-radius-wide, but focused on the area suggested by t
 
 ```
 BUG: BUG-NNN-<slug>
-Bug report: .adlc/bugs/BUG-NNN-<slug>/bug.md
+Bug report: .adlc/<BUG_PATH>/bug.md
 Work path: <workPath>
 Focus: <function or module suggested by repro>
 
@@ -105,12 +105,12 @@ Find:
 3. Similar past bugs (search hot.md, gotchas.md, lessons/)
 4. Any gotcha or lesson that applies to the affected file
 
-Write to: .adlc/bugs/BUG-NNN-<slug>/investigation.md
+Write to: .adlc/<BUG_PATH>/investigation.md
 ```
 
 ### Diagnose
 
-After the explorer returns, write the root cause to `.adlc/bugs/BUG-NNN-<slug>/bug.md` under "Investigation log":
+After the explorer returns, write the root cause to `.adlc/<BUG_PATH>/bug.md` under "Investigation log":
 
 ```markdown
 ### YYYY-MM-DD — root cause
@@ -120,7 +120,7 @@ The actual cause, with file:line references. Why it produces the symptom.
 
 Sketch a fix approach in the bug.md "Fix approach" section. Two or three bullets — concrete enough that the user can evaluate whether to proceed.
 
-While diagnosing, if the codebase quirk that produced the bug or any insight from `investigation.md` deserves vault capture, append a candidate to `.adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md` (source tag `bugfix-investigate`). The Phase 5 verdict step decides whether it becomes a lesson, gotcha, or discard.
+While diagnosing, if the codebase quirk that produced the bug or any insight from `investigation.md` deserves vault capture, append a candidate to `.adlc/<BUG_PATH>/lesson-candidates.md` (source tag `bugfix-investigate`). The Phase 5 verdict step decides whether it becomes a lesson, gotcha, or discard.
 
 ### Gate card
 
@@ -152,8 +152,8 @@ Decision →  approve · revise <what> · reframe · abort
 
 ```
 Task: Fix BUG-NNN-<slug>
-Bug report: .adlc/bugs/BUG-NNN-<slug>/bug.md
-Investigation: .adlc/bugs/BUG-NNN-<slug>/investigation.md
+Bug report: .adlc/<BUG_PATH>/bug.md
+Investigation: .adlc/<BUG_PATH>/investigation.md
 Work path: <workPath>
 Approach: <copy from bug.md "Fix approach">
 
@@ -162,9 +162,9 @@ Implement:
 2. A regression test that fails before the fix and passes after
 3. Any cleanup necessary
 
-Draft commit message to .adlc/bugs/BUG-NNN-<slug>/commits-draft.md.
+Draft commit message to .adlc/<BUG_PATH>/commits-draft.md.
 Run tests; verify they pass.
-Surface lesson candidates to .adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md per your skill instructions (source tag remains `implement-task`; the bugfix folder is the candidates location).
+Surface lesson candidates to .adlc/<BUG_PATH>/lesson-candidates.md per your skill instructions (source tag remains `implement-task`; the bugfix folder is the candidates location).
 Do NOT run git mutations.
 ```
 
@@ -205,11 +205,11 @@ Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector`
 
 The user commits before this runs — same as `/proceed`'s Phase 4 protocol.
 
-When dispatching, pass `Candidates file: .adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/bugs/BUG-NNN-<slug>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`.
+When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/<BUG_PATH>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`.
 
 ### Findings
 
-Consolidate into `.adlc/bugs/BUG-NNN-<slug>/verification.md` with the same shape as `/review`'s output but only two reviewer sections.
+Consolidate into `.adlc/<BUG_PATH>/verification.md` with the same shape as `/review`'s output but only two reviewer sections.
 
 ### Gate card
 
@@ -239,7 +239,7 @@ Same as `/wrapup`, but with the bug-specific knowledge capture:
 
 Mirrors `/wrapup`'s "Process candidates" step, but bound to the bugfix folder:
 
-1. **Read `.adlc/bugs/BUG-NNN-<slug>/lesson-candidates.md`.** If absent, sweep `bug.md`, `investigation.md`, and `verification.md` for capture-worthy patterns and write them as candidates before continuing.
+1. **Read `.adlc/<BUG_PATH>/lesson-candidates.md`.** If absent, sweep `bug.md`, `investigation.md`, and `verification.md` for capture-worthy patterns and write them as candidates before continuing.
 2. **For each candidate, verdict one of**: `promote` → new lesson, `demote-to-gotcha` → new gotcha entry, `discard` with one-line reason.
 3. **Append a `## Candidate verdicts` table** to the bottom of the candidates file with the verdicts and target/reason for each.
 4. **Mandatory minimum for bugfix:** at least one non-discard verdict (promote OR demote-to-gotcha). A bug fix that produced zero non-discard verdicts is a missed knowledge opportunity — push back on yourself before issuing the gate prompt; if you genuinely conclude there's nothing to keep, surface that explicitly in the gate prompt for the user's call.
@@ -258,7 +258,7 @@ Same shape as `/wrapup`'s `merge-checklist.md`.
 
 ### Source write-back (optional, gated)
 
-Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/bugs/BUG-NNN-<slug>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. An external write — it always stops for your OK (even under `/autopilot`), and is limited by `sources.write` and `autonomy.sources`.
+Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes the issue tracker and this bug was seeded from (or links to) an issue: draft the comment/transition into `.adlc/<BUG_PATH>/source-writeback.md` (e.g. "Fixed in PR <link> — BUG-NNN-<slug>", `→ Closed`). Never auto-send; surface it at the ship gate and execute only on explicit approval. An external write — it always stops for your OK (even under `/autopilot`), and is limited by `sources.write` and `autonomy.sources`.
 
 ### Gate card
 

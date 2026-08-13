@@ -4,6 +4,8 @@ Execute the ADLC **bugfix** protocol — defined in `.adlc-toolkit/core/skills/b
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
 
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
+
 **Gate:** this skill ends in an approval gate. Stop and wait for the user's explicit approval before anything proceeds past it. Do not auto-fix-and-continue on a gate failure — surface what failed and wait.
 
 This skill dispatches sub-agents (codebase-explorer, task-implementer). Run them as subagents and consolidate their reports.

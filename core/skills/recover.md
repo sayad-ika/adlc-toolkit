@@ -32,10 +32,11 @@ Zero or more REQ/BUG IDs as arguments.
 ## Preflight
 
 1. **Read the toolkit ETHOS.**
+1a. **Read the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — the path grammar for `specs/`, `bugs/`, and `sprints/`. This skill resolves and lists work folders, and a vault may hold flat and bucketed folders at the same time. Never hard-code a path under those trees; use its `resolve` / `enumerate` rules.
 2. **Load vault basics:** `.adlc/CLAUDE.md`, `.adlc/config.yml`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries).
 3. **Determine scope:**
-   - If IDs were provided, verify each exists in `specs/`, `bugs/`, or `sprints/`. If any are unknown, halt and ask.
-   - If no IDs, walk `.adlc/specs/`, `.adlc/bugs/`, and `.adlc/sprints/` — skipping `specs/_archive/`: an archived REQ is terminal by definition. Collect every entry that isn't `prState: "merged"` with `mergedAt` older than 7 days. Skip any REQ that already has `recoveredAt` set unless the user invoked it by name. If the user names an archived REQ explicitly, treat it as read-only history — surface its state, don't recover it.
+   - If IDs were provided, resolve each per VAULT-LAYOUT's `resolve` rule: `find .adlc/specs -maxdepth 4 -type d -name '<ID>-*'` for a REQ, the same against `.adlc/bugs` for a bug, `find .adlc/sprints -maxdepth 2 -name '<ID>.json'` for a sprint. No hit: halt and ask. Two hits: show both and ask, never take the first. Each hit minus the leading `.adlc/` is that entry's `<REQ_PATH>` (or `<BUG_PATH>`), so every path below reads `.adlc/<REQ_PATH>/…`.
+   - If no IDs, enumerate rather than listing the trees: `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'`, the same against `.adlc/bugs` with `BUG-*`, and `find .adlc/sprints -maxdepth 2 -name 'SPRINT-*.json'`. Depth catches flat and bucketed folders in one pass, and `_archive/` stays out — an archived REQ is terminal by definition. Match on the folder's own name, never on `pipeline-state.json`: it's gitignored, so on a fresh clone the scan would find nothing to recover. Collect every entry that isn't `prState: "merged"` with `mergedAt` older than 7 days. Skip any REQ that already has `recoveredAt` set unless the user invoked it by name. If the user names an archived REQ explicitly, treat it as read-only history — surface its state, don't recover it.
 
 ## Steps
 
@@ -252,7 +253,7 @@ REQ-NNN-<slug> looks alive. State and git agree. Run /proceed REQ-NNN-<slug> to 
 
 #### `recover` with classification `sprint-stuck`
 
-1. Read the sprint registry at `.adlc/sprints/SPRINT-YYYY-MM-DD-<HHMM>.json`.
+1. Read the sprint registry. Resolve it by name per VAULT-LAYOUT's sprint rule — `find .adlc/sprints -maxdepth 2 -name 'SPRINT-YYYY-MM-DD-<HHMM>.json'` — since a bucketed vault files it under its month.
 2. Update: `status: "ended"`, `endedAt: <now>`, `endedReason: "recovered-out-of-band"`.
 3. Append to `hot.md`: `## [DATE] sprint-recovered | SPRINT-... | manually ended after drift`.
 
@@ -298,20 +299,20 @@ If any `divergent` entries remain, list them with the raw signals so the user ca
 
 Per recovered REQ:
 
-- Updated `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json` with `recoveredAt`, `recoveryNotes`, terminal/merged state
-- `.adlc/specs/REQ-NNN-<slug>/verification.md` (placeholder, if missing)
-- `.adlc/specs/REQ-NNN-<slug>/pr-draft.md` (historical record, if missing)
+- Updated `.adlc/<REQ_PATH>/pipeline-state.json` with `recoveredAt`, `recoveryNotes`, terminal/merged state
+- `.adlc/<REQ_PATH>/verification.md` (placeholder, if missing)
+- `.adlc/<REQ_PATH>/pr-draft.md` (historical record, if missing)
 - User-captured `.adlc/knowledge/lessons/LESSON-NNN-<slug>.md` files
 - User-captured entries appended to `.adlc/knowledge/gotchas.md`
 - Updates to `.adlc/hot.md`, `.adlc/index.md`, `.adlc/now.md`, `.adlc/decisions.md`
 
 Per recovered BUG:
 
-- Same shape, scoped to `.adlc/bugs/BUG-NNN-<slug>/`
+- Same shape, scoped to `.adlc/<BUG_PATH>/`
 
 Per recovered sprint:
 
-- Updated `.adlc/sprints/SPRINT-*.json` with `status: "ended"`
+- The resolved sprint registry (flat or under its month bucket) updated with `status: "ended"`
 - `hot.md` entry
 
 ## Done condition

@@ -49,8 +49,9 @@ Execute in order. Update `pipeline-state.json` after each phase. Pause for the u
 ### Phase 0 — Setup
 
 - Read the launch prompt to learn: REQ ID, repo path, worktree path.
+- Resolve the REQ folder per VAULT-LAYOUT's `resolve` rule (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-NNN-*'`, which covers flat, bucketed, and archived shapes in one pass. Two hits: a real collision — emit terminal claim `blocked`, never take the first. No hit: the folder doesn't exist yet, so mint it at the shape `config.yml` → `layout.partition` dictates (see VAULT-LAYOUT, "The shapes"). The hit minus the leading `.adlc/` is `<REQ_PATH>`, fixed for the whole run; every REQ path below reads `.adlc/<REQ_PATH>/…`.
 - Create the worktree: `git -C <repo-path> worktree add <worktree-path> -b <branch-name>`.
-- Initialize `.adlc/specs/REQ-xxx/pipeline-state.json` with `currentPhase: 0`, `completedPhases: [0]`, `isolation: "worktree"`, `workPath: <path>`, `worktree: <path>`, `branch: <branch>`.
+- Initialize `.adlc/<REQ_PATH>/pipeline-state.json` with `currentPhase: 0`, `completedPhases: [0]`, `isolation: "worktree"`, `workPath: <path>`, `worktree: <path>`, `branch: <branch>`.
 - Preload context: read `.adlc/now.md`, `hot.md` (last 20 entries), `config.yml`, `context/project-overview.md`, `context/conventions.md`, `context/architecture.md`.
 - No gate. Advance to Phase 1.
 
@@ -135,7 +136,7 @@ The user runs the commit and merge. After the user reports merge complete, you m
 
 At every gate:
 
-1. Write `.adlc/specs/REQ-xxx/.awaiting-approval` with the phase name and what's waiting for the user.
+1. Write `.adlc/<REQ_PATH>/.awaiting-approval` with the phase name and what's waiting for the user.
 2. Update `pipeline-state.json` with `gateState: awaiting`, `currentPhaseGate: <phase>`.
 3. Emit a terminal claim (see "Terminal state contract" below).
 4. **Stop executing**. Do not proceed to the next phase until the marker file is deleted (the user's approval signal) or the orchestrator sends an explicit "approved" message.
@@ -199,7 +200,7 @@ You can't dispatch the ui-reviewer, but you can still run its lens inline. Resol
 
 ## Surface lesson candidates
 
-You produce knowledge across phases 3, 4, and 5. Append candidate lesson entries to `.adlc/specs/REQ-xxx/lesson-candidates.md` as they emerge during your work.
+You produce knowledge across phases 3, 4, and 5. Append candidate lesson entries to `.adlc/<REQ_PATH>/lesson-candidates.md` as they emerge during your work.
 
 **Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. Phase 5 issues a verdict (promote / demote-to-gotcha / discard) on each.
 

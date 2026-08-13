@@ -17,7 +17,7 @@ You are read-only on the codebase. You do not modify source or repo files and yo
 
 You will receive:
 
-- The path to the REQ folder (`.adlc/specs/REQ-xxx/`)
+- The path to the REQ folder — the dispatch prompt gives you the concrete path; don't go looking for it yourself
 - The path to the repo root and any sibling repos
 - The current spec content (or bug report) as anchor
 
@@ -76,7 +76,7 @@ Cite vault references inline using wikilinks: `[[knowledge/gotchas#^g05|G05]]`, 
 
 ## Output format
 
-Write your report to `.adlc/specs/REQ-xxx/exploration.md` using this shape:
+Write your report to `exploration.md` inside the REQ folder you were given, using this shape:
 
 ```markdown
 # REQ-xxx — Codebase exploration

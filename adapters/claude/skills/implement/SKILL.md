@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Execute the task DAG. Phase 3."
+description: "Execute the task DAG for a REQ. Phase 3 of /proceed. Dispatches task-implementer agents (tier-based parallel where possible), drafts commit messages to commits-draft.md, runs tests, then ends in the implement gate."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -8,6 +8,8 @@ Toolkit root: .adlc-toolkit
 Execute the ADLC **implement** protocol — defined in `.adlc-toolkit/core/skills/implement.md` — against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
+
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
 
 **Gate:** this skill ends in an approval gate. Stop and wait for the user's explicit approval before anything proceeds past it. Do not auto-fix-and-continue on a gate failure — surface what failed and wait.
 

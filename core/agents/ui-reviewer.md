@@ -101,7 +101,7 @@ For an `indirect-api-impact` dispatch, run these same checks on the consuming sc
 - **Cross-screen consistency.** Capture sibling screens (peer list pages, the same control on different routes) and compare: spacing, typography hierarchy, control styling and placement, empty/error-state structure, icon set. A screen that breaks the app's own pattern is a finding — cite both screenshots so the misalignment is visible side by side.
 - **Design-system match.** When `.adlc/context/design-system.md` exists, compare the rendered UI against its ratified tokens, components, and patterns — an on-screen value or bespoke control that bypasses the system is a finding even when it looks fine in isolation.
 
-Save screenshots as evidence under `.adlc/specs/REQ-NNN-<slug>/ui-evidence/` (for `standalone-audit`: the evidence dir from the dispatch prompt) and reference them in findings. Capture the *state* in the shot (e.g. `checkout-submit-disabled-pristine.png`), not just the page.
+Save screenshots as evidence under `ui-evidence/` in the REQ folder you were given (for `standalone-audit`: the evidence dir from the dispatch prompt) and reference them in findings. Capture the *state* in the shot (e.g. `checkout-submit-disabled-pristine.png`), not just the page.
 
 ## Step 5: Tear down and report
 
@@ -145,7 +145,7 @@ If you ran the **static-only** tier, also append a `## UI manual-verification ch
 
 ## Surface lesson candidates
 
-If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` per the standard format, source tag `ui-review`. When in doubt, surface — `/wrapup` issues the verdict.
+If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `lesson-candidates.md` in the REQ folder you were given, per the standard format, source tag `ui-review`. When in doubt, surface — `/wrapup` issues the verdict.
 
 ## Constraints
 

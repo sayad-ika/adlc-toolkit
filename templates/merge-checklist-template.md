@@ -13,7 +13,7 @@ You run these. Claude does not.
 - [ ] Push the branch:
       `git -C <workPath> push -u origin <branch>`
 - [ ] Open the PR (paste title/body from pr-draft.md):
-      `gh pr create --base <base-branch> --head <branch> --title "<title>" --body-file .adlc/specs/REQ-NNN-<slug>/pr-draft.md`
+      `gh pr create --base <base-branch> --head <branch> --title "<title>" --body-file .adlc/{{REQ_PATH}}/pr-draft.md`
       (or use the web UI)
 - [ ] Wait for CI to pass
 - [ ] Request review (if applicable)

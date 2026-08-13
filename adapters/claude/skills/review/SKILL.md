@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Dispatch reviewers, consolidate findings. Phase 4."
+description: "Multi-perspective code review for a REQ. Phase 4 of /proceed. Dispatches 4 read-only review agents in parallel (correctness, quality, architecture, reflector) — plus a 5th ui-reviewer that runs the app in a browser when the change touches a UI surface — consolidates findings by severity, and ends in the verify gate."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -8,6 +8,8 @@ Toolkit root: .adlc-toolkit
 Execute the ADLC **review** protocol — defined in `.adlc-toolkit/core/skills/review.md` — against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
+
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
 
 **Gate:** this skill ends in an approval gate. Stop and wait for the user's explicit approval before anything proceeds past it. Do not auto-fix-and-continue on a gate failure — surface what failed and wait.
 

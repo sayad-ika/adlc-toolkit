@@ -48,7 +48,7 @@ Edge cases or contexts where the rule is wrong. Important — over-applied lesso
 
 ### Related
 
-- Originating REQ: [[specs/{{REQ_ID}}/requirement]]
+- Originating REQ: {{REQ_ID}} — resolve the folder per `core/VAULT-LAYOUT.md`; this lesson outlives the REQ, so it records the ID, not a path that archiving would break
 - Concepts: {{CONCEPT_LINKS}}
 - Components: {{COMPONENT_LINKS}}
 - See also: {{LESSON_LINKS}}

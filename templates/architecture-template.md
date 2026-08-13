@@ -114,7 +114,7 @@ What could go wrong. What we're betting on. What we'd do if the bet fails.
 
 ## Related
 
-- Spec: [[specs/{{REQ_ID}}/requirement]]
+- Spec: {{REQ_ID}} — resolve the folder per `core/VAULT-LAYOUT.md`
 - Concepts: {{CONCEPT_LINKS}}
 - Components: {{COMPONENT_LINKS}}
 - Lessons checked: {{LESSON_LINKS}}

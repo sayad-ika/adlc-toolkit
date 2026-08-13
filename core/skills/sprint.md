@@ -28,14 +28,14 @@ A reasonable upper bound is **5 concurrent REQs**. Beyond that, gate triage beco
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — each per-REQ gate in the queue renders as a gate card.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — each per-REQ gate in the queue renders as a gate card.
 2. **Load vault.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`. From `config.yml → autonomy`, read `gates` (plus `escalation`, the rework caps, `confidence_floor`, `packet_max_bytes`, `hard_stops`) — apply any `--gates` flag override. Absent `autonomy` block ⇒ `manual`.
 3. **Validate input.** For each argument:
-   - If it's a REQ ID, verify `.adlc/specs/REQ-NNN-*/` exists and has a `requirement.md`. If it exists only under `specs/_archive/`, it's completed and archived — say so and drop it from the sprint list; don't offer to re-create it. If it exists nowhere, surface and ask: should we create it via `/spec` first?
+   - If it's a REQ ID, resolve it per VAULT-LAYOUT's `resolve` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-NNN-*'` — and check the folder has a `requirement.md`. The hit minus the leading `.adlc/` is that REQ's `<REQ_PATH>`. Two hits is a collision: show both and ask. If the only hit is under `specs/_archive/`, it's completed and archived — say so and drop it from the sprint list; don't offer to re-create it. If nothing resolves, surface and ask: should we create it via `/spec` first?
    - If it's free text, treat as a new feature and call `/spec` for each, sequentially (or interactively).
 4. **Check global REQ counter.** REQ IDs must be unique across all in-flight work. Read `~/.adlc/.global-next-req` (a global atomic counter). Increment for each new REQ created during this sprint setup. Honor the lock — concurrent sprints across projects share this counter.
 5. **Check for collisions.**
-   - Active REQs already in flight (read all `pipeline-state.json` files). Don't start a sprint that includes an already-active REQ.
+   - Active REQs already in flight — enumerate them per VAULT-LAYOUT's `enumerate(active)` rule, then read each folder's `pipeline-state.json`. Don't start a sprint that includes an already-active REQ.
    - Worktree path collisions: each REQ's worktree must be a unique path.
 6. **Confirm with the user.** Show the list of REQs about to be launched, the worktree paths, the model used per pipeline-runner, and the gate mode. In `assisted`/`auto`, say in one line what that means for this sprint ("auto: I clear routine gates via the decision-maker; you see hard-stops, critical findings, HALTs, and every final review"). Get explicit confirmation before dispatching.
 
@@ -56,6 +56,7 @@ For each REQ, dispatch a `pipeline-runner` agent (deep tier) with:
 
 ```
 REQ ID: REQ-NNN-<slug>
+REQ folder: .adlc/<REQ_PATH>/
 Repository path: <repo-path from config.yml>
 WORKTREE PATH (mandatory): <repo-path>/.worktrees/REQ-NNN-<slug>
 Subagent mode: true (you cannot dispatch sub-agents)
@@ -67,11 +68,13 @@ Do NOT run git mutations beyond worktree creation.
 Update pipeline-state.json after every phase.
 ```
 
+Write the REQ folder out in full — the runner resolves nothing. The worktree path is not a vault path: worktrees live in the repo, so name each one by REQ ID and slug, never by `<REQ_PATH>`.
+
 Dispatch all runners in a single message so they run concurrently. **Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
 
 ### 3. Initialize the sprint registry
 
-Create `.adlc/sprints/SPRINT-YYYY-MM-DD-<HHMM>.json`:
+Read `config.yml` → `layout.partition`. With `none`, the registry is `.adlc/sprints/SPRINT-YYYY-MM-DD-<HHMM>.json`; with anything else it goes in this month's bucket — `.adlc/sprints/<YYYY-MM>/SPRINT-YYYY-MM-DD-<HHMM>.json`. Sprints take the month and **no author folder**; that's deliberate, don't add one. `mkdir -p` the parent first, then write:
 
 ```json
 {
@@ -158,14 +161,14 @@ SPRINT GATE QUEUE · SPRINT-...
      Phase: architect (gate)
      Files affected: 6
      ADR proposed: yes (ADR-014)
-     Drafted: .adlc/specs/REQ-101-.../architecture.md
+     Drafted: .adlc/<REQ_PATH>/architecture.md
      Worktree: <path>
 
   2. REQ-103-fix-cookie-domain
      Phase: implement (gate)
      Tasks complete: 4/4
      Tests pass: ✓
-     Drafted commits: .adlc/specs/REQ-103-.../commits-draft.md
+     Drafted commits: .adlc/<REQ_PATH>/commits-draft.md
      Worktree: <path>
 
 Not yet at gate:
@@ -259,7 +262,7 @@ When all REQs reach `merged` (or are aborted):
 
 ## Output artifacts
 
-- `.adlc/sprints/SPRINT-YYYY-MM-DD-<HHMM>.json`
+- The sprint registry — `.adlc/sprints/SPRINT-YYYY-MM-DD-<HHMM>.json`, or under this month's bucket when `layout.partition` isn't `none`
 - One pipeline run per REQ (with all the artifacts that produces — see `/proceed`'s output list)
 - Updates to `.adlc/hot.md` for sprint lifecycle events
 - `gate-decisions.md` per REQ (`assisted`/`auto` — every adjudicated verdict, approvals included)

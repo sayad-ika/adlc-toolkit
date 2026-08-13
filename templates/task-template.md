@@ -37,5 +37,5 @@ Anything task-implementer needs to know that isn't in the spec or architecture.
 
 ## Related
 
-- Architecture: [[specs/{{REQ_ID}}/architecture]]
+- Architecture: [[{{REQ_PATH}}/architecture]]
 - Lessons checked: {{LESSON_LINKS}}

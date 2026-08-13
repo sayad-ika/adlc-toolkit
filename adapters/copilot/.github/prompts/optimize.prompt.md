@@ -1,5 +1,5 @@
 ---
-description: "Standalone performance/cost scan."
+description: "Standalone performance and cost audit. Dispatches the performance-scanner agent and produces a dated report in .adlc/audits/. Identifies LLM/API cost hotspots, DB performance issues, latency drivers, caching opportunities. No gates — read-only."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -7,6 +7,8 @@ Toolkit root: .adlc-toolkit
 Execute the ADLC **optimize** protocol — defined in `.adlc-toolkit/core/skills/optimize.md` — against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
+
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
 
 This skill relies on the agents (performance-scanner). Invoke the matching custom agents (use handoffs) or run each role sequentially.
 

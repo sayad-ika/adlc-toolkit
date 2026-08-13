@@ -14,6 +14,10 @@ You are surfacing the current state of work in the vault. Read-only, no gates, n
 
 ## Steps
 
+### 0. Read the vault layout
+
+Load `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`. This skill walks `specs/` and `bugs/` to build the dashboard, and a vault may hold flat and bucketed folders at the same time — use its `enumerate` rule rather than listing either tree directly.
+
 ### 1. Read the navigation files
 
 - `.adlc/now.md` — active focus marker (manually edited; not always current)
@@ -22,9 +26,11 @@ You are surfacing the current state of work in the vault. Read-only, no gates, n
 
 ### 2. Walk active REQs
 
-For each REQ folder under `.adlc/specs/` (skip `specs/_archive/` entirely — archived REQs are done by definition):
+List them with VAULT-LAYOUT's `enumerate(active)` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'` — one pass that catches flat and bucketed folders alike and skips the archive (archived REQs are done by definition). The match is on the folder's **own name**. Don't test for `pipeline-state.json` instead: it's gitignored, so on a teammate's fresh clone every folder looks empty and the dashboard comes back blank. Take the display ID from that same folder name — in a bucketed vault the child of `specs/` is a month like `2026-08`, not an ID.
 
-- Read `pipeline-state.json` if it exists
+For each REQ found:
+
+- Read `pipeline-state.json` if it exists — on a fresh clone it won't; list the REQ with its state unknown rather than dropping it
 - Skip REQs where `prState == "merged"` and `mergedAt` is more than 7 days old (they're done)
 - For each remaining REQ, collect:
   - REQ ID and title
@@ -40,7 +46,7 @@ For each REQ folder under `.adlc/specs/` (skip `specs/_archive/` entirely — ar
 
 ### 3. Walk active bugs
 
-Same as REQs but under `.adlc/bugs/`.
+Same as REQs, with the same rule pointed at `.adlc/bugs` and `-name 'BUG-*'`. Keep the `_archive/` exclusion — `bugs/_archive/` doesn't exist yet, but it costs nothing and the tree may grow one.
 
 ### 4. Walk recent audits
 

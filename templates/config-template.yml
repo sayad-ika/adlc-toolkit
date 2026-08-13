@@ -23,6 +23,21 @@ req:
   id_scheme: sequential
   # prefix: <your-initials>   # used by `prefixed` (and as the ticket fallback)
 
+# Where work records live on disk. Knowledge files (lessons, ADRs, concepts)
+# are never partitioned — they're found by search, not by browsing.
+#
+#   none          — specs/REQ-042-slug/             (today's shape)
+#   month-author  — specs/2026-08/sf/REQ-042-slug/  (sprints/ get the month only)
+#
+# Bucketing keeps `specs/` showing a month of work instead of a year of it.
+# The month is the month the REQ was created, is always YYYY-MM, and never
+# changes — archiving preserves it. Both shapes stay readable forever, so
+# switching is safe and reversible; run `/config migrate` to move existing
+# folders into buckets (gated, shows the move plan first).
+layout:
+  partition: none
+  # author: <your-initials>   # falls back to req.prefix, then git user.name
+
 # Git policy — how much git the assistant may run. The WHOLE pipeline respects
 # this; /autopilot's autonomy.git (below) may lower it but never exceed it. Set by /init.
 #

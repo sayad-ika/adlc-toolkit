@@ -24,7 +24,7 @@ The user is **{{USER_NAME}}** ({{USER_EMAIL}}). They make every decision. You do
 | `context/*` | Project-wide architecture, conventions, overview |
 | `architecture/adr-*.md` (status: accepted) | Decisions in effect |
 | `knowledge/*` | Lessons, gotchas, concepts, components |
-| `specs/REQ-xxx/*` (status: validated and later) | The contract for that REQ |
+| The REQ's own folder (status: validated and later) | The contract for that REQ |
 
 When two sources disagree, **stop and surface the contradiction**. Never silently pick one. Anything marked `STATUS: needs verification` is provisional — don't build on it without asking. ADRs with status `proposed` or `superseded` are not in effect.
 
@@ -46,14 +46,14 @@ When two sources disagree, **stop and surface the contradiction**. Never silentl
 
 ## File conventions
 
-- **Wikilinks** for cross-references: `[[concepts/idempotency]]`, `[[knowledge/gotchas#^g05|G05]]`, `[[specs/REQ-042/requirement]]`.
+- **Wikilinks** for cross-references: `[[concepts/idempotency]]`, `[[knowledge/gotchas#^g05|G05]]`. Name a REQ by its **ID** (`REQ-042`), never its folder path — lessons and ADRs outlive the REQ, and a baked-in path breaks when it's archived.
 - **Block anchors** for anything referenced from elsewhere: `^L##` (lessons), `^g##` (gotchas), `^ADR-##` (ADRs). Prefer block anchors over heading anchors — they survive renames.
 - **`STATUS:` markers**: `needs verification` (assumed, not confirmed) · `deprecated` (don't build on) · `superseded by X` (X is the new truth).
 - **Field table** at the top of every spec, ADR, concept, and component page; **Related / Backlinks** sections at the bottom of substantive pages.
 
 ## How the pipeline writes here
 
-Each phase writes its artifacts under `specs/REQ-xxx/` and pauses at a gate: a chat prompt plus a `.awaiting-approval` marker in the REQ folder (deleted on approval). Full artifact map: each phase skill and the vault [[README]]. On `/proceed --revert`, captured lessons are kept with a retraction banner, never deleted.
+Each phase writes into the REQ's own folder — flat under `specs/`, or bucketed by month and author (`config.yml` → `layout.partition`) — and pauses at a gate: a chat prompt plus a `.awaiting-approval` marker there, deleted on approval. Full artifact map: each phase skill and the vault [[README]]. On `/proceed --revert`, captured lessons are kept with a retraction banner, never deleted.
 
 ## When to write to the vault
 

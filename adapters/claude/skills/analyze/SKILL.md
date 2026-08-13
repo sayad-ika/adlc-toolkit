@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: "Standalone codebase health audit."
+description: "Standalone codebase health audit. Dispatches the health-auditor agent and produces a dated report in .adlc/audits/. No pipeline state, no gates — read-only audit that you run periodically or on demand."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -8,6 +8,8 @@ Toolkit root: .adlc-toolkit
 Execute the ADLC **analyze** protocol — defined in `.adlc-toolkit/core/skills/analyze.md` — against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
+
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
 
 This skill dispatches sub-agents (health-auditor). Run them as subagents and consolidate their reports.
 

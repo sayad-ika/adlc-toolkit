@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Draft and validate a requirement spec for a new REQ. Phase 1 of the /proceed pipeline. Ends in the spec gate — user must approve before /architect can run. Writes specs/REQ-xxx/requirement.md and pauses for review.
+description: Draft and validate a requirement spec for a new REQ. Phase 1 of the /proceed pipeline. Ends in the spec gate — user must approve before /architect can run. Writes the REQ's requirement.md and pauses for review.
 ---
 
 You are running Phase 1 of the ADLC pipeline: drafting and validating a requirement spec.
@@ -18,17 +18,17 @@ You are running Phase 1 of the ADLC pipeline: drafting and validating a requirem
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md`, `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`, and `$TOOLKIT_PATH/core/VOICE.md` into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
+1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md`, `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`, `$TOOLKIT_PATH/core/VOICE.md`, and `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` (where work records live on disk — never hard-code a path under `specs/`, `bugs/`, or `sprints/`) into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
 2. **Read the vault basics.** Load `.adlc/CLAUDE.md`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries), `.adlc/config.yml`, `.adlc/context/project-overview.md`, `.adlc/context/conventions.md`.
-3. **Determine the REQ ID.** Read `config.yml` → `req.id_scheme` (default `sequential` if absent) and `req.prefix`.
-   - If the user passed an explicit ID, use it; verify it doesn't collide with an existing folder in `.adlc/specs/` **or** `.adlc/specs/_archive/` (archived REQs still own their IDs).
+3. **Determine the REQ ID.** Read `config.yml` → `req.id_scheme` (default `sequential` if absent) and `req.prefix`. Every scheme mints off the one scan from VAULT-LAYOUT's `mint` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*'` — where depth 4 covers every month bucket, every author folder, **and** `_archive/` in a single pass. Archived REQs still own their numbers; other people's folders hold live ones.
+   - If the user passed an explicit ID, run the same scan first and refuse if it collides.
    - Otherwise mint one per the scheme:
-     - **`sequential`** — scan `.adlc/specs/` **and** `.adlc/specs/_archive/` for the highest `REQ-NNN-*`, increment, pad to 3 digits → `REQ-NNN`. Archived REQs keep their numbers — skipping the archive would re-mint an old ID. (Solo default; numbers can collide across people's branches.)
-     - **`prefixed`** — `REQ-<prefix>-NNN`, where `<prefix>` is `req.prefix` (e.g. your initials) and `NNN` is max+1 **within that prefix's** folders (again across both `specs/` and `specs/_archive/`). Per-person namespace — safe for teams without a shared tracker, works offline.
+     - **`sequential`** — highest `REQ-NNN` in that scan, increment, pad to 3 digits → `REQ-NNN`. (Solo default; numbers can collide across people's branches.)
+     - **`prefixed`** — `REQ-<prefix>-NNN`, where `<prefix>` is `req.prefix` (e.g. your initials) and `NNN` is max+1 within that prefix — same scan, `-name 'REQ-<prefix>-*'`. Keep the depth: narrowing it to your own author folder re-mints IDs that are live under someone else's. Per-person namespace — safe for teams without a shared tracker, works offline.
      - **`ticket`** — derive from the tracker issue this REQ implements: invoked as `/spec #842` (or an issue URL) with `sources.issues` set → the ID is the issue's key (`REQ-842` for a bare number; the native key like `PROJ-842` for Jira/Linear). Globally unique by construction — the recommended team default. If the scheme is `ticket` but no issue ref was given, fall back to `prefixed` (if `req.prefix` set) else `sequential`, and say so in one line.
    - **Throughout the rest of this protocol, `REQ-NNN` denotes whatever ID the scheme produced** (e.g. `REQ-842`, `REQ-sf-007`) — substitute accordingly.
 4. **Determine the slug.** Short kebab-case description from the user's input (e.g., `firestore-composite-indexes`). Keep ≤40 chars.
-5. **Create the REQ folder:** `.adlc/specs/REQ-NNN-<slug>/`.
+5. **Create the REQ folder.** Read `config.yml` → `layout.partition`: `none` gives `specs/REQ-NNN-<slug>`; `month-author` gives `specs/<YYYY-MM>/<author>/REQ-NNN-<slug>`, where `<YYYY-MM>` is today's month (the month the REQ is created — it never changes afterwards) and `<author>` is the first of `layout.author`, `req.prefix`, initials from `git config user.name`, or `_`. `mkdir -p` the parents, then create the folder. **That vault-relative path is `<REQ_PATH>` for the rest of this protocol** — it carries no `.adlc/` prefix, so every path below reads `.adlc/<REQ_PATH>/…`.
 6. **Resolve a source reference (optional).** If the user invoked with an issue reference (e.g. `/spec #8`) or pasted an issue URL, and `config.yml.sources.issues` is set (not `none`):
    - **Resolve the mechanism, first that works wins:** a dedicated CLI if installed and authed (for `github`, `gh issue view <n> --json title,body,labels,comments,author,createdAt`, defaulting the repo to `sources.repo`); else an attached MCP server for that service; else a plain fetch if the reference is a full URL. A full URL may point at a different repo/service than the default — honor it.
    - **If a mechanism resolves,** read the issue title/body/labels/linked discussion and carry them into step 1 as draft material (problem framing, goal, candidate acceptance criteria). Record provenance: add the issue link to the spec's "Related" section so the vault stays traceable.
@@ -39,10 +39,11 @@ You are running Phase 1 of the ADLC pipeline: drafting and validating a requirem
 
 ### 1. Draft the spec
 
-Copy `.adlc/templates/spec-template.md` to `.adlc/specs/REQ-NNN-<slug>/requirement.md`. Substitute the placeholders using:
+Copy `.adlc/templates/spec-template.md` to `.adlc/<REQ_PATH>/requirement.md`. Substitute the placeholders using:
 
 - `{{TITLE}}` — one-line summary of the REQ
 - `{{REQ_ID}}` — `REQ-NNN`
+- `{{REQ_PATH}}` — the vault-relative folder path from preflight (e.g. `specs/2026-08/sf/REQ-042-payment-retries`). Templates use `{{REQ_ID}}` where the reference must outlive the REQ (lessons, ADRs) and `{{REQ_PATH}}` where it dies with the folder — see `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`.
 - `{{DATE}}` — today
 - `{{REPO_ID}}` — primary repo from `config.yml`
 - `{{REPO_LIST}}` — touched repos (if cross-repo)
@@ -73,7 +74,7 @@ If you find anything, add the wikilinks to the "Related" section of the spec. If
 
 ### 3. Initialize pipeline state
 
-Create `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`:
+Create `.adlc/<REQ_PATH>/pipeline-state.json`:
 
 ```json
 {
@@ -109,14 +110,14 @@ Each item is reported in the gate prompt with a tick or a flag.
 
 ### 5. Write the gate marker
 
-Create `.adlc/specs/REQ-NNN-<slug>/.awaiting-approval` with content:
+Create `.adlc/<REQ_PATH>/.awaiting-approval` with content:
 
 ```
 Phase: spec
 REQ: REQ-NNN-<slug>
 Awaiting: review the requirement and approve to proceed, or reply with revisions.
 Files:
-  - .adlc/specs/REQ-NNN-<slug>/requirement.md
+  - .adlc/<REQ_PATH>/requirement.md
 ```
 
 ### 6. Emit the gate card
@@ -173,7 +174,7 @@ If the user replies `abort`:
 
 ## Output artifacts
 
-- `.adlc/specs/REQ-NNN-<slug>/requirement.md`
-- `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`
-- `.adlc/specs/REQ-NNN-<slug>/.awaiting-approval` (until gate cleared)
+- `.adlc/<REQ_PATH>/requirement.md`
+- `.adlc/<REQ_PATH>/pipeline-state.json`
+- `.adlc/<REQ_PATH>/.awaiting-approval` (until gate cleared)
 - New entry in `.adlc/hot.md` (on gate clearance or abort)

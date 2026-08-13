@@ -25,6 +25,10 @@ You are bootstrapping a new project's `.adlc/` vault. Invoke this skill once per
 
 ## Steps
 
+### 0. Read the vault layout
+
+Load `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`. This skill creates the vault's directory tree and proposes its `.gitignore` block, and both come from that file — copy the 18-line pattern set from it rather than retyping (single-`*` globs silently stop matching the moment a vault buckets, and start committing per-developer state with no error).
+
 ### 1. Gather project info from the user
 
 Ask the user (use your assistant's structured-question UI if it has one; otherwise ask in chat):
@@ -33,6 +37,12 @@ Ask the user (use your assistant's structured-question UI if it has one; otherwi
 - **One-line description** — used in README and project-overview
 - **Stack snapshot** — languages, frontends, backends, databases (free text; the user can refine in config.yml later)
 - **Cross-repo?** — single-repo (default) or multi-repo. If multi-repo, gather sibling repo paths.
+- **Your initials** — 1–8 lowercase characters; offer the ones from `git config user.name` ("Shamim Fahad" → `sf`). Record them as both `req.prefix` and `layout.author`, and set `req.id_scheme: prefixed` so IDs read `REQ-sf-007`. Per-person IDs are what stop two teammates minting `REQ-042` on parallel branches — folders don't. If the user skips, leave `id_scheme: sequential`; `layout.author` then falls back at runtime.
+- **Vault layout** — the on-disk shape of `specs/`, `bugs/`, and `sprints/`. Present as discrete options (ETHOS principle 6) and record as `layout.partition`:
+  - **month-author** (default for a new vault) — `specs/2026-08/sf/REQ-042-slug/`, so `specs/` shows a month of work instead of a year of it.
+  - **none** — every REQ folder sits directly under `specs/`, flat.
+
+  A new vault has no folders to move yet, so this choice is free now; both shapes stay readable, and `/config migrate` switches later either way. The shipped `config-template.yml` says `none` because it also serves vaults created before layouts existed — for a fresh vault, write `month-author` over it unless the user picks flat.
 - **Git policy** — how much git the assistant may run. Present these as discrete options (ETHOS principle 6) and record the answer as `git.mode`:
   - **manual** (default, recommended) — the assistant never runs git writes; it drafts the commit message, PR body, and merge checklist, and you run every git command.
   - **commit** — the assistant may `git add` + `git commit` on the REQ's feature branch after a phase's gate is approved; you still push and open/merge the PR.
@@ -167,6 +177,8 @@ Inside the repo root, create:
 
 Use `mkdir -p` (or platform equivalent). Don't fail if a directory already exists.
 
+`specs/`, `bugs/`, and `sprints/` are created empty. Under `layout.partition: month-author` the month and author folders inside them are made by `/spec`, `/task`, and `/bugfix` when the first REQ or bug lands — don't create any here.
+
 ### 5. Copy vault bootstrap files
 
 Copy from `$TOOLKIT_PATH/templates/vault/` to `.adlc/`:
@@ -222,6 +234,8 @@ Open `.adlc/config.yml` and pre-fill what you gathered:
 - `project.name`
 - `project.description`
 - `git.mode` (the value chosen in step 1; default `manual`)
+- `req.id_scheme` and `req.prefix` (the initials from step 1 — `prefixed` unless the user skipped)
+- `layout.partition` and `layout.author` (step 1; write `month-author` over the template's `none` unless the user chose flat)
 - `stack.languages` (best effort from the user's free text)
 - `repos.<this-repo-id>.primary: true`
 - `sources` (the services chosen in step 1). If the user picked an issue tracker or design tool, uncomment the `sources:` block and fill `issues`, `design`, `repo`, and `write` accordingly. If they chose `none` for everything, leave the block commented out so the pipeline stays self-contained.
@@ -345,21 +359,22 @@ If `.gitignore` exists at the repo root, **propose** (don't auto-write) appendin
 # ADLC — per-developer scratch state. Shared knowledge files stay committed;
 # the shared logs (hot.md, decisions.md, glossary.md) are committed too.
 .adlc/now.md
-.adlc/specs/*/pipeline-state.json
-.adlc/specs/*/.awaiting-approval
-.adlc/specs/*/commits-draft.md
-.adlc/specs/*/pr-draft.md
-.adlc/specs/*/merge-checklist.md
-.adlc/specs/*/source-writeback.md
-.adlc/specs/*/last-seen.json
-.adlc/bugs/*/pipeline-state.json
-.adlc/bugs/*/.awaiting-approval
-.adlc/bugs/*/commits-draft.md
-.adlc/bugs/*/pr-draft.md
-.adlc/bugs/*/merge-checklist.md
-.adlc/bugs/*/source-writeback.md
-.adlc/bugs/*/last-seen.json
-.adlc/sprints/*.json
+.adlc/specs/**/pipeline-state.json
+.adlc/specs/**/.awaiting-approval
+.adlc/specs/**/commits-draft.md
+.adlc/specs/**/pr-draft.md
+.adlc/specs/**/merge-checklist.md
+.adlc/specs/**/source-writeback.md
+.adlc/specs/**/last-seen.json
+.adlc/bugs/**/pipeline-state.json
+.adlc/bugs/**/.awaiting-approval
+.adlc/bugs/**/commits-draft.md
+.adlc/bugs/**/pr-draft.md
+.adlc/bugs/**/bug-fix-pr-draft.md
+.adlc/bugs/**/merge-checklist.md
+.adlc/bugs/**/source-writeback.md
+.adlc/bugs/**/last-seen.json
+.adlc/sprints/**/*.json
 .adlc/ui-auth.env
 ```
 

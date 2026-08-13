@@ -12,9 +12,9 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
 
 ## Preflight
 
-1. **Verify implement gate cleared and code is committed.** Read `pipeline-state.json` (`currentPhase >= 3`, `gateState: "cleared"` for implement). Check that `git -C <workPath> log <base-branch>..<branch> --oneline` shows commits — if the branch has no commits past the base, **stop and remind** the user to run the commits first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 9.
-3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `specs/REQ-NNN-<slug>/requirement.md`, `architecture.md`, `commits-draft.md`.
+1. **Resolve the REQ folder, then verify the implement gate cleared and code is committed.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Read `.adlc/<REQ_PATH>/pipeline-state.json` (`currentPhase >= 3`, `gateState: "cleared"` for implement). Check that `git -C <workPath> log <base-branch>..<branch> --oneline` shows commits — if the branch has no commits past the base, **stop and remind** the user to run the commits first.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 9.
+3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `<REQ_PATH>/requirement.md`, `architecture.md`, `commits-draft.md`.
 4. **Verify the work path and branch.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. Verify the branch ref exists: `git -C <workPath> rev-parse --verify <branch>`. (In `branch` mode, HEAD may be on a different branch — that's fine; comparisons below use `<branch>` by name.)
 5. **Identify the diff.** Determine the base branch from `config.yml` (default `main`). Capture the list of changed files: `git -C <workPath> diff --name-only <base-branch>...<branch>`.
 6. **Decide whether the UI reviewer runs.** Condition (a) is mandatory: `config.yml` → `stack.frontends` must be non-empty (the project has a frontend at all). If it's empty, never dispatch — there is no UI to review. With a frontend present, dispatch if **either** of these holds:
@@ -30,7 +30,7 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
 
 The review writes **two files** with different jobs. `verification.md` is the **verdict file** — the digest, consolidated findings, summary, and acceptance-criteria check. It's what `/wrapup`, the gate packets, and every later reader load, so keep it lean (target ≤8KB). `review-log.md` is the **narrative log** — the reviewers' full sections, re-review threads, and packet-gap notes. Nothing downstream loads it; it exists for the human and for on-demand archaeology.
 
-Create or truncate `.adlc/specs/REQ-NNN-<slug>/verification.md`:
+Create or truncate `.adlc/<REQ_PATH>/verification.md`:
 
 ```markdown
 # REQ-NNN-<slug> — Verification
@@ -64,7 +64,7 @@ _(populated after all reviewers complete)_
 _(populated at the acceptance-criteria cross-check)_
 ```
 
-And create or truncate `.adlc/specs/REQ-NNN-<slug>/review-log.md`:
+And create or truncate `.adlc/<REQ_PATH>/review-log.md`:
 
 ```markdown
 # REQ-NNN-<slug> — Review log
@@ -95,7 +95,7 @@ _(written by ui-reviewer — only when the change touches a UI surface; otherwis
 
 ### 1.5. Build the review packet
 
-Write `.adlc/specs/REQ-NNN-<slug>/review-packet.md`. This bundles the context all four reviewers need so they don't each re-read the same files.
+Write `.adlc/<REQ_PATH>/review-packet.md`. This bundles the context all four reviewers need so they don't each re-read the same files.
 
 Compose from:
 
@@ -143,7 +143,7 @@ In a single message, launch the four static reviewers — **plus the ui-reviewer
 - **reflector** (balanced)
 - **ui-reviewer** (balanced) — *only if the UI-surface condition held*
 
-Each agent receives:
+Each agent receives the following. Write the resolved path out in full — the agents resolve nothing, so `<REQ_PATH>` must already be substituted when it arrives:
 
 ```
 REQ: REQ-NNN-<slug>
@@ -151,9 +151,9 @@ Work path: <workPath>
 Branch: <branch>
 Files changed: <list>
 Base branch: <base-branch>
-Packet: .adlc/specs/REQ-NNN-<slug>/review-packet.md
-Output file: .adlc/specs/REQ-NNN-<slug>/review-log.md
-Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md
+Packet: .adlc/<REQ_PATH>/review-packet.md
+Output file: .adlc/<REQ_PATH>/review-log.md
+Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md
 
 Read the packet first. It contains the diff with full file context, the REQ spec and architecture, and the earlier codebase exploration report. Do not re-read those files. If you Read anything beyond the packet, add a `**Packet-gap:**` line in your section so we can tighten the packet.
 
@@ -285,8 +285,8 @@ Phase: verify
 REQ: REQ-NNN-<slug>
 Awaiting: review the findings, decide which to fix.
 Files:
-  - .adlc/specs/REQ-NNN-<slug>/verification.md
-  - .adlc/specs/REQ-NNN-<slug>/review-log.md (full narratives — open on demand)
+  - .adlc/<REQ_PATH>/verification.md
+  - .adlc/<REQ_PATH>/review-log.md (full narratives — open on demand)
 ```
 
 ### 9. Emit the gate card
@@ -347,7 +347,7 @@ If `fix: <ids>`, `fix: all-major`, or `fix: all`:
    Apply the fix. Append a commit message to commits-draft.md (new section: "Fix commits").
    Run tests, verify they pass.
    ```
-3. **Patch the review packet's diff section.** Use `Edit` on `.adlc/specs/REQ-NNN-<slug>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
+3. **Patch the review packet's diff section.** Use `Edit` on `.adlc/<REQ_PATH>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
 4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed). Their re-review sections append to `review-log.md`, same as the first pass.
 5. Refresh `verification.md` — digest rows, consolidated entries, summary counts — from the updated log, then re-emit the gate prompt with updated counts — and, when the set excluded needs-decision findings, carry those into `NEEDS YOU` by ID.
 
@@ -368,9 +368,9 @@ If `abort`:
 
 ## Output artifacts
 
-- `.adlc/specs/REQ-NNN-<slug>/verification.md` (the compact verdict file — digest, consolidated findings, summary, AC check; target ≤8KB)
-- `.adlc/specs/REQ-NNN-<slug>/review-log.md` (full reviewer narratives and re-review threads; on no later phase's load path)
-- `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` (appended to by the four reviewers; persists for /wrapup to verdict)
+- `.adlc/<REQ_PATH>/verification.md` (the compact verdict file — digest, consolidated findings, summary, AC check; target ≤8KB)
+- `.adlc/<REQ_PATH>/review-log.md` (full reviewer narratives and re-review threads; on no later phase's load path)
+- `.adlc/<REQ_PATH>/lesson-candidates.md` (appended to by the four reviewers; persists for /wrapup to verdict)
 - Updates to `pipeline-state.json` (findings counts, gateState)
 - Updates to `commits-draft.md` if fixes were applied
 - Updates to `hot.md` on gate clearance

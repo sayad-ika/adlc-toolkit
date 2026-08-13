@@ -12,9 +12,9 @@ You are running Phase 3 of the ADLC pipeline: implementing the tasks for a REQ.
 
 ## Preflight
 
-1. **Verify architecture gate cleared.** Read `pipeline-state.json`. If `currentPhase < 2` or `gateState != "cleared"` for the architect phase, **stop** — direct the user to run `/architect`.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 9.
-3. **Load context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/conventions.md`, `specs/REQ-NNN-<slug>/requirement.md`, `architecture.md`, `exploration.md`, all `tasks/TASK-*.md`.
+1. **Resolve the REQ folder, then verify the architecture gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Then read `.adlc/<REQ_PATH>/pipeline-state.json`. If `currentPhase < 2` or `gateState != "cleared"` for the architect phase, **stop** — direct the user to run `/architect`.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 9.
+3. **Load context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/conventions.md`, `<REQ_PATH>/requirement.md`, `architecture.md`, `exploration.md`, all `tasks/TASK-*.md`.
 4. **Verify the work path exists.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. In `worktree` mode, also verify the worktree is still registered (`git -C <repo-path> worktree list`). In `branch` mode, verify the branch ref exists (`git -C <workPath> rev-parse --verify <branch>`). If anything is missing, stop and surface — `/architect` should have established the work path.
 5. **Confirm cwd discipline.** All Bash calls must use absolute paths or `git -C <workPath>` form. Shell cwd does not persist between Bash calls.
 6. **Work out where the assistant may edit freely, and when it must ask.** Read `config.yml.workflow.edits` (default `confirm-out-of-scope`). The REQ's **blast radius** is its work path (`pipeline-state.json.workPath`) plus the union of files named in the `tasks/TASK-*.md` "Files to touch" tables. This is the zone the implementer may edit freely. The *edge* of the radius — where the implementer must stop and surface instead of editing — is: a file no task named, a new top-level dependency, a schema/migration change, or anything touching auth/security/secrets. In `confirm-each` mode, every write is surfaced regardless. Carry this rule into every dispatch below (ETHOS principle 1: edit freely inside the scope, hard stop at the edge). When a task's "Files to touch" names a user-facing doc (README, `docs/`, API reference), updating it is part of completing that task — write the doc change in the same diff as the code, so it's reviewed at `/review` rather than discovered stale later.
@@ -34,24 +34,24 @@ If you find a circular dependency that wasn't caught at the architect gate, **st
 
 ### 2. Execute tier 0 in parallel
 
-For each task in tier 0, launch a `task-implementer` agent (deep tier) with the following prompt:
+For each task in tier 0, launch a `task-implementer` agent (deep tier) with the following prompt. Write the resolved path out in full — the agent resolves nothing, so `<REQ_PATH>` must already be substituted when it arrives:
 
 ```
 Task: TASK-NNN
-Task file: .adlc/specs/REQ-NNN-<slug>/tasks/TASK-NNN.md
-REQ folder: .adlc/specs/REQ-NNN-<slug>/
+Task file: .adlc/<REQ_PATH>/tasks/TASK-NNN.md
+REQ folder: .adlc/<REQ_PATH>/
 Work path: <workPath from pipeline-state.json>
-Architecture: .adlc/specs/REQ-NNN-<slug>/architecture.md
-Exploration: .adlc/specs/REQ-NNN-<slug>/exploration.md
+Architecture: .adlc/<REQ_PATH>/architecture.md
+Exploration: .adlc/<REQ_PATH>/exploration.md
 
 Implement the task per your skill instructions. Write code in the worktree.
 Edit posture: <workflow.edits>. Blast radius = this work path + the files this
 task names. Edit freely inside it. STOP and report (do not edit) if the work
 needs to cross the edge: a file no task named, a new top-level dependency, a
 schema/migration, or anything touching auth/security/secrets.
-Draft commit messages to .adlc/specs/REQ-NNN-<slug>/commits-draft.md (append).
+Draft commit messages to .adlc/<REQ_PATH>/commits-draft.md (append).
 Run tests, verify they pass.
-Surface lesson candidates to .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md per your skill instructions (bar: when in doubt, surface).
+Surface lesson candidates to .adlc/<REQ_PATH>/lesson-candidates.md per your skill instructions (bar: when in doubt, surface).
 Do NOT run any git mutation commands.
 Report when done.
 ```
@@ -131,7 +131,7 @@ REQ: REQ-NNN-<slug>
 Awaiting: review the implementation, run the drafted commits, approve to proceed to /review.
 Files:
   - Working diff at: <workPath>
-  - .adlc/specs/REQ-NNN-<slug>/commits-draft.md
+  - .adlc/<REQ_PATH>/commits-draft.md
 ```
 
 ### 9. Emit the gate card
@@ -212,7 +212,7 @@ If `abort`:
 ## Output artifacts
 
 - Code changes in the worktree (uncommitted)
-- `.adlc/specs/REQ-NNN-<slug>/commits-draft.md` (drafts for the user to run)
-- `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` (created or appended to by task-implementer; persists for /review and /wrapup)
+- `.adlc/<REQ_PATH>/commits-draft.md` (drafts for the user to run)
+- `.adlc/<REQ_PATH>/lesson-candidates.md` (created or appended to by task-implementer; persists for /review and /wrapup)
 - Updates to `pipeline-state.json` (taskStatus, currentPhase, gateState)
 - Updates to `hot.md` on gate clearance or abort

@@ -4,7 +4,7 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 
 ## Read this first
 
-- [[CLAUDE]] — the rulebook: how Claude reads and writes this folder. How Claude reads and writes this vault. Claude reads this at the start of every session.
+- [[CLAUDE]] — the rulebook: how Claude reads and writes this vault. Claude reads this at the start of every session.
 - [[now]] — what's actively in flight right now.
 - [[hot]] — the activity log. New entries go on top; old ones are never edited.
 - [[index]] — content catalog. Drill into specific pages from here.
@@ -14,15 +14,28 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 | Path | What lives here |
 |---|---|
 | `context/` | Project-wide architecture, conventions, overview |
-| `knowledge/lessons/` | Per-file lessons with `^L##` anchors |
+| `knowledge/lessons/` | One file per lesson, each with a `^L##` anchor (not a mirror of your source tree) |
 | `knowledge/gotchas.md` | Consolidated codebase quirks with `^g##` anchors |
 | `knowledge/concepts/` | Patterns, invariants, domain models |
 | `knowledge/components/` | One page per major module |
 | `architecture/` | High-level architecture + ADRs |
-| `specs/REQ-xxx/` | All artifacts for a single requirement |
-| `specs/_archive/` | Merged REQs, moved here whole at wrap-up (offered at `merged`; IDs stay reserved) |
+| `specs/` | One folder per requirement, holding all its artifacts — `specs/REQ-042-slug/`, or `specs/2026-08/sf/REQ-042-slug/` when bucketed (below) |
+| `specs/_archive/` | Merged REQs, moved here whole at wrap-up (offered at `merged`; IDs stay reserved). The move keeps whatever bucket the REQ had |
 | `templates/` | Per-project copies of toolkit templates |
 | `config.yml` | Stack config — deploy targets, repo layout |
+
+### Month and author buckets
+
+`config.yml` → `layout.partition` sets the on-disk shape of `specs/`, `bugs/`, and `sprints/`:
+
+- **`none`** — `specs/REQ-042-payment-retries/`. A flat list.
+- **`month-author`** — `specs/2026-08/sf/REQ-042-payment-retries/`, where `2026-08` is the month the REQ was created and `sf` is who created it. `sprints/` takes the month only, no author folder.
+
+The month is set once and never changes: a REQ opened in July and merged in August stays in `2026-07/` forever. Both shapes are readable at the same time and always will be, so a vault can hold a mix of them and switching is safe. `/config migrate` moves existing folders into buckets — it shows the whole move plan first and is safe to run twice.
+
+Don't type these paths, and don't assume a shape. Refer to a REQ by its ID and let the pipeline find the folder.
+
+**`knowledge/`, `architecture/`, `context/`, and `audits/` are never bucketed.** Nobody asks which month they learned the auth-token thing; they ask whether there's a lesson about auth tokens. That's a question a flat folder and a search answer well and a dated tree answers badly — so those paths stay stable whatever `layout.partition` says.
 
 ## Conventions
 
@@ -48,12 +61,12 @@ The hot-path files are loaded at every phase entry — their size is a recurring
 
 ## How the pipeline writes here
 
-Each phase of `/proceed` creates or updates artifacts in this vault:
+Each phase of `/proceed` creates or updates artifacts in this vault. `<REQ>` below is that REQ's own folder — `specs/REQ-042-slug/` in a flat vault, `specs/2026-08/sf/REQ-042-slug/` in a bucketed one. The skills resolve it from the ID; you never type it.
 
-1. `/spec` → `specs/REQ-xxx/requirement.md`
-2. `/architect` → `specs/REQ-xxx/architecture.md`, `tasks/TASK-*.md`
+1. `/spec` → `<REQ>/requirement.md`
+2. `/architect` → `<REQ>/architecture.md`, `<REQ>/tasks/TASK-*.md`
 3. `/implement` → code changes (in your repo, not the vault) + `commits-draft.md`
-4. `/review` → `specs/REQ-xxx/verification.md` (compact verdict) + `review-log.md` (full narratives)
+4. `/review` → `<REQ>/verification.md` (compact verdict) + `review-log.md` (full narratives)
 5. `/wrapup` → `pr-draft.md`, updates to `lessons/`, `gotchas.md`, `concepts/`, `index.md`, `hot.md`
 
 By default you commit everything yourself (`git.mode: manual`). You can let the assistant commit or push on the feature branch — see `config.yml` → Git policy.

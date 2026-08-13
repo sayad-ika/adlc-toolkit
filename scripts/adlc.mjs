@@ -196,6 +196,15 @@ function mergeManifest(core, local) {
   out.tierToModel = { ...(core.tierToModel || {}), ...(local.tierToModel || {}) };
   out.tierEffort = { ...(core.tierEffort || {}), ...(local.tierEffort || {}) };
   out.sources = local.sources ? { ...(core.sources || {}), ...local.sources } : core.sources;
+  // Deep-merge `layout` too: an overlay that sets one sub-key (e.g. layout.monthFormat)
+  // must not drop `partitioned`/`flat`/`maxDepth` from the core block.
+  out.layout = local.layout
+    ? {
+        ...(core.layout || {}),
+        ...local.layout,
+        partitioned: { ...(core.layout?.partitioned || {}), ...(local.layout?.partitioned || {}) },
+      }
+    : core.layout;
   return out;
 }
 const coreManifest = JSON.parse(readFileSync(join(ROOT, 'core/manifest.json'), 'utf8'));
@@ -268,6 +277,8 @@ function buildModel(toolkitPath) {
       `Execute the ADLC **${s.name}** protocol — defined in \`${skillRef(s.name)}\` — against the \`.adlc/\` vault in the current repository.`,
       ``,
       `Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load \`${tp}/ETHOS.md\`).`,
+      ``,
+      `**Paths:** \`${tp}/core/VAULT-LAYOUT.md\` owns where work records live under \`${manifest.vaultDir}/specs\`, \`${manifest.vaultDir}/bugs\`, and \`${manifest.vaultDir}/sprints\`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.`,
     ];
     if (s.gate)
       lines.push(
@@ -312,7 +323,7 @@ function buildModel(toolkitPath) {
       ``,
       `This repository uses the **ADLC toolkit**: a spec-driven development pipeline with a human approval gate at every phase boundary. You are running inside ${toolLabel}.`,
       ``,
-      `**Knowledge vault:** \`${manifest.vaultDir}/\` holds specs, architecture, conventions, decisions (ADRs), lessons, gotchas, and glossary. Read \`${manifest.vaultDir}/context/conventions.md\`, \`${manifest.vaultDir}/context/project-overview.md\`, and \`${manifest.vaultDir}/now.md\` before non-trivial work. The toolkit itself lives at \`${tp}/\`.`,
+      `**Knowledge vault:** \`${manifest.vaultDir}/\` holds specs, architecture, conventions, decisions (ADRs), lessons, gotchas, and glossary. Read \`${manifest.vaultDir}/context/conventions.md\`, \`${manifest.vaultDir}/context/project-overview.md\`, and \`${manifest.vaultDir}/now.md\` before non-trivial work. The toolkit itself lives at \`${tp}/\`. Work records under \`specs/\`, \`bugs/\`, and \`sprints/\` may be flat or bucketed by month and author — \`${tp}/core/VAULT-LAYOUT.md\` is the only place that grammar is written down; resolve paths through it rather than assuming a shape.`,
       ``,
       `**The seven principles (full text: \`${tp}/ETHOS.md\`):**`,
       `1. **You decide; the assistant drafts.** Every phase boundary pauses for the user. Git writes follow \`${manifest.vaultDir}/config.yml\` → \`git.mode\` (default \`manual\` = the assistant drafts; you run git).`,

@@ -12,6 +12,37 @@ import { join, dirname } from 'node:path';
 
 const PHASE = { 1: 'spec', 2: 'architect', 3: 'implement', 4: 'review', 5: 'wrap up' };
 
+// Work folders may sit flat (specs/REQ-042-x/) or bucketed by month and author
+// (specs/2026-08/sf/REQ-042-x/), and one vault can hold both — see
+// core/VAULT-LAYOUT.md. Walk down to the bucket depth rather than assuming REQ
+// folders are direct children; the old flat loop found nothing in a bucketed
+// vault and exited silently, so gates stopped notifying with no error anywhere.
+//
+// The sentinel is the folder's own NAME: pipeline-state.json is gitignored, and
+// bug folders have bug.md, not requirement.md.
+const MAX_DEPTH = 4;
+
+function collect(root, depth, waiting) {
+  let entries;
+  try { entries = readdirSync(root, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const folder = join(root, e.name);
+    if (/^(REQ|BUG)-/.test(e.name)) {
+      if (!existsSync(join(folder, '.awaiting-approval'))) continue;
+      let phase = '';
+      try {
+        const st = JSON.parse(readFileSync(join(folder, 'pipeline-state.json'), 'utf8'));
+        phase = PHASE[st.currentPhase] ? ` (${PHASE[st.currentPhase]})` : '';
+      } catch {}
+      waiting.push(`${e.name}${phase}`);
+      continue;
+    }
+    if (e.name === '_archive') continue; // archived work has no live gate
+    if (depth < MAX_DEPTH) collect(folder, depth + 1, waiting);
+  }
+}
+
 function findVault(start) {
   let dir = start;
   for (let i = 0; i < 6; i++) {
@@ -34,17 +65,7 @@ try {
   const waiting = [];
   for (const kind of ['specs', 'bugs']) {
     const root = join(vault, kind);
-    if (!existsSync(root)) continue;
-    for (const e of readdirSync(root, { withFileTypes: true })) {
-      if (!e.isDirectory()) continue;
-      if (!existsSync(join(root, e.name, '.awaiting-approval'))) continue;
-      let phase = '';
-      try {
-        const st = JSON.parse(readFileSync(join(root, e.name, 'pipeline-state.json'), 'utf8'));
-        phase = PHASE[st.currentPhase] ? ` (${PHASE[st.currentPhase]})` : '';
-      } catch {}
-      waiting.push(`${e.name}${phase}`);
-    }
+    if (existsSync(root)) collect(root, 1, waiting);
   }
   if (waiting.length === 0) process.exit(0);
   const msg =

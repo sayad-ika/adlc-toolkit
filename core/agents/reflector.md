@@ -129,7 +129,7 @@ If the new code solves a problem that's already solved elsewhere in the codebase
 
 ## Output format
 
-Write findings to `.adlc/specs/REQ-xxx/review-log.md` under a `## Reflection findings` heading (the `/review` skill distills the consolidated verdict into `verification.md` — your category tags like `repo-doc-stale` / `vault-stale` / `adr-conflict` must appear on each finding so they survive that distillation).
+Write findings to `review-log.md` in the REQ folder you were given, under a `## Reflection findings` heading (the `/review` skill distills the consolidated verdict into `verification.md` — your category tags like `repo-doc-stale` / `vault-stale` / `adr-conflict` must appear on each finding so they survive that distillation).
 
 Each finding:
 
@@ -176,7 +176,7 @@ Do not silently let the new code violate vault content. Surface the conflict eit
 
 You are the primary surfacer of *new* vault entries because your job already reads the diff through the lens of existing knowledge. Whenever your check makes you reach for a lesson, gotcha, or ADR that doesn't yet exist (or is too narrow to cover the current case), that gap is a candidate.
 
-Append candidates to `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md`.
+Append candidates to `lesson-candidates.md` in the same REQ folder.
 
 **Bar: when in doubt, surface.** `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is the knowledge loop this toolkit exists to enable.
 

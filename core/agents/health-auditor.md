@@ -102,8 +102,8 @@ The vault has a size discipline: the hot-path files are loaded at every phase en
 - **Dead gotcha anchors** — gotchas whose named file no longer exists in the repo.
 - **Stale provisional marks** — `STATUS: needs verification` older than 30 days.
 - **Superseded-but-referenced ADRs** — ADRs with status `superseded` that other pages still wikilink as if in effect.
-- **Merged REQ folders still under `specs/`** — REQs merged more than 30 days ago whose folders sit alongside active work (archive candidates).
-- **Footprint report** — bytes and estimated tokens (bytes ÷ 4) per layer: hot path (`CLAUDE.md` + `config.yml` + nav files + `context/`), knowledge (`knowledge/` + accepted ADRs), active `specs/` folders. Include the tiered-loading trigger readout: `knowledge/ at <N>KB of 60KB · <N> of 30 lessons` (the trigger is defined in the toolkit's tiered-vault-loading ADR — when either bound is crossed, say so on its own line and point the user at that ADR).
+- **Merged REQ folders still under `specs/`** — REQs merged more than 30 days ago whose folders sit alongside active work (archive candidates). Find them with VAULT-LAYOUT's `enumerate(active)` walk — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'` — which matches on each folder's own basename, so bucketed vaults list too. The `-not -path` is the point: a REQ already under `_archive/` is filed, not a candidate.
+- **Footprint report** — bytes and estimated tokens (bytes ÷ 4) per layer: hot path (`CLAUDE.md` + `config.yml` + nav files + `context/`), knowledge (`knowledge/` + accepted ADRs), active `specs/` folders (the same `enumerate(active)` walk — don't `du` `specs/`, that counts the archive). Include the tiered-loading trigger readout: `knowledge/ at <N>KB of 60KB · <N> of 30 lessons` (the trigger is defined in the toolkit's tiered-vault-loading ADR — when either bound is crossed, say so on its own line and point the user at that ADR).
 
 ## Output format
 

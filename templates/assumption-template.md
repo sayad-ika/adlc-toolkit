@@ -40,6 +40,6 @@ Filled when validated or invalidated. Date, what was found, link to the REQ or c
 
 ## Related
 
-- REQ: [[specs/{{REQ_ID}}/requirement]]
+- REQ: [[{{REQ_PATH}}/requirement]]
 - Concepts: {{CONCEPT_LINKS}}
 - If invalidated, follow-up REQ: {{LINK}}

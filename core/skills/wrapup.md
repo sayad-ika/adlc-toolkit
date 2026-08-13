@@ -12,8 +12,8 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 
 ## Preflight
 
-1. **Verify verify gate cleared.** Read `pipeline-state.json`. `currentPhase >= 4`, `gateState: "cleared"` for verify.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 8.
+1. **Resolve the REQ folder, then verify the verify gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Read `.adlc/<REQ_PATH>/pipeline-state.json`: `currentPhase >= 4`, `gateState: "cleared"` for verify.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 8.
 3. **Load only what the steps below actually read.** `requirement.md` (goal + acceptance criteria), `verification.md` (reflector findings, follow-ups), and `architecture.md`'s **blast-radius section only**. `commits-draft.md` is step 2's input — but run the git-log check (next item) first; if the commit subjects plus `--stat` already tell the change story, don't open the draft. Do **not** load `tasks/*.md`, `exploration.md`, or `review-log.md`: no step below reads them, and `exploration.md` is usually the largest file in the REQ folder. If a step turns out to need one, open it *at that step* and add a `**Packet-gap:**` line to the gate card so this list gets tightened.
 
    **Do not pre-load the vault write targets.** `hot.md`, `index.md`, `now.md`, `decisions.md`, and `glossary.md` are step 4's *outputs*, and a typical REQ touches two of them. Open each at the step that writes it, and read only the section being edited. Pre-loading the set costs the same tokens on every REQ and grows as the vault does — exactly backwards: wrap-up must not get more expensive the better the vault gets.
@@ -39,7 +39,7 @@ Surface any findings. The gate prompt will ask the user to clean before merging.
 
 ### 2. Draft the PR
 
-Write `.adlc/specs/REQ-NNN-<slug>/pr-draft.md` from `.adlc/templates/pr-template.md` — read the template *here*, not at preflight. (Fall back to `$TOOLKIT_PATH/templates/pr-template.md` if this vault predates it; `/config templates` adds the vault copy.)
+Write `.adlc/<REQ_PATH>/pr-draft.md` from `.adlc/templates/pr-template.md` — read the template *here*, not at preflight. (Fall back to `$TOOLKIT_PATH/templates/pr-template.md` if this vault predates it; `/config templates` adds the vault copy.)
 
 Filling notes the template can't carry:
 
@@ -51,7 +51,7 @@ Filling notes the template can't carry:
 
 ### 3. Update the vault — knowledge
 
-Knowledge capture happens in two halves: candidates were surfaced upstream (during /implement and /review) into `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md`. This step issues a verdict on each candidate and writes the resulting lessons, gotchas, and other vault entries.
+Knowledge capture happens in two halves: candidates were surfaced upstream (during /implement and /review) into `.adlc/<REQ_PATH>/lesson-candidates.md`. This step issues a verdict on each candidate and writes the resulting lessons, gotchas, and other vault entries.
 
 #### Process candidates
 
@@ -146,13 +146,13 @@ If new project-specific terms emerged, add them — test each candidate term wit
 
 ### 5. Draft the merge checklist
 
-Write `.adlc/specs/REQ-NNN-<slug>/merge-checklist.md` from `.adlc/templates/merge-checklist-template.md` — read it *here*, not at preflight, same toolkit fallback as step 2. Substitute every `<placeholder>` with real values from `pipeline-state.json` and `config.yml`, and keep **only** the post-merge cleanup block matching `pipeline-state.isolation`: the template carries both `worktree` and `branch`, the written file carries one.
+Write `.adlc/<REQ_PATH>/merge-checklist.md` from `.adlc/templates/merge-checklist-template.md` — read it *here*, not at preflight, same toolkit fallback as step 2. Substitute every `<placeholder>` with real values from `pipeline-state.json` and `config.yml`, and keep **only** the post-merge cleanup block matching `pipeline-state.isolation`: the template carries both `worktree` and `branch`, the written file carries one.
 
 ### 5a. Draft source write-back (optional, gated)
 
 Only if `config.yml.sources.write` includes the issue tracker **and** this REQ was seeded from (or links to) an issue. Otherwise skip this step entirely.
 
-- **Draft, don't send.** Write the proposed write-back into `.adlc/specs/REQ-NNN-<slug>/source-writeback.md`: the target issue, the comment text (e.g. "Addressed in PR <link> — REQ-NNN-<slug>"), and any status transition (e.g. `→ In Review`). Use the PR link only if one exists yet; otherwise leave a placeholder the user fills after opening the PR.
+- **Draft, don't send.** Write the proposed write-back into `.adlc/<REQ_PATH>/source-writeback.md`: the target issue, the comment text (e.g. "Addressed in PR <link> — REQ-NNN-<slug>"), and any status transition (e.g. `→ In Review`). Use the PR link only if one exists yet; otherwise leave a placeholder the user fills after opening the PR.
 - **Never auto-submit.** This is surfaced at the wrap-up gate as a proposed action and executed only on explicit approval, using the resolved mechanism (`gh issue comment` / MCP / etc.). External writes always stop for your explicit OK — even under `/autopilot`.
 - **Capped.** Under `/proceed`, the user approves it at the gate like everything else. Under `/autopilot`, it is additionally capped by `autonomy.sources` (default `read-only` ⇒ never auto-sent) and `sources.write`.
 
@@ -173,8 +173,8 @@ Phase: ship
 REQ: REQ-NNN-<slug>
 Awaiting: review the PR draft and vault updates, then run the merge checklist.
 Files:
-  - .adlc/specs/REQ-NNN-<slug>/pr-draft.md
-  - .adlc/specs/REQ-NNN-<slug>/merge-checklist.md
+  - .adlc/<REQ_PATH>/pr-draft.md
+  - .adlc/<REQ_PATH>/merge-checklist.md
   - New / updated vault files (see below)
 ```
 
@@ -230,7 +230,11 @@ If `merged`:
 2. Update `pipeline-state.json`: `prState: "merged"`, `mergedAt: <timestamp>`, terminal status.
 3. Append to `hot.md`: `## [DATE] req-merged | REQ-NNN-<slug>`.
 4. Update `now.md`: remove this REQ from active focus.
-5. **Offer to archive.** One question: move `specs/REQ-NNN-<slug>/` → `specs/_archive/REQ-NNN-<slug>/`? Archiving keeps `specs/` showing only active work and keeps Obsidian search and graph focused; the folder moves **whole** — verdict, log, drafts, state — nothing is deleted, and git history keeps every prior path. On yes: move the folder, repoint this REQ's `index.md` rows at the `_archive/` path, and append `## [DATE] req-archived | REQ-NNN-<slug>` to `hot.md`. On no: leave it — `/analyze`'s vault-health lists it as an archive candidate after 30 days, so the offer comes back. (Archived REQs keep their IDs; `/spec` and `/task` scan `_archive/` when minting, so numbers are never reused.)
+5. **Offer to archive.** One question: move `<REQ_PATH>/` under `_archive/`? Archiving keeps `specs/` showing only active work and keeps Obsidian search and graph focused; the folder moves **whole** — verdict, log, drafts, state — nothing is deleted, and git history keeps every prior path.
+
+   The destination **mirrors the source's tail**: insert `_archive/` right after `specs/` and keep everything after it exactly as it was — `specs/2026-08/sf/REQ-042-slug/` archives to `specs/_archive/2026-08/sf/REQ-042-slug/`, and a flat REQ archives flat. Never mint a month here — that would bucket the work by its merge date instead of the date it was opened.
+
+   On yes: `mkdir -p` the destination's parent first (the move fails outright if it doesn't exist), then plain `mv` the folder — **not `git mv`**, which stages a rename and would be a git write in `manual` mode. Git detects the rename from content at commit time either way, so `git log --follow` still traces the files. Then repoint this REQ's `Path` column in `.adlc/index.md` to the new path, and append `## [DATE] req-archived | REQ-NNN-<slug>` to `hot.md`. On no: leave it — `/analyze`'s vault-health lists it as an archive candidate after 30 days, so the offer comes back. (Archived REQs keep their IDs; `/spec` and `/task` scan `_archive/` when minting, so numbers are never reused.)
 6. Clean up: ask the user if they want to delete the REQ folder's ephemeral files (`.awaiting-approval` if any, the worktree path can be removed since it's likely already gone).
 
 If `abort`:
@@ -248,10 +252,10 @@ If `abort`:
 
 ## Output artifacts
 
-- `.adlc/specs/REQ-NNN-<slug>/pr-draft.md`
-- `.adlc/specs/REQ-NNN-<slug>/merge-checklist.md`
-- `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` (now includes the `## Candidate verdicts` table appended at the bottom; retained after wrapup as decision history)
-- `.adlc/specs/REQ-NNN-<slug>/source-writeback.md` (only when `sources.write` is configured and a write-back was drafted at step 5a)
+- `.adlc/<REQ_PATH>/pr-draft.md`
+- `.adlc/<REQ_PATH>/merge-checklist.md`
+- `.adlc/<REQ_PATH>/lesson-candidates.md` (now includes the `## Candidate verdicts` table appended at the bottom; retained after wrapup as decision history)
+- `.adlc/<REQ_PATH>/source-writeback.md` (only when `sources.write` is configured and a write-back was drafted at step 5a)
 - New / updated vault files: `lessons/`, `gotchas.md`, `concepts/`, `components/`, `architecture/`, `index.md`, `decisions.md`, `hot.md`, `now.md`, `glossary.md`
-- On `merged` + user approval: the REQ folder moved to `specs/_archive/REQ-NNN-<slug>/` (whole, nothing deleted) with `index.md` repointed
+- On `merged` + user approval: the REQ folder moved under `specs/_archive/` with its tail preserved (whole, nothing deleted) and its `Path` column in `index.md` repointed
 - Updates to `pipeline-state.json`

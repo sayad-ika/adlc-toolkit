@@ -67,7 +67,7 @@ Every verdict carries a calibrated `confidence` in `[0,1]` — your honest proba
 
 ## Output — append to `gate-decisions.md`
 
-Append one entry to `.adlc/specs/REQ-NNN-<slug>/gate-decisions.md` (create the file with a `# Gate decisions — REQ-NNN-<slug>` header if absent). **Every** invocation writes an entry — there are no silent verdicts.
+Append one entry to `gate-decisions.md` in the work folder your packet gives you (create the file with a `# Gate decisions — <ID>` header if absent). **Every** invocation writes an entry — there are no silent verdicts.
 
 ```markdown
 ## [<timestamp>] <PHASE> gate — <APPROVE | REWORK | HALT>

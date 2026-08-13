@@ -26,11 +26,11 @@ The defining feature: `/task` is **self-triaging**. Small work runs here; work t
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at both gates below.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at both gates below.
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
-3. **Assign the REQ ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), exactly as `/spec` preflight does — `sequential` (`REQ-NNN`, max+1, scanning `specs/` **and** `specs/_archive/`), `prefixed` (`REQ-<req.prefix>-NNN`, same two-folder scan), or `ticket` (the issue key when invoked with an issue ref + `sources.issues`; else fall back to prefixed/sequential, noting it). `/task` uses the **same ID namespace and `.adlc/specs/` location as `/spec`** — this is what makes escalation to `/proceed` a clean handoff rather than a migration. Throughout, `REQ-NNN` denotes the assigned ID in whatever form the scheme produced.
+3. **Assign the REQ ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), exactly as `/spec` preflight does — one scan, `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*'`, which covers every month bucket, every author folder, and `_archive/`. `sequential` takes max+1 padded to 3 (`REQ-NNN`); `prefixed` (`REQ-<req.prefix>-NNN`) narrows the `-name` to `REQ-<req.prefix>-*` but keeps the depth — scoped to your own author folder it would re-mint someone else's live IDs; `ticket` takes the issue key when invoked with an issue ref + `sources.issues`, else falls back to prefixed/sequential, noting it. `/task` uses the **same ID namespace and `specs/` tree as `/spec`** — this is what makes escalation to `/proceed` a clean handoff rather than a migration. Throughout, `REQ-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Determine the slug.** Short kebab-case, ≤40 chars.
-5. **Create the REQ folder:** `.adlc/specs/REQ-NNN-<slug>/`.
+5. **Create the REQ folder.** Same rule as `/spec` preflight step 5: read `config.yml` → `layout.partition`; `none` gives `specs/REQ-NNN-<slug>`, `month-author` gives `specs/<YYYY-MM>/<author>/REQ-NNN-<slug>` — today's month (the creation month, fixed from here) and `<author>` the first of `layout.author`, `req.prefix`, initials from `git config user.name`, or `_`. `mkdir -p` the parents. **That vault-relative path is `<REQ_PATH>` below** — no `.adlc/` prefix, so paths read `.adlc/<REQ_PATH>/…`, and agent dispatch prompts get it written out in full (the agents resolve nothing).
 6. **Resolve a source reference (optional).** Same resolver as `/spec` preflight step 6 (issue ref / URL via `gh` → MCP → fetch when `sources.issues` is set). Additive; never blocks.
 
 ## Phase 1 — Plan (gate)
@@ -64,7 +64,7 @@ Using the recon, evaluate the change against the escalation criteria above. Deci
 
 ### 3. Draft the lightweight requirement
 
-Write a compact `.adlc/specs/REQ-NNN-<slug>/requirement.md` — not the full spec template. Include:
+Write a compact `.adlc/<REQ_PATH>/requirement.md` — not the full spec template. Include:
 
 - **Goal** — one or two sentences: the state of the world after this ships.
 - **Acceptance criteria** — 1–3 testable, yes/no statements.
@@ -76,7 +76,7 @@ Add `kind: task` to the frontmatter so the vault and `/status` can tell task-REQ
 
 ### 4. Initialize pipeline state
 
-`.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`:
+`.adlc/<REQ_PATH>/pipeline-state.json`:
 
 ```json
 {
@@ -159,7 +159,7 @@ Dispatch a **reduced reviewer set**, not the full five:
 - **ui-reviewer** — only when the change touches UI directly or via a consumed API contract (the same evidence-driven trigger `/review` uses). A task that changes a button or an API a screen calls still gets its UI verified.
 - Skip quality and architecture reviewers unless the diff introduced significant new code or moved layering — if it did, that's also a hint it should have been `/proceed`.
 
-Pass `Candidates file: .adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` — and pass `Output file: .adlc/specs/REQ-NNN-<slug>/verification.md`, stating in the dispatch prompt: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The reviewer agents' own instructions default to `review-log.md` because the full `/review` splits verdict from narrative; a `/task` review is small enough that one file *is* the verdict.) Consolidate findings in place with the same severity shape as `/review`, with only the dispatched reviewers' sections.
+Pass `Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md` — and pass `Output file: .adlc/<REQ_PATH>/verification.md`, stating in the dispatch prompt: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The reviewer agents' own instructions default to `review-log.md` because the full `/review` splits verdict from narrative; a `/task` review is small enough that one file *is* the verdict.) Consolidate findings in place with the same severity shape as `/review`, with only the dispatched reviewers' sections.
 
 ### 2. Wrapup-lite — capture knowledge
 

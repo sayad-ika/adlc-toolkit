@@ -11,6 +11,7 @@ It exists for one reason hand-editing YAML can't satisfy: some settings have a *
 
 - `.adlc/config.yml` must exist. If it doesn't, tell the user to run `/init` first and stop.
 - Determine `$TOOLKIT_PATH` (the "Toolkit root:" line in the command that invoked you) — needed to read canonical templates when re-syncing derived files.
+- If the user asked for `migrate`, or is setting any `layout.*` key, read `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` first — it owns the path grammar the layout step rearranges.
 
 ## Modes of invocation
 
@@ -38,6 +39,8 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `git.protect` | list of branch globs | must be non-empty; warn (don't block) if `main`/`master` is removed |
 | `workflow.isolation` | `auto` \| `branch` \| `worktree` | explain the trade-off when changing (branch keeps the editor session; worktree tolerates a dirty checkout) |
 | `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | how often the implementer asks before editing within a phase. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
+| `layout.partition` | `none` \| `month-author` | on-disk shape of `specs/`, `bugs/`, `sprints/` — see `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`. Changing it affects **new** folders only; existing ones move when the user runs `/config migrate` (mode D, layout step). Both shapes stay readable, so a half-migrated vault is fine. |
+| `layout.author` | free text, `[a-z0-9-]`, 1–8 chars | initials used as the folder bucket under `month-author`. Falls back to `req.prefix`, then initials from `git config user.name`, then `_`. Lowercase it; if the user gives something outside the charset, offer the sanitized form rather than writing it raw. |
 | `sources.issues` | `github` \| `linear` \| `jira` \| `none` | issue tracker `/spec` and `/bugfix` seed from. Setting non-`none` enables read-seeding (mechanism auto-resolved: CLI → MCP → URL). If set, prompt for `sources.repo` too. |
 | `sources.design` | `figma` \| `none` | design tool `/architect` seeds UI/component specs from. |
 | `sources.repo` | free text (`owner/name`) | default repo for bare refs like `/spec #8`. |
@@ -70,6 +73,33 @@ If the user names a key not in this catalog, don't invent behavior — show the 
 When the toolkit gains new settings (e.g. `workflow.edits`, the `sources` block, `autonomy.sources`), a vault created before the update won't have them. Their skills default safely when absent, so nothing breaks — but a user who wants the new capability shouldn't have to hand-paste YAML. Migration scaffolds the missing pieces in, additively.
 
 **This is strictly additive.** It never changes an existing value, never removes a key (including custom keys the user added), and never reorders the file. It only inserts blocks/keys that the canonical template has and the project config lacks, carrying the template's explanatory comments with them.
+
+**`layout.partition` is inserted as `none`, always.** The template ships `none` for exactly this reason: a vault created before 1.6.0 has flat folders on disk, and injecting `month-author` would leave its config claiming a shape its files don't have. An existing vault adopts partitioning only by an explicit choice — either the user sets the key, or they accept the layout step in the migration below. Never infer it from the folders present.
+
+### Layout step (only when `layout.partition` is not `none`)
+
+Offered as a separate, separately-gated step after the config keys are handled. Read `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` first — it owns the path grammar this step rearranges.
+
+This is a **reconciler**: it computes the gap between what's on disk and what the config asks for, and closes it. Running it twice is a no-op by construction, because the second run finds no work. There is no "already migrated" marker to get out of sync, and nothing is backed up to `.bak` — `git mv` keeps the history.
+
+1. **Find the work — two passes, different depths.** Folders that still sit directly under the tree root are un-bucketed:
+   - Active: `find .adlc/specs -mindepth 1 -maxdepth 1 -type d -name 'REQ-*'`
+   - Archived: `find .adlc/specs/_archive -mindepth 1 -maxdepth 1 -type d -name 'REQ-*'`
+
+   Anything deeper is already bucketed. **The archive pass is not optional** — skip it and the vault stays half-partitioned forever (active work bucketed, archive flat). Nothing breaks, because both shapes resolve; it just never finishes.
+2. **Derive the month** for each folder, first hit wins:
+   - `git log --diff-filter=A --format=%ad --date=format:%Y-%m -- <path> | tail -1`
+   - `pipeline-state.json`'s created timestamp
+   - the folder's mtime — mark this row `(guessed)`
+3. **Derive the author** from that same first commit's `%an`, reduced to initials. No commit, or unparseable → `_`.
+4. **Show the whole move plan before touching anything** — a table of old path → new path, plus where the month came from. Group `(guessed)` rows at the top so they get looked at. Gate on it: `move all`, `move except <ID>`, or `skip`.
+5. **Move, per folder:** `mkdir -p` the destination's parent, **then** plain `mv` — the move fails outright if the parent doesn't exist. Use `mv`, **not `git mv`**: this skill never runs git writes, and `git mv` stages a rename. Git detects the rename from content when the user commits, so `git log --follow` still traces the files. Gitignored files inside the folder (`pipeline-state.json` and friends) come along with the directory either way.
+6. **Repoint and log.** Update each moved REQ's row in `.adlc/index.md`, then append one line to `.adlc/hot.md`: `## [DATE] layout-migrated | <N> REQs, <M> bugs, <K> sprints`.
+7. **Offer the `.gitignore` replacement** as its own gated diff. The old block's single-`*` globs stop matching the moment folders are bucketed, which silently starts committing per-developer state. The `**` set from `VAULT-LAYOUT.md` covers both shapes, so it's worth offering even to vaults staying flat.
+
+Same procedure for `bugs/` (active only — there is no `bugs/_archive/`) and for `sprints/`, which take the month bucket but no author segment.
+
+Durable artifacts — lessons, ADRs, concept pages — reference REQs by **ID**, not path, so nothing outside these trees needs rewriting. If you find yourself sweeping `knowledge/` for path strings, something upstream wrote a path where it should have written an ID.
 
 **Steps:**
 

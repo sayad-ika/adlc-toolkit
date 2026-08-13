@@ -1,6 +1,6 @@
 ---
 name: task
-description: "Slim self-triaging pipeline for small changes; escalates to /proceed when large."
+description: "Slim ADLC pipeline for small changes — a tweak, a small feature, a contained refactor that's too small for /proceed's five phases but should still live in the vault. Triage → plan (gate) → implement → review + ship (gate). Self-triaging: recommends /proceed if the work is actually large, up front or mid-flight, without losing the REQ folder it created. Use instead of doing small work ad-hoc, so the vault still captures it."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -8,6 +8,8 @@ Toolkit root: .adlc-toolkit
 Execute the ADLC **task** protocol — defined in `.adlc-toolkit/core/skills/task.md` — against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
+
+**Paths:** `.adlc-toolkit/core/VAULT-LAYOUT.md` owns where work records live under `.adlc/specs`, `.adlc/bugs`, and `.adlc/sprints`. A vault may hold flat and month-bucketed folders at the same time, so never hard-code a path under those trees — resolve it.
 
 **Gate:** this skill ends in an approval gate. Stop and wait for the user's explicit approval before anything proceeds past it. Do not auto-fix-and-continue on a gate failure — surface what failed and wait.
 

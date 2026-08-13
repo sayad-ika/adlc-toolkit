@@ -12,9 +12,9 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
 
 ## Preflight
 
-1. **Verify spec gate cleared.** Read `.adlc/specs/REQ-NNN-<slug>/pipeline-state.json`. If `currentPhase < 1` or `gateState != "cleared"` for the spec phase, **stop** — direct the user to run `/spec` first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, and the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`) — the shared gate-card format used at step 10.
-3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `specs/REQ-NNN-<slug>/requirement.md`.
+1. **Resolve the REQ folder, then verify the spec gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Then read `.adlc/<REQ_PATH>/pipeline-state.json`. If `currentPhase < 1` or `gateState != "cleared"` for the spec phase, **stop** — direct the user to run `/spec` first.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 10.
+3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `<REQ_PATH>/requirement.md`.
 4. **Establish the work path.** If `pipeline-state.json.workPath` is null:
 
    a. Read `config.yml.workflow.isolation` (default: `auto`).
@@ -26,7 +26,7 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
    c. Read the primary repo path from `config.yml`. Derive the branch name from `conventions.md`'s branch-naming rule, default `feat/REQ-NNN-<slug>`.
    d. Execute by mode:
       - **`branch` mode.** Verify the working tree is clean: `git -C <repo-path> status --porcelain`. If the output is non-empty, **stop and surface** — direct the user to commit or stash, or to set `workflow.isolation: worktree` in `config.yml` if they want parallel uncommitted work to coexist with this REQ. If clean, run `git -C <repo-path> checkout -b <branch-name>`. Update `pipeline-state.json` with `isolation: "branch"`, `workPath: <repo-path>`, `branch: <branch-name>`, `worktree: null`.
-      - **`worktree` mode.** Derive the worktree path: `<repo-path>/.worktrees/REQ-NNN-<slug>`. Run `git -C <repo-path> worktree add <worktree-path> -b <branch-name>`. Update `pipeline-state.json` with `isolation: "worktree"`, `workPath: <worktree-path>`, `worktree: <worktree-path>`, `branch: <branch-name>`.
+      - **`worktree` mode.** Derive the worktree path: `<repo-path>/.worktrees/REQ-NNN-<slug>` — it lives in the repo, not the vault, so name it by REQ ID and slug, never by `<REQ_PATH>`. Run `git -C <repo-path> worktree add <worktree-path> -b <branch-name>`. Update `pipeline-state.json` with `isolation: "worktree"`, `workPath: <worktree-path>`, `worktree: <worktree-path>`, `branch: <branch-name>`.
    e. Append to `hot.md`: `## [DATE] work-path-set | REQ-NNN-<slug> | <mode> at <workPath>`.
 5. **Resolve a design reference (optional).** If `config.yml.sources.design` is set (not `none`) and the spec or the user supplies a design reference (a Figma frame/file link, or a node mentioned in `requirement.md`):
    - Resolve the mechanism, first that works wins: an attached MCP server for the design tool, else a plain fetch if the reference is a full URL.
@@ -39,16 +39,16 @@ You are running Phase 2 of the ADLC pipeline: designing the architecture and bre
 
 **Dispatch by exact agent name.** If the agent type isn't available (not installed, or the sync hasn't run since it was added), **stop and tell the user**: "`<agent>` isn't installed — run the toolkit sync, then re-run this step." Never absorb the agent's work into the main session as a fallback: inline work runs at the session's model instead of the agent's tier (a haiku-priced exploration silently becomes an opus-priced one), and for reviewers it destroys the independence the gate depends on — the same context that wrote the code would be reviewing it.
 
-Launch the `codebase-explorer` agent (fast tier) with the following prompt:
+Launch the `codebase-explorer` agent (fast tier) with the following prompt. Write the resolved path out in full — the agent resolves nothing, so `<REQ_PATH>` must already be substituted when it arrives:
 
 ```
 REQ: REQ-NNN-<slug>
-Spec path: .adlc/specs/REQ-NNN-<slug>/requirement.md
+Spec path: .adlc/<REQ_PATH>/requirement.md
 Work path: <work-path>
 Vault root: .adlc/
 
 Do a structured exploration pass per your skill instructions. Write the report to:
-  .adlc/specs/REQ-NNN-<slug>/exploration.md
+  .adlc/<REQ_PATH>/exploration.md
 ```
 
 Wait for the agent to complete. Verify `exploration.md` exists and has all four sections.
@@ -57,7 +57,7 @@ If the agent reports a contradiction with the spec, **stop and surface** to the 
 
 ### 2. Draft architecture.md
 
-Copy `.adlc/templates/architecture-template.md` to `.adlc/specs/REQ-NNN-<slug>/architecture.md`. Fill it based on:
+Copy `.adlc/templates/architecture-template.md` to `.adlc/<REQ_PATH>/architecture.md`. Fill it based on:
 
 - The spec (`requirement.md`)
 - The exploration report (`exploration.md`)
@@ -81,7 +81,7 @@ Sections to fill:
 
 ### 3. Create task files
 
-For each task in the DAG, create `.adlc/specs/REQ-NNN-<slug>/tasks/TASK-NNN.md` from `templates/task-template.md`.
+For each task in the DAG, create `.adlc/<REQ_PATH>/tasks/TASK-NNN.md` from `templates/task-template.md`. Substitute `{{REQ_PATH}}` with the resolved vault-relative path and `{{REQ_ID}}` with the bare ID.
 
 Tasks should be:
 
@@ -149,7 +149,7 @@ The cost is proportional to the stakes — don't attack a trivial change.
 
 Otherwise run the **quick self-check** (no dispatch): you yourself ask the sharpest questions of the plan — what acceptance criterion has no task, what failure mode is unhandled, what's the rollback story, what decision is implicit, and (when there's a UI) what screen state has no plan — and fix or note anything that surfaces. One short paragraph in the gate prompt; move on.
 
-**Full pass — dispatch the adversary.** Launch the `architecture-adversary` agent (read-only) with:
+**Full pass — dispatch the adversary.** Launch the `architecture-adversary` agent (read-only) with the following — again, substitute the resolved path before sending; the agent resolves nothing:
 
 ```
 REQ: REQ-NNN-<slug>
@@ -157,12 +157,12 @@ Work path: <workPath>
 Branch: <branch>
 Trigger: <new-adr | large-blast-radius | cross-repo | sensitive-surface | ui-surface>
 Artifacts:
-  - .adlc/specs/REQ-NNN-<slug>/requirement.md
-  - .adlc/specs/REQ-NNN-<slug>/architecture.md
-  - .adlc/specs/REQ-NNN-<slug>/tasks/*.md
-  - .adlc/specs/REQ-NNN-<slug>/exploration.md (if present)
+  - .adlc/<REQ_PATH>/requirement.md
+  - .adlc/<REQ_PATH>/architecture.md
+  - .adlc/<REQ_PATH>/tasks/*.md
+  - .adlc/<REQ_PATH>/exploration.md (if present)
   - <new ADR path, if drafted>
-Output file: .adlc/specs/REQ-NNN-<slug>/architecture-adversary.md
+Output file: .adlc/<REQ_PATH>/architecture-adversary.md
 
 Attack the design before the gate. Report findings only — do not edit any artifact.
 Follow your skill instructions for lenses, self-refutation, and output format.
@@ -197,10 +197,10 @@ Phase: architect
 REQ: REQ-NNN-<slug>
 Awaiting: review the architecture and tasks, approve to proceed to /implement.
 Files:
-  - .adlc/specs/REQ-NNN-<slug>/architecture.md
-  - .adlc/specs/REQ-NNN-<slug>/tasks/*.md
-  - .adlc/specs/REQ-NNN-<slug>/exploration.md
-  - .adlc/specs/REQ-NNN-<slug>/architecture-adversary.md (if the full pass ran)
+  - .adlc/<REQ_PATH>/architecture.md
+  - .adlc/<REQ_PATH>/tasks/*.md
+  - .adlc/<REQ_PATH>/exploration.md
+  - .adlc/<REQ_PATH>/architecture-adversary.md (if the full pass ran)
   - .adlc/architecture/adr-NNN-<slug>.md (if drafted)
 ```
 
@@ -290,9 +290,9 @@ If `abort`:
 
 ## Output artifacts
 
-- `.adlc/specs/REQ-NNN-<slug>/architecture.md`
-- `.adlc/specs/REQ-NNN-<slug>/exploration.md` (from codebase-explorer)
-- `.adlc/specs/REQ-NNN-<slug>/tasks/TASK-*.md`
+- `.adlc/<REQ_PATH>/architecture.md`
+- `.adlc/<REQ_PATH>/exploration.md` (from codebase-explorer)
+- `.adlc/<REQ_PATH>/tasks/TASK-*.md`
 - `.adlc/architecture/adr-NNN-<slug>.md` (if a new decision was made)
 - Updates to `pipeline-state.json`, `.awaiting-approval`, `hot.md`, `decisions.md`
 - New stubs in `knowledge/components/` and `knowledge/concepts/` if applicable

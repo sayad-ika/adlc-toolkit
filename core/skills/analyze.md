@@ -31,6 +31,7 @@ If the user doesn't provide arguments, ask once whether they want the default (`
 ## Preflight
 
 1. **Read the toolkit ETHOS.**
+1a. **Read the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — the path grammar for `specs/`, `bugs/`, and `sprints/`. This skill resolves and lists work folders, and a vault may hold flat and bucketed folders at the same time. Never hard-code a path under those trees; use its `resolve` / `enumerate` rules.
 2. **Load vault context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `context/architecture.md`. The auditor needs to know the rules it's checking against.
 3. **Verify auditable scope exists.** Check that the scope path has source files. If empty, surface and stop.
 4. **Check for prior audits.** Read `.adlc/audits/health-*.md`. If a recent one exists (<30 days), surface it and ask whether the user wants a new run or to just look at the recent one.

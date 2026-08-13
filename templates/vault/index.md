@@ -12,9 +12,11 @@ Updated by `/wrapup` at the end of each REQ. You can also edit it manually. When
 
 _(REQ pages by id, with a one-line summary)_
 
-| REQ | Title | Status |
-|---|---|---|
-| _(empty)_ | | |
+`Path` is vault-relative and is the one place a REQ's folder location is written down — `/wrapup` repoints it when a REQ is archived, and `/config migrate` repoints it when folders are bucketed. Everything else refers to a REQ by **ID** and resolves the path at read time.
+
+| REQ | Title | Status | Path |
+|---|---|---|---|
+| _(empty)_ | | | |
 
 ## ADRs
 

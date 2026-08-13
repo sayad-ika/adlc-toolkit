@@ -17,8 +17,8 @@ You are the only agent (besides pipeline-runner) that can write code. With that 
 
 You will receive:
 
-- The path to the task file (`.adlc/specs/REQ-xxx/tasks/TASK-NN.md`)
-- The path to the REQ folder and architecture doc
+- The path to the task file (`tasks/TASK-NN.md` inside the REQ folder)
+- The path to the REQ folder and architecture doc — the dispatch prompt gives you the concrete path; don't go looking for it yourself
 - The work path (where you write code — either an isolated worktree, or the user's main checkout in branch mode)
 - The path to the exploration report from codebase-explorer
 
@@ -58,7 +58,7 @@ For each acceptance criterion in the task file, verify it's met. If any aren't, 
 
 ### 4. Draft the commit message
 
-Write to `.adlc/specs/REQ-xxx/commits-draft.md` (append, don't overwrite — each task contributes one or more commits to the same file).
+Write to `commits-draft.md` in the REQ folder you were given (append, don't overwrite — each task contributes one or more commits to the same file).
 
 Format:
 
@@ -150,7 +150,7 @@ If you can't complete the task — blocked dependency, missing information, cont
 
 ## Surface lesson candidates
 
-While implementing, append candidate lesson entries to `.adlc/specs/REQ-xxx/lesson-candidates.md` whenever you encounter something future you (or another implementer) would benefit from being warned about.
+While implementing, append candidate lesson entries to `lesson-candidates.md` in the REQ folder you were given, whenever you encounter something future you (or another implementer) would benefit from being warned about.
 
 **Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
@@ -188,7 +188,7 @@ Your task is complete when:
 
 - All acceptance criteria are met
 - All tests pass
-- `.adlc/specs/REQ-xxx/commits-draft.md` has an entry for your task
+- `commits-draft.md` in the REQ folder has an entry for your task
 - Your status report has been emitted
 - No `--no-verify`, no `.skip()`, no commented-out code, no debug logging in the diff
 - If anything during implementation was worth flagging for future you, candidates have been appended to `lesson-candidates.md`

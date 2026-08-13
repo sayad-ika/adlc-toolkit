@@ -99,7 +99,7 @@ A finding without a recorded surviving refutation attempt is not a finding. No b
 
 ## Output format
 
-Write findings to `.adlc/specs/REQ-NNN-<slug>/architecture-adversary.md`:
+Write findings to `architecture-adversary.md` in the REQ folder you were given:
 
 ```markdown
 # Architecture adversary — REQ-NNN-<slug>

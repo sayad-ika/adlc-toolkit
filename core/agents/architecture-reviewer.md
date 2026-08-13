@@ -97,7 +97,7 @@ When flagging pattern divergence, **cite the established pattern** — file path
 
 ## Output format
 
-Write findings to `.adlc/specs/REQ-xxx/review-log.md` under a `## Architecture findings` heading (the `/review` skill consolidates across reviewers into `verification.md`, the compact verdict file).
+Write findings to `review-log.md` in the REQ folder you were given, under a `## Architecture findings` heading (the `/review` skill consolidates across reviewers into `verification.md`, the compact verdict file).
 
 Each finding:
 
@@ -131,7 +131,7 @@ Each finding:
 
 ## Surface lesson candidates
 
-Alongside your findings in `review-log.md`, append candidate lesson entries to `.adlc/specs/REQ-NNN-<slug>/lesson-candidates.md` whenever a finding might generalize beyond this REQ.
+Alongside your findings in `review-log.md`, append candidate lesson entries to `lesson-candidates.md` in the same REQ folder whenever a finding might generalize beyond this REQ.
 
 **Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
