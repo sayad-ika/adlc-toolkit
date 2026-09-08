@@ -23,6 +23,7 @@ All five assistants converged on the same three primitives — a memory/context 
 | **Reviewer read-only on source** | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction |
 | Parallel sub-agents (`/sprint`) | ✅ | ❌ sequential | ⚠️ handoffs | ✅ | ✅ |
 | Per-agent model tier | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Vault budgets enforced (hook) | ✅ `adlc-budget.mjs` | ❌ prose only | ❌ prose only | ❌ prose only | ❌ prose only |
 
 ✅ first-class · ⚠️ works, reduced · ❌ not available, degrades gracefully
 
@@ -33,6 +34,8 @@ All five assistants converged on the same three primitives — a memory/context 
 **Parallel sub-agents / `/sprint`.** `/sprint` runs several REQs at once, each in its own worktree, via the `pipeline-runner` agent. Claude, Codex, and Gemini can spawn parallel sub-agents, so `/sprint` works as designed. **Copilot uses sequential "handoffs"** and **Cursor has no isolated sub-agents**, so on those two `/sprint` runs one REQ at a time — same results, just not in parallel. The single-REQ pipeline (`/proceed`) works fully everywhere.
 
 **Inline agents on Cursor.** Cursor has no sub-agent process, so the reviewer/explorer/implementer roles run sequentially inside the main session. The generated `adlc-agent-*` command files let you invoke a role on demand, and the orchestration stubs instruct the main agent to run each role's checklist in its own pass. You lose isolation (each role sees the others' context) but keep the substance.
+
+**Vault budgets.** Every adapter carries the budgets as protocol: `/wrapup` rotates `hot.md` and keeps `now.md` to its table, `/status` prints the strip, `/config budgets` repairs drift. Only Claude Code has a hook surface that can refuse a write, so only there is a budget a guarantee rather than an instruction. On the other tools, run `/status` and act on `⚠`.
 
 **Per-agent model tier.** Claude/Codex/Gemini/Copilot can assign a cheaper model to the recon pass and a stronger one to implementation. Cursor uses one model for the session. Tier defaults live in `core/manifest.json` → `tierToModel` and are overridable in `.adlc/config.yml`.
 

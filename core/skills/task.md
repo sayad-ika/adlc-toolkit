@@ -155,17 +155,18 @@ One consolidated gate covering verification and wrapup.
 
 Dispatch a **reduced reviewer set**, not the full five:
 
-- **correctness-reviewer** and **reflector** — always (the two highest-yield: logic/security, and the vault check for repeated mistakes). The reflector stays even on the smallest task — it's cheap and catches "you're repeating a known lesson / breaking a gotcha / leaving a doc stale" regardless of size.
+- **correctness-reviewer** and **reflector** — always (the two highest-yield: logic/security, and the vault check for repeated mistakes). The reflector stays even on the smallest task — it's cheap and catches "you're repeating a known lesson / breaking a gotcha" regardless of size. (Repo docs are swept at wrapup-lite, same as `/wrapup`.)
 - **ui-reviewer** — only when the change touches UI directly or via a consumed API contract (the same evidence-driven trigger `/review` uses). A task that changes a button or an API a screen calls still gets its UI verified.
 - Skip quality and architecture reviewers unless the diff introduced significant new code or moved layering — if it did, that's also a hint it should have been `/proceed`.
 
-Pass `Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md` — and pass `Output file: .adlc/<REQ_PATH>/verification.md`, stating in the dispatch prompt: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The reviewer agents' own instructions default to `review-log.md` because the full `/review` splits verdict from narrative; a `/task` review is small enough that one file *is* the verdict.) Consolidate findings in place with the same severity shape as `/review`, with only the dispatched reviewers' sections. **If a re-review round runs**, create `review-log.md` at that point and send every round's narrative there, keeping the verdict file to the digest — single-file is right for one pass, not for four. From round 3 on, lead the re-emitted gate card with `Re-review round <N> · verdict file <N>KB`.
+Pass `Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md` and `Output file: .adlc/<REQ_PATH>/review-log.md` — the reviewer agents' default, so no special wording is needed. State the write budget in the dispatch prompt as `/review` does: summary ≤5 lines, finding ≤8 lines after its table, section ≤12KB, ≤12 candidates of ≤4 lines. Then consolidate into `.adlc/<REQ_PATH>/verification.md` exactly as `/review` step 4 does: digest table, roster line, consolidated findings with only the dispatched reviewers' sections. The verdict file is the digest; the narrative lives in the log from the first pass. (Until 1.7.0 slim pipelines wrote reviewer narrative straight into `verification.md` and created a log only at the first re-review; measured `/task` verdict files were 43–51KB against an 8KB budget after a single pass, so the split now applies from round 1.) Re-review rounds follow `/review` step 6: the log keeps every round, the verdict file collapses resolved findings, and from round 3 the gate card leads with `Re-review round <N> · verdict file <N>KB`.
 
 ### 2. Wrapup-lite — capture knowledge
 
 - Process lesson candidates: read `lesson-candidates.md`, issue a verdict on each (`promote` / `demote-to-gotcha` / `discard`), append the `## Candidate verdicts` table. **Unlike `/bugfix`, zero non-discard verdicts is allowed** — a small task may legitimately produce no lasting knowledge; sweep honestly and a clean "nothing to keep" is fine, no forced capture.
 - Write any promoted lessons / gotchas to the vault (minimum-required fields).
 - Update navigation: `hot.md` (req-ready entry + any artifacts), `index.md` (the new REQ, any lessons), `now.md` (clear active focus if this was it).
+- Repo-doc sweep, same as `/wrapup` step 1: grep the doc surface for the changed symbols, list stale claims with corrected facts under NEEDS YOU, apply on approve.
 - Draft `pr-draft.md` (title + body, change summary, lessons captured) and `merge-checklist.md` — same shapes as `/wrapup`, slimmer body.
 - Source write-back (optional, gated): same rule as `/wrapup` step 5a — only if `sources.write` lists the tracker and this REQ links an issue; drafted, never auto-sent.
 
@@ -220,7 +221,7 @@ Per `REQ-NNN-<slug>` (kind: task):
 
 - `requirement.md` (compact: goal + ACs + scope + approach)
 - `commits-draft.md`
-- `verification.md` (reduced reviewer set)
+- `verification.md` (verdict digest, reduced reviewer set) and `review-log.md` (reviewer narrative)
 - `pr-draft.md`, `merge-checklist.md`
 - `lesson-candidates.md` (with verdicts; zero non-discard allowed)
 - `source-writeback.md` (only when configured and an issue is linked)

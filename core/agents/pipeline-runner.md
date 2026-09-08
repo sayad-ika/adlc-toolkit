@@ -97,7 +97,7 @@ For each task, follow the `task-implementer` checklist inline:
 2. Plan, then write code.
 3. Update tests; run them; verify they pass.
 4. Self-check against acceptance criteria.
-5. Append a commit-message draft to `commits-draft.md`.
+5. Append a commit-message draft to `commits-draft.md` — subject + ≤10 body lines + file list per commit; the same hard cap as `task-implementer`.
 6. Surface any lesson candidates to `lesson-candidates.md` per the "Surface lesson candidates" section below (source tag: `implement-task`).
 
 After all tasks: update state. **Gate.** Emit terminal claim `gate-blocked:implement`.
@@ -108,7 +108,7 @@ When the user clears the implement gate, proceed.
 
 Run the **review checklists inline** (you cannot dispatch reviewer agents). Use the checklists in the "Inline review checklists" section below. Always run correctness, quality, architecture, and reflection. **Also run the UI checklist** when `config.yml` → `stack.frontends` is set and **either** this REQ's diff touches a UI surface (components/pages/views/styles/templates) **or** it changes an API the frontend consumes (grep the frontend for the changed endpoints/fields/types — a changed contract can break a screen with no UI file touched). Skip it only for changes with no frontend or no frontend consumer.
 
-Write your full per-checklist findings to `review-log.md`, then distill `verification.md` — the compact verdict file later phases load (target ≤8KB): digest table, findings consolidated by severity (Critical / Major / Minor / Trivial), summary, acceptance-criteria check. Deduplicate where checklists overlap.
+Write your full per-checklist findings to `review-log.md` (per lens: summary ≤5 lines, each finding ≤8 lines after its field table, ≤12KB — the reviewer agents' write budget applies to you too), then distill `verification.md` — the compact verdict file later phases load (target ≤8KB): digest table, findings consolidated by severity (Critical / Major / Minor / Trivial), summary, acceptance-criteria check. Deduplicate where checklists overlap.
 
 As you run each checklist, also surface lesson candidates to `lesson-candidates.md` per the "Surface lesson candidates" section below — use the source tag matching the lens (`review-corr` / `review-qual` / `review-arch` / `review-reflect`).
 
@@ -185,7 +185,7 @@ Check the captured vault knowledge:
 - Does it touch any file referenced in `knowledge/gotchas.md`? If so, does it respect the gotcha?
 - Does it conflict with any accepted ADR in `architecture/`?
 - Did exploration miss a similar implementation in the codebase that this code duplicates?
-- Did the change alter behavior described in a user-facing doc (`config.yml` → `docs:`, or `README*` + `docs/`) without updating that doc? Flag stale docs (`repo-doc-stale`) to fix in this diff.
+- (Repo docs are swept in your wrap-up phase, not here — same as `/wrapup` step 1.)
 
 ### UI checklist (when the change touches UI directly or via a consumed API)
 
@@ -222,7 +222,7 @@ You produce knowledge across phases 3, 4, and 5. Append candidate lesson entries
 
 ### Format
 
-Append to `lesson-candidates.md` (create if absent):
+Append to `lesson-candidates.md` (create if absent) — Claim · one `file:line` · ≤2 lines context, at most 12 per lens, then `(N more not listed: <topics>)`:
 
 ```markdown
 ## CAND-NNN [<source-tag>]

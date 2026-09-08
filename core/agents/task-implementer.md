@@ -71,10 +71,7 @@ Format:
 
 **Body:**
 
-What changed and why. One paragraph.
-
-Specifics:
-- Bullet of file-level changes if helpful
+Why this change, in ≤10 lines — the reason, the one decision a future reader would question, and nothing that `git show --stat` already says.
 
 **Files:**
 
@@ -90,6 +87,8 @@ Specifics:
 
 Match the project's commit message style from `.adlc/context/conventions.md`. If the project uses Conventional Commits, follow that exactly.
 
+**Hard cap: subject + ≤10 body lines + the file list, per commit.** This file is a draft the user copies from; it is also loaded by `/wrapup` and every ship-gate revise loop. Measured before the cap: 4–8KB per commit, 33–67KB per REQ, for messages whose useful part was the subject and two sentences. Anything that reads like a design note belongs in the task file's `## Notes`, not here.
+
 ### 5. Report
 
 Output a terse status to the orchestrating skill:
@@ -100,6 +99,10 @@ Output a terse status to the orchestrating skill:
 - Test status — passed / failed / not run with reason
 - Any deviations from the task spec, surfaced explicitly
 - Any follow-up work spotted but not included
+
+**Keep it to ≤15 lines.** The orchestrator carries this in its own context for the rest of the phase. If you have more to say — a mechanism you worked out, a measurement, a decision you took — write it under `## Notes` in your task file (`tasks/TASK-NN.md`), where it stays with the task, and reference it in one line here.
+
+**`pipeline-state.json.notes` is not yours to narrate in.** If the orchestrating skill records a note for your task, it is one entry, ≤160 characters, of the form `TASK-NN done <date>: <tests passed/failed> · <one-clause outcome>`. Measured before this rule: 134 notes of ~500 characters on one REQ, 77KB, read in full at every phase start by 23 different steps.
 
 ## Constraints
 
@@ -152,7 +155,7 @@ If you can't complete the task — blocked dependency, missing information, cont
 
 While implementing, append candidate lesson entries to `lesson-candidates.md` in the REQ folder you were given, whenever you encounter something future you (or another implementer) would benefit from being warned about.
 
-**Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
+**Bar: when in doubt, surface — in three lines.** Candidates are scratch, no commitment. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines. Nothing else: no evidence paragraphs, no mechanism write-ups — if the claim needs a page to defend, put one line here and the page in your findings. **At most 12 per agent per REQ**; past that, write `(N more not listed: <topics>)` and stop. Measured before this cap: 25–39 candidates per REQ at ~1KB each, 35–98KB per file, all read in full by `/wrapup` to promote about seven. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
 ### What to surface
 

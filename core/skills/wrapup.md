@@ -25,7 +25,12 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 
 Run `git -C <workPath> diff <base-branch>..<branch> --stat` and compare against architecture.md's blast radius. Surface any mismatch — files changed that weren't in the architecture, or files in architecture that weren't actually touched.
 
-**Doc-staleness backstop.** Re-read `verification.md` for reflector findings of category `repo-doc-stale`. For each one, check whether the diff actually updated that doc (it appears in `git diff --stat`). Any `repo-doc-stale` finding whose doc is *not* in the diff is an unresolved stale doc — surface it at the gate so the user fixes it before merging, rather than shipping docs that contradict the code. Also re-confirm the cheap case: any doc file that architecture.md listed in the blast radius but the diff didn't touch is a likely missed update — flag it the same way. This is a safety net; the real fix should already have landed at `/implement` and cleared `/review`.
+**Repo documentation sweep.** This is where user-facing docs get checked and fixed — one place, at the end, instead of a review finding plus a fix round. Read `config.yml` → `docs:` for the doc surface (files/dirs/globs); absent means `README*` at the repo root plus `docs/` if it exists; `docs: []` skips the sweep, say so on the gate card. Two passes, grep scopes and you judge:
+
+1. **Candidate-find.** From `git diff --stat` and the commit subjects, list the changed surface: renamed/removed/added symbols, CLI flags, config keys, env vars, routes, file paths, defaults, test counts a README quotes. `grep` the doc surface for each. Every hit is a candidate.
+2. **Judge.** Grep only finds docs that name the symbol. Also read each doc in the changed area's neighbourhood and ask whether what it *claims* still matches what the code now *does*. The reflector's summary may carry a `docs likely affected:` line — start there.
+
+For each stale claim, write the corrected fact. Then, **after the user approves the list at the gate** (it appears under NEEDS YOU as `docs: <file> — <claim> → <fact>`, one line each), apply the edits directly — prose docs are not source code, and this is the one repo write `/wrapup` makes. Append a `docs(...)` commit to `commits-draft.md` for them. Also confirm the cheap case: any doc file `architecture.md` listed in the blast radius that the diff didn't touch is a likely missed update — same list. Skip the sweep on a diff that touches no behaviour (pure refactor, tests only) and say so.
 
 Check for residual artifacts one more time:
 
@@ -126,7 +131,7 @@ Plus one entry per artifact created:
 ## [YYYY-MM-DD] concept | <name> — first captured
 ```
 
-Maintain the 20-entry-visible rule by truncation only when the file gets unwieldy (>500 lines). Older entries stay but newest at the top.
+**Rotate past 500 lines — here, every time.** After appending, `wc -l`. If the file is over 500 lines, cut everything from the 501st line down (the oldest entries — newest are at the top) and prepend it to `.adlc/hot-archive-<YYYY>.md` (the year of the oldest cut entry; create with a one-line header if absent). Add or keep one row for the archive in `index.md`. Nothing is deleted; Obsidian still searches both. Measured before this rule: 3,860 lines, 754KB, "truncate when unwieldy" never fired because nobody was the one to call it unwieldy.
 
 #### `.adlc/index.md`
 
@@ -139,6 +144,8 @@ Update if ADR statuses changed — most REQs change none, in which case never op
 #### `.adlc/now.md`
 
 If this was the focus, update the "Active focus" line. If multiple REQs are in flight (in `/sprint`), update the active-REQ table.
+
+**Budget: 1KB, and this step is where it holds.** `now.md` is the active-REQ table plus a one-line focus, read at every phase start by every skill. If it holds anything else — a sprint retrospective, a merge plan, notes — move that text verbatim to `sprints/<SPRINT-ID>.md` or the REQ folder it describes and leave a one-line pointer. A measured vault carried a 680-line retrospective here for two months after the REQs merged; every preflight paid ~17k tokens to read it. (The Claude adapter's budget hook refuses the write otherwise.)
 
 #### `.adlc/glossary.md`
 
@@ -185,8 +192,8 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body i
 - **Header** — `Gate 5 of 5 · Wrap up · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "PR + vault ready — run the checklist when you're set", or flag if the final sanity check surfaced anything.
 - **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable).
-- **NEEDS YOU** — only genuine calls: a drafted issue-tracker write-back awaiting your OK (never auto-sent); a "no knowledge captured — is that right?" confirmation; any unresolved final-sanity item. Omit if none.
-- **CHECKS** — final diff sanity as one compact `✓ / ⚠` line: blast radius matches architecture · user-facing docs updated (no unresolved repo-doc-stale) · no debug artifacts · no `--no-verify` · commit drafts all in git log.
+- **NEEDS YOU** — only genuine calls: the repo-doc list from step 1 (`docs: <file> — <claim> → <fact>`, applied on approve); a drafted issue-tracker write-back awaiting your OK (never auto-sent); a "no knowledge captured — is that right?" confirmation; any unresolved final-sanity item. Omit if none.
+- **CHECKS** — final diff sanity as one compact `✓ / ⚠` line: blast radius matches architecture · user-facing docs swept (`N` stale claims listed / none / skipped) · no debug artifacts · no `--no-verify` · commit drafts all in git log.
 - **MY READ** — recommendation + one-line why.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (gate cleared — run the merge checklist), **revise** (adjust PR draft or vault updates), **merged** (after you merge — finalize state, log to `hot.md`), **abort** (halt without merging). Mark approve *(Recommended)* per `MY READ`.
 

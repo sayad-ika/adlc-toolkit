@@ -93,6 +93,8 @@ Create `.adlc/<REQ_PATH>/pipeline-state.json`:
 }
 ```
 
+`notes[]` is a log line per phase event, ≤160 characters each — `spec-gate-cleared 2026-09-08`, `TASK-003 done: 41 passed · hatch precedes translator`. It is read in full by every phase preflight and by `/status`, `/proceed --resume`, and `/recover`, so a paragraph here is paid dozens of times. Narrative belongs in the artifact it describes (task file, `verification.md`, `hot.md` entry).
+
 Isolation, workPath, worktree, and branch get filled when the user moves to `/architect` (the architect skill or `/proceed` orchestrator creates them).
 
 ### 4. Inline validation

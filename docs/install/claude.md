@@ -95,6 +95,6 @@ claude
 - `CLAUDE.md` is the project memory file. If your repo already has one, merge the ADLC block rather than overwriting.
 - Per-agent models come from `core/manifest.json` → `tierToModel.claude`. Override in `.adlc/config.yml`.
 
-## Optional: statusline + gate notifications
+## Optional: statusline, gate notifications, vault budgets
 
-Two Claude-only extras make the pipeline visible without reading scrollback: a **statusline** showing the active REQ, phase, and whether a gate is waiting, and a **desktop notification** when the pipeline pauses at a gate. Setup is two `settings.json` snippets — see [`adapters/claude/extras/README.md`](../../adapters/claude/extras/README.md). The pipeline works the same without them.
+Three Claude-only extras. Two make the pipeline visible without reading scrollback: a **statusline** showing the active REQ, phase, and whether a gate is waiting, and a **desktop notification** when the pipeline pauses at a gate. The third, **vault budgets**, is the one worth wiring on day one: it turns the vault's size budgets into refusals (an over-budget `now.md` write is bounced back with the fix; a `Read` of generated code the review packet excludes is denied; a reviewer section over 12KB blocks the reviewer's stop until trimmed) and prints a budget strip at session start. Setup is three `settings.json` snippets — see [`adapters/claude/extras/README.md`](../../adapters/claude/extras/README.md). The pipeline works the same without them.

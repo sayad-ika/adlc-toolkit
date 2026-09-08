@@ -67,10 +67,25 @@ stack:
   backends: [<node|dotnet|django|cloud-run|lambda|...>]   # optional
   databases: [<postgres|firestore|sqlserver|...>]   # optional
 
-# User-facing repo documentation. These are the docs the doc-staleness sweep
-# (/review's reflector, backstopped at /wrapup) checks for drift when a REQ
-# changes documented behavior — DISTINCT from the .adlc/ knowledge vault, which
-# /wrapup owns. List the paths (files or directories) that describe behavior to
+# Review packet — what /review bundles for its reviewers. Every dispatched
+# reviewer reads the packet in full, so each file you exclude is saved four or
+# five times over. Excluded files never enter the packet; the manifest lists
+# them as `<path> (+N/-M)` and a reviewer who needs one reads it directly.
+# Put generated outputs here: API clients (NSwag/OpenAPI/Prisma), lockfiles,
+# snapshots, minified bundles. /init seeds this from `stack:`.
+review:
+  packet:
+    exclude:
+      - "**/*.lock"
+      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
+      - "**/*.snap"
+      # - "frontend/src/types/api/index.ts"   # generated API client
+
+# User-facing repo documentation. These are the docs /wrapup's repo-doc sweep
+# (step 1) checks for drift when a REQ changes documented behavior, and edits
+# once you approve the list at the ship gate — DISTINCT from the .adlc/
+# knowledge vault, which /wrapup also owns. List the paths (files or directories) that describe behavior to
 # humans: READMEs, a docs site, API reference, changelogs. Globs allowed.
 #
 # Omit the block entirely and the sweep falls back to a default scan of

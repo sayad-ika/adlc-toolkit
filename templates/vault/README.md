@@ -48,15 +48,17 @@ Don't type these paths, and don't assume a shape. Refer to a REQ by its ID and l
 
 ## Size budgets
 
-The hot-path files are loaded at every phase entry — their size is a recurring token tax, so each has a soft budget. `/analyze`'s vault-health section flags files over budget; nothing enforces them silently.
+The hot-path files are loaded at every phase entry — their size is a recurring token tax, so each has a budget. Three things hold them: `/wrapup` rotates `hot.md` and keeps `now.md` to its table on every REQ; the Claude adapter's optional `adlc-budget.mjs` hook refuses a write that leaves a file over budget; `/config budgets` repairs a vault that drifted, gated per file and moving text rather than deleting it. `/status` prints the strip; `/analyze` reports the history.
 
 | File | Budget |
 |---|---|
 | `CLAUDE.md` | 5KB |
 | each `context/*.md` | 8KB |
 | `now.md` | 1KB |
-| `hot.md` | 500 lines (20 newest visible) |
+| `hot.md` | 500 lines (20 newest visible); older entries rotate to `hot-archive-<YYYY>.md` |
 | each REQ's `verification.md` | 8KB (verdict only — narrative goes in `review-log.md`) |
+| each REQ's `review-packet.md` | 120KB target, 250KB ceiling (read in full by every reviewer; `config.yml → review.packet.exclude` keeps generated code out) |
+| each reviewer section of `review-log.md` | 12KB |
 | `knowledge/` total | 60KB / 30 lessons — soft trigger for the toolkit's tiered-vault-loading ADR |
 
 ## How the pipeline writes here

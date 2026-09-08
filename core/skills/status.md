@@ -21,7 +21,8 @@ Load `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`. This skill walks `specs/` and `bugs/`
 ### 1. Read the navigation files
 
 - `.adlc/now.md` — active focus marker (manually edited; not always current)
-- `.adlc/hot.md` — last 20 entries (the real source of recent activity)
+- `.adlc/hot.md` — last 20 entries (the real source of recent activity). Read with a line limit; never the whole file.
+- **Measure the hot path** while you're here: `wc -c` on `now.md`, `CLAUDE.md`, each `context/*.md` (skip `*-rationale.md`); `wc -l` on `hot.md`; the newest active REQ's `review-packet.md` and `verification.md` sizes if present. These feed the budget strip in step 5.
 - `.adlc/index.md` — overall vault catalog (for context, not status)
 
 ### 2. Walk active REQs
@@ -58,6 +59,7 @@ Output a structured status report in chat:
 
 ```
 ADLC Status — YYYY-MM-DD HH:MM
+Budgets: now.md 0.8/1KB · hot.md 312/500 · CLAUDE.md 4.9/5KB · conventions 7.4/8KB · packet(last) 298KB ⚠  → /config budgets
 
 Active focus (from now.md):
   > <focus line from now.md>

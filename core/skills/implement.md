@@ -49,7 +49,7 @@ Edit posture: <workflow.edits>. Blast radius = this work path + the files this
 task names. Edit freely inside it. STOP and report (do not edit) if the work
 needs to cross the edge: a file no task named, a new top-level dependency, a
 schema/migration, or anything touching auth/security/secrets.
-Draft commit messages to .adlc/<REQ_PATH>/commits-draft.md (append).
+Draft commit messages to .adlc/<REQ_PATH>/commits-draft.md (append). Hard caps apply: ≤10 body lines per commit, ≤12 lesson candidates of ≤4 lines, status report ≤15 lines — narrative goes in your task file's ## Notes.
 Run tests, verify they pass.
 Surface lesson candidates to .adlc/<REQ_PATH>/lesson-candidates.md per your skill instructions (bar: when in doubt, surface).
 Do NOT run any git mutation commands.
@@ -62,7 +62,7 @@ Dispatch all tier-0 tasks in a single message so they run concurrently. **Dispat
 
 Collect status from each agent. For each:
 
-- **Done, tests pass** → mark task complete in `pipeline-state.json.taskStatus`.
+- **Done, tests pass** → mark task complete in `pipeline-state.json.taskStatus`. If you add to `notes[]`, one entry per task, ≤160 characters (`TASK-NN done <date>: <tests> · <outcome>`); the implementer's narrative is in `tasks/TASK-NN.md` → `## Notes`, not in state.
 - **Done, tests fail** → STOP. Do not proceed to next tier. Surface failure to user.
 - **Blocked** → STOP. Surface the blocker.
 - **Deviation surfaced** → STOP. Surface to user; they decide whether to approve the deviation or revise the task.

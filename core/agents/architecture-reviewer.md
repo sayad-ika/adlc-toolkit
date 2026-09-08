@@ -129,11 +129,21 @@ Each finding:
 - **Major** — violates a documented convention or established pattern in a way that's not isolated to this REQ (will spread if not fixed); missing mock for a new external dependency
 - **Minor** — small pattern divergence; opportunity to consolidate
 
+### Write budget — hard caps
+
+Your section is re-read at every gate, by `/review`'s consolidation, by `/wrapup`, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
+
+- **Summary:** ≤5 lines. What you checked (counts, not lists), how many findings by severity, one sentence on the biggest one.
+- **Each finding:** the field table, then **What / Why it matters / Recommendation** at ≤8 lines total. Cite `file:line`; never paste code the packet carries. If a finding needs more than eight lines to make, it is two findings or it is not yet a finding.
+- **Dispatch questions:** one line each, answered in the summary — a finding if it earned one, otherwise "checked, nothing".
+- **Whole section:** ≤12KB. Over that, cut trivials first, then merge findings that share a root cause. Say `(N trivials not listed)` rather than listing them.
+- **No restating the packet.** The spec, architecture, and diff are in front of the reader too.
+
 ## Surface lesson candidates
 
 Alongside your findings in `review-log.md`, append candidate lesson entries to `lesson-candidates.md` in the same REQ folder whenever a finding might generalize beyond this REQ.
 
-**Bar: when in doubt, surface.** Candidates are scratch — three lines, no commitment. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
+**Bar: when in doubt, surface — in three lines.** Candidates are scratch, no commitment. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines. Nothing else: no evidence paragraphs, no mechanism write-ups — if the claim needs a page to defend, put one line here and the page in your findings. **At most 12 per agent per REQ**; past that, write `(N more not listed: <topics>)` and stop. Measured before this cap: 25–39 candidates per REQ at ~1KB each, 35–98KB per file, all read in full by `/wrapup` to promote about seven. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
 ### What to surface (from this agent's lens)
 

@@ -143,9 +143,19 @@ If you ran the **static-only** tier, also append a `## UI manual-verification ch
 - **Major** — a visible layout break; the result clearly diverges from the design on a load-bearing element; an accessibility blocker on a new control; a wrong interaction state (submit enabled on a pristine/invalid form, or stuck disabled when valid); a missing error or empty state where the path is reachable.
 - **Minor** — cosmetic drift from the design; a small responsive imperfection; a disabled state conveyed only in CSS; a non-blocking polish item.
 
+### Write budget — hard caps
+
+Your section is re-read at every gate, by `/review`'s consolidation, by `/wrapup`, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
+
+- **Summary:** ≤5 lines. What you checked (counts, not lists), how many findings by severity, one sentence on the biggest one.
+- **Each finding:** the field table, then **What / Why it matters / Recommendation** at ≤8 lines total. Cite `file:line`; never paste code the packet carries. If a finding needs more than eight lines to make, it is two findings or it is not yet a finding.
+- **Dispatch questions:** one line each, answered in the summary — a finding if it earned one, otherwise "checked, nothing".
+- **Whole section:** ≤12KB. Over that, cut trivials first, then merge findings that share a root cause. Say `(N trivials not listed)` rather than listing them.
+- **No restating the packet.** The spec, architecture, and diff are in front of the reader too.
+
 ## Surface lesson candidates
 
-If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `lesson-candidates.md` in the REQ folder you were given, per the standard format, source tag `ui-review`. When in doubt, surface — `/wrapup` issues the verdict.
+If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `lesson-candidates.md` in the REQ folder you were given, per the standard format (Claim · one `file:line` · ≤2 lines context; at most 12), source tag `ui-review`. When in doubt, surface — `/wrapup` issues the verdict.
 
 ## Constraints
 

@@ -25,6 +25,8 @@ It exists for one reason hand-editing YAML can't satisfy: some settings have a *
 
 **E. Refresh templates (`templates`, `refresh-templates`, or offered at the end of `migrate`).** Update this vault's `.adlc/templates/` copies to match the toolkit's current `templates/` after an update — gated, per file, never silent. See "Template refresh" below.
 
+**F. Budgets (`budgets`, or offered by `/status` when its strip shows `⚠`).** Bring the hot-path files back under the vault README's size budgets, gated per file, nothing deleted. See "Budgets" below.
+
 In every mode, **confirm before writing** when a value actually changes: show `key: old → new` and any derived-file re-sync that will follow, and proceed only on explicit confirmation. There's no formal gate, but a settings change is consequential — don't write silently.
 
 ## Settings catalog
@@ -56,6 +58,7 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `autonomy.hard_stops` | list | free-text categories; keep the safety defaults unless the user is explicit |
 | `autonomy.notify.on_halt` / `.on_complete` | `true` \| `false` | |
 | `stack.languages` / `.frontends` / `.backends` / `.databases` | list | free text |
+| `review.packet.exclude` | list of globs | generated code, lockfiles, snapshots — never enters the review packet; listed in its manifest with +/− counts |
 | `repos.*` | map | advanced — primary flag, sibling ids, paths. Warn that cross-repo configs must mirror each other (each repo marks itself `primary: true` and lists the others). |
 | `read_only_sources` / `forbidden_paths` | list of paths | free text |
 | `deploy.*`, `services.*`, `merge_order` | as templated | free text; only used by external/deploy-aware tooling |
@@ -136,6 +139,18 @@ The hazard mirrors the `local/` overlay-shadow problem: a vault template may hav
 5. **Report + log.** List what was updated / added / kept, and append one line to `.adlc/hot.md`: `## [DATE] config-templates | updated: <files>`.
 
 This skill replaces whole template files; it does **not** merge. If a user wants to keep local edits *and* take the upstream changes, that's their manual merge — show both sides and let them do it. If every template is already current, say so and write nothing.
+
+## Budgets (bring the hot path back under budget)
+
+The budgets are in the vault README ("Size budgets"). `/wrapup` keeps `hot.md` and `now.md` inside them on every REQ from 1.7.0 on, and the Claude adapter's `adlc-budget.mjs` hook refuses over-budget writes — but a vault that predates 1.7.0, or one that drifted, needs a one-time repair. Measure first, then offer one action per file, each with a preview and its own approve:
+
+- **`now.md` > 1KB** → keep the active-REQ table and one-line focus; move every other section verbatim to `sprints/<SPRINT-ID>.md` (if it describes a sprint) or `<REQ_PATH>/notes.md` (if it describes one REQ), leaving a one-line pointer. Show what moves where.
+- **`hot.md` > 500 lines** → cut from line 501 down into `hot-archive-<YYYY>.md`, newest-first order preserved, one `index.md` row. Same rotation `/wrapup` step 4 does.
+- **`context/<name>.md` > 8KB** → split into the rulebook (what reviewers enforce: rules, names, patterns, do/don't) and `context/<name>-rationale.md` (why, history, examples, discussion), read on demand. Propose the split by section heading; the user moves headings between the two lists before approving. The rulebook keeps every rule; nothing is summarized.
+- **`CLAUDE.md` > 5KB** → same split into `README.md` (explanation) and `CLAUDE.md` (rules).
+- **`review-packet.md` / `verification.md` over budget in active REQs** → report only; those are `/review`'s to fix on the next round.
+
+Never merge, summarize, or drop text in this mode. Every byte moves; the diff of the pair is zero. Log one `hot.md` line: `## [DATE] config-budgets | <file>: <before> → <after>, moved to <target>`.
 
 ## Derived-file sync
 

@@ -205,11 +205,11 @@ Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector`
 
 The user commits before this runs — same as `/proceed`'s Phase 4 protocol.
 
-When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/<BUG_PATH>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`. **If a re-review round runs**, create `review-log.md` at that point and send every round's narrative there, keeping the verdict file to the digest — single-file is right for one pass, not for four. From round 3 on, lead the re-emitted gate card with `Re-review round <N> · verdict file <N>KB`.
+When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and `Output file: .adlc/<BUG_PATH>/review-log.md` — the agents' default. State the write budget in the dispatch prompt as `/review` does: summary ≤5 lines, finding ≤8 lines after its table, section ≤12KB, ≤12 candidates of ≤4 lines. Tags from those agents remain `review-corr` and `review-reflect`. The verdict/narrative split applies from the first pass, same as `/review` and `/task`: reviewer narrative goes to the log, `verification.md` holds the digest. Re-review rounds follow `/review` step 6 — the log keeps every round, the verdict file collapses resolved findings, and from round 3 the gate card leads with `Re-review round <N> · verdict file <N>KB`.
 
 ### Findings
 
-Consolidate into `.adlc/<BUG_PATH>/verification.md` with the same shape as `/review`'s output but only two reviewer sections.
+Consolidate from `review-log.md` into `.adlc/<BUG_PATH>/verification.md` with the same shape as `/review`'s verdict file — digest table, roster line, consolidated findings — but only two reviewer sections.
 
 ### Gate card
 
@@ -244,6 +244,10 @@ Mirrors `/wrapup`'s "Process candidates" step, but bound to the bugfix folder:
 3. **Append a `## Candidate verdicts` table** to the bottom of the candidates file with the verdicts and target/reason for each.
 4. **Mandatory minimum for bugfix:** at least one non-discard verdict (promote OR demote-to-gotcha). A bug fix that produced zero non-discard verdicts is a missed knowledge opportunity — push back on yourself before issuing the gate prompt; if you genuinely conclude there's nothing to keep, surface that explicitly in the gate prompt for the user's call.
 5. Write the resulting lessons (minimum-required fields only per the lesson template) to `knowledge/lessons/` and append gotchas to `knowledge/gotchas.md`.
+
+### Repo-doc sweep
+
+Same as `/wrapup` step 1, scaled to the fix: grep the doc surface (`config.yml` → `docs:`, or `README*` + `docs/`) for any symbol, flag, default, or behaviour the fix changed; list stale claims with corrected facts under NEEDS YOU; apply on approve. A fix that changes no documented behaviour says so in one line.
 
 ### PR draft
 
@@ -301,7 +305,7 @@ Per `BUG-NNN-<slug>`:
 - `bug.md` (report, with investigation log appended)
 - `investigation.md` (from codebase-explorer)
 - `commits-draft.md`
-- `verification.md`
+- `verification.md` (verdict digest) and `review-log.md` (reviewer narrative)
 - `bug-fix-pr-draft.md`
 - `merge-checklist.md`
 - `lesson-candidates.md` (created or appended to across phases 2-4; verdicts appended at Phase 5; persists as decision history)

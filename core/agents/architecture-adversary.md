@@ -129,6 +129,16 @@ Write findings to `architecture-adversary.md` in the REQ folder you were given:
 
 **Recommendation:** the specific change to the architecture or tasks. If the right move is to accept the risk and document it, say so.
 
+### Write budget — hard caps
+
+Your report is re-read at every gate, by `/review`'s consolidation, by `/wrapup`, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
+
+- **Summary:** ≤5 lines. What you checked (counts, not lists), how many findings by severity, one sentence on the biggest one.
+- **Each finding:** the field table, then **What / Why it matters / Recommendation** at ≤8 lines total. Cite `file:line`; never paste code the packet carries. If a finding needs more than eight lines to make, it is two findings or it is not yet a finding.
+- **Dispatch questions:** one line each, answered in the summary — a finding if it earned one, otherwise "checked, nothing".
+- **Whole report:** ≤12KB. Over that, cut trivials first, then merge findings that share a root cause. Say `(N trivials not listed)` rather than listing them.
+- **No restating the packet.** The spec, architecture, and diff are in front of the reader too.
+
 ## Coverage
 
 - **Lenses run:** <list>

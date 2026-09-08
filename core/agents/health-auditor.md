@@ -97,7 +97,7 @@ For each rule in `conventions.md`, find existing code that violates it. The most
 
 The vault has a size discipline: the hot-path files are loaded at every phase entry, so oversized files are a per-REQ token tax. Budgets live in the vault [[README]] ("Size budgets"); check each:
 
-- **Files over budget** — `CLAUDE.md` (5KB), each `context/*.md` (8KB), `now.md` (1KB), `hot.md` (500 lines), each REQ's `verification.md` (8KB — the verdict file; the narrative belongs in `review-log.md`), each REQ's `review-packet.md` (120KB target / 250KB ceiling — read in full by every dispatched reviewer, so its cost is multiplied by four or five). Report actual vs. budget.
+- **Files over budget** — `CLAUDE.md` (5KB), each `context/*.md` (8KB), `now.md` (1KB), `hot.md` (500 lines), each REQ's `verification.md` (8KB — the verdict file; the narrative belongs in `review-log.md`), each REQ's `review-packet.md` (120KB target / 250KB ceiling — read in full by every dispatched reviewer, so its cost is multiplied by four or five). Report actual vs. budget, and say which mechanism should have held it: `/wrapup` step 4 (hot.md rotation, now.md), the Claude adapter's `adlc-budget.mjs` hook (refuses over-budget writes — note whether it is wired in the user's `settings.json`), or `/config budgets` (one-time repair).
 - **Uncited lessons** — a lesson no `exploration.md` or `verification.md` has referenced in the last 5 completed REQs. Not a deletion order — a "still earning its place?" question for the user (merge, demote to gotcha, or keep).
 - **Dead gotcha anchors** — gotchas whose named file no longer exists in the repo.
 - **Stale provisional marks** — `STATUS: needs verification` older than 30 days.
