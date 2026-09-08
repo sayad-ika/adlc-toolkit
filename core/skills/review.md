@@ -97,20 +97,30 @@ _(written by ui-reviewer — only when the change touches a UI surface; otherwis
 
 Write `.adlc/<REQ_PATH>/review-packet.md`. This bundles the context all four reviewers need so they don't each re-read the same files.
 
+**Assemble it with shell redirection, never `Read` + `Write`.** Composing the packet by reading each source into context and writing it back out puts a full extra copy of the largest artifact in the system into the main session — the one context the packet exists to protect. Write the manifest with a heredoc, then append with `git diff >>` and `cat >>`. Nothing below needs to pass through your context window.
+
 Compose from:
 
 - The manifest paragraph at the top (verbatim, including the packet-gap note — reviewers act on this language)
 - `git -C <workPath> diff <base-branch>...<branch> --unified=99999` — the full-context diff (one stream covers added, removed, and surrounding lines for every changed file)
-- Verbatim content of `requirement.md`
-- Verbatim content of `architecture.md`
-- Verbatim content of `exploration.md` if it exists on disk, else `_(no exploration report)_`
+- `requirement.md` — `cat`, not read-then-write
+- `architecture.md` — same
+- `exploration.md`'s **Blast radius** and **Vault references** sections only, if the file exists on disk. The long recon narrative goes to `reflector` alone via its dispatch prompt: it is the only agent whose mandate covers the exploration report, and shipping it to everyone costs four extra copies to serve one reader. If the file is absent, write `_(no exploration report)_`.
+
+**Then measure it.** `wc -c` the finished packet and put the number in its header line and in `verification.md`'s Summary. Target ≤120KB; over 250KB is over ceiling — say so on the gate card. The packet is read **in full by every dispatched reviewer**, so it is the one artifact in the toolkit whose size is multiplied by four or five. An unmeasured packet is the easiest way for a phase to cost ten times what it should.
 
 Shape:
 
 `````markdown
 # REQ-NNN-<slug> — Review Packet
 
-This packet contains the diff with full file context, the REQ spec, the REQ architecture, and the earlier codebase exploration report. **Do not re-read these via Read — cite this packet.** If you Read anything beyond this packet — vault content (gotchas, lessons, ADRs, conventions, concepts) or a related source file outside the diff — add a `**Packet-gap:**` line in your section: `**Packet-gap:** <path> — <why the packet didn't cover it>`, whether or not it produced a finding. These notes are how future packets improve.
+`Packet: <N>KB · <M> files changed · diff <D>KB`
+
+This packet contains the diff with full file context, the REQ spec, the REQ architecture, and the exploration report's blast radius and vault references. **Do not re-read these via Read — cite this packet.**
+
+**Your own required reading is not a packet gap.** `context/conventions.md`, the vault (lessons, gotchas, ADRs, concepts), and any source file outside the diff that this change interacts with are your mandate. Read them freely; do not report them.
+
+**`Packet-gap` means the packet's own contents fell short** — the diff, spec, or architecture was missing or insufficient for a call you had to make. Then, and only then, add `**Packet-gap:** <path> — <why the packet didn't cover it>` to your section, whether or not it produced a finding. Kept this narrow the signal is actionable and we act on it; applied to your required reading it fires on every run and tells us nothing.
 
 ## Diff with full context (vs <base-branch>)
 
@@ -126,9 +136,11 @@ This packet contains the diff with full file context, the REQ spec, the REQ arch
 
 <verbatim architecture.md>
 
-## Codebase exploration
+## Codebase exploration — blast radius + vault references
 
-<verbatim exploration.md, or "_(no exploration report)_">
+<those two sections of exploration.md, or "_(no exploration report)_">
+
+_(the full recon narrative is not here — it goes to reflector alone; see step 2)_
 `````
 
 ### 2. Dispatch the reviewers in parallel
@@ -160,6 +172,14 @@ Read the packet first. It contains the diff with full file context, the REQ spec
 Append your findings under your section heading in the output file.
 Append any lesson candidates to the candidates file per your skill instructions (bar: when in doubt, surface).
 Follow your skill instructions for output format.
+```
+
+The **reflector** additionally receives one line, because the packet deliberately carries only part of the exploration report:
+
+```
+Exploration report: .adlc/<REQ_PATH>/exploration.md — read it in full.
+The packet carries only its blast radius and vault references; the recon narrative is
+yours alone, so reading this file is expected, not a packet gap.
 ```
 
 The **ui-reviewer**, when dispatched, additionally receives (it needs runtime context the packet doesn't carry):
@@ -348,7 +368,13 @@ If `fix: <ids>`, `fix: all-major`, or `fix: all`:
    Run tests, verify they pass.
    ```
 3. **Patch the review packet's diff section.** Use `Edit` on `.adlc/<REQ_PATH>/review-packet.md` to replace the contents of the `## Diff with full context (vs <base-branch>)` section with the output of `git -C <workPath> diff <base-branch>...<branch> --unified=99999` against the updated branch. Spec, architecture, and exploration sections are unchanged — leave them alone.
-4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed). Their re-review sections append to `review-log.md`, same as the first pass.
+4. After fixes complete, re-run the affected reviewers on the new diff (not all four — only those whose findings were addressed). Their re-review sections append **in full** to `review-log.md`, same as the first pass — the log keeps every round, uncollapsed. That is what it is for.
+
+   **In `verification.md`, collapse instead of appending.** A finding the round resolved becomes one line on its digest row (`CORR-001 — resolved, round 3`); only findings still open keep narrative. Rounds accumulate in the log, never in the verdict file. Without this rule a four-round review puts four full narratives into the one file `/wrapup`, `/status`, and every gate packet must load — measured at 149KB against an 8KB target.
+
+   **Slim pipelines create a log at the first re-review.** `/task` and `/bugfix` are single-file by design, which is right for one pass and wrong for four. On the **first** re-review round, create `review-log.md`, divert every round's narrative there, and keep the verdict file to the digest. Being a slim pipeline is not a licence to grow the verdict file without bound.
+
+   **From round 3, say the number out loud.** Lead the re-emitted gate card with `Re-review round <N> · verdict file <N>KB`. This does not block — the loop is the user's to run, each round on their say-so — but round five should never arrive unannounced.
 5. Refresh `verification.md` — digest rows, consolidated entries, summary counts — from the updated log, then re-emit the gate prompt with updated counts — and, when the set excluded needs-decision findings, carry those into `NEEDS YOU` by ID.
 
 If `abort`:
@@ -364,12 +390,14 @@ If `abort`:
 - **Deduplicate honestly.** Two reviewers flagging the same issue from different angles is a strong signal — don't lose that by collapsing too aggressively.
 - **Surface vault-stale findings.** Reflector findings recommending the vault (not the code) change need special attention — the user decides whether to update the lesson/gotcha/ADR.
 - **`verification.md` is the verdict file — keep it lean.** Target ≤8KB. Every later reader (`/wrapup`, the gate packets, `/status`) loads the verdict file and only that; per-finding essays belong in `review-log.md`. If the consolidated section starts reading like the log, you're writing in the wrong file.
+- **`review-packet.md` is read in full by every dispatched reviewer — its cost is multiplied by four or five.** Target ≤120KB, ceiling 250KB. It is the largest artifact the pipeline produces and the only one paid for that many times; a packet over ceiling is a fact about the REQ worth surfacing, not a detail. Record the measured size on the gate card and in the Summary.
 - **Review applies code fixes but does not itself commit.** Committing follows `git.mode` (`.adlc/config.yml`, default `manual`) and happens at the implement/wrapup gate boundaries — never here, and never on a protected branch.
 
 ## Output artifacts
 
 - `.adlc/<REQ_PATH>/verification.md` (the compact verdict file — digest, consolidated findings, summary, AC check; target ≤8KB)
 - `.adlc/<REQ_PATH>/review-log.md` (full reviewer narratives and re-review threads; on no later phase's load path)
+- `.adlc/<REQ_PATH>/review-packet.md` (shared reviewer context; target ≤120KB, ceiling 250KB — measured size recorded in its header and in `verification.md`'s Summary)
 - `.adlc/<REQ_PATH>/lesson-candidates.md` (appended to by the four reviewers; persists for /wrapup to verdict)
 - Updates to `pipeline-state.json` (findings counts, gateState)
 - Updates to `commits-draft.md` if fixes were applied

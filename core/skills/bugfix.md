@@ -205,7 +205,7 @@ Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector`
 
 The user commits before this runs — same as `/proceed`'s Phase 4 protocol.
 
-When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/<BUG_PATH>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`.
+When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` so the reviewers append to the bugfix folder (not a REQ folder), and pass `Output file: .adlc/<BUG_PATH>/verification.md`, stating: "single-file review — this slim pipeline has no `review-log.md`; write your section to the output file." (The agents' own instructions default to `review-log.md`, which is `/review`'s split — a two-reviewer bugfix stays in one file.) Tags from those agents remain `review-corr` and `review-reflect`. **If a re-review round runs**, create `review-log.md` at that point and send every round's narrative there, keeping the verdict file to the digest — single-file is right for one pass, not for four. From round 3 on, lead the re-emitted gate card with `Re-review round <N> · verdict file <N>KB`.
 
 ### Findings
 

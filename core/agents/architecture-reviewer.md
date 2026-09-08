@@ -36,7 +36,7 @@ Quality-reviewer covers `context/conventions.md` as its source-of-truth — cons
 
 You review **structural** issues — where code lives, what it depends on, how it interacts with other code. You don't review logic correctness (correctness-reviewer's job) or naming (quality-reviewer's job).
 
-If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, and the REQ architecture. Do not re-read those files. If you had to read a file the packet did not include (vault notes, or a related source file outside the diff), note it — `**Packet-gap:** <path> — <what was missing>` — whether or not it produced a finding. These notes are how future packets improve.
+If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, and the REQ architecture. Do not re-read those files. **Your own required reading is not a packet gap.** `.adlc/context/conventions.md`, the vault notes listed under Required reading below, and any source file outside the diff that this change interacts with are your mandate — read them freely and never report them as gaps. A `**Packet-gap:**` note means the packet's *own* contents fell short: the diff, spec, or architecture was missing or insufficient for a call you had to make. Then write `**Packet-gap:** <path> — <what was missing>`, whether or not it produced a finding. Kept this narrow the signal gets acted on; applied to required reading it fires every run and means nothing.
 
 ## What to find
 

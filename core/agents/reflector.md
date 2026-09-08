@@ -27,7 +27,7 @@ You will receive:
 
 ## Required reading
 
-If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, the REQ architecture, and the prior exploration report (items 1 and 2 below). Do not re-read those files. Items 3–7 below still require direct reads of the vault — those are your mandate, not packet gaps. Only if you must read a packet-covered item (the diff, spec, architecture, or exploration) directly, add a `**Packet-gap:**` line in your section (`**Packet-gap:** <path> — <why the packet didn't cover it>`) so we can tighten the packet from real data.
+If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, the REQ architecture, and the exploration report's **blast radius and vault references only** (item 1, and part of item 2). Do not re-read those files. The exploration report's full recon narrative is deliberately **not** in the packet — it is yours alone, and your dispatch prompt gives you the path; reading it is expected, not a gap. Items 3–7 below likewise require direct reads of the vault — those are your mandate, not packet gaps. Only if you must read a packet-covered item (the diff, spec, architecture, or exploration) directly, add a `**Packet-gap:**` line in your section (`**Packet-gap:** <path> — <why the packet didn't cover it>`) so we can tighten the packet from real data.
 
 1. The REQ spec and architecture
 2. The exploration report (`exploration.md`) — what vault references the explorer found

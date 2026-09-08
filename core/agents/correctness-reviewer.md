@@ -24,7 +24,7 @@ You will receive:
 
 ## Scope
 
-You review **only** the changes made for this REQ. If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, and the REQ architecture. Do not re-read those files. If you had to read a file the packet did not include (vault notes, or a related source file outside the diff), note it — `**Packet-gap:** <path> — <what was missing>` — whether or not it produced a finding. These notes are how future packets improve. Don't review unchanged code unless the change interacts with it in a way that requires understanding the surrounding context.
+You review **only** the changes made for this REQ. If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, and the REQ architecture. Do not re-read those files. **Your own required reading is not a packet gap.** `.adlc/context/conventions.md`, the vault notes listed under Required reading below, and any source file outside the diff that this change interacts with are your mandate — read them freely and never report them as gaps. A `**Packet-gap:**` note means the packet's *own* contents fell short: the diff, spec, or architecture was missing or insufficient for a call you had to make. Then write `**Packet-gap:** <path> — <what was missing>`, whether or not it produced a finding. Kept this narrow the signal gets acted on; applied to required reading it fires every run and means nothing. Don't review unchanged code unless the change interacts with it in a way that requires understanding the surrounding context.
 
 ## Required reading before reviewing
 

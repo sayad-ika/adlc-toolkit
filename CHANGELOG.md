@@ -4,6 +4,19 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.6.1] — 2026-09-08
+
+### The review packet learns its own size **[protocol]**
+
+Audit of 38 real `review-packet.md` files across a 68-REQ vault: median **274KB**, largest **942KB**, 12MB across the corpus. Every dispatched reviewer reads the packet **in full**, so its cost is multiplied by four or five — a median review phase spends ~342k tokens of reviewer context, the largest ~1.2M. It is the biggest artifact the toolkit produces and the only one with no budget, no ceiling, and no measurement. Written 2026-07-31 as 1.4.6 and never committed; rebased onto 1.6.0 unchanged. The diff-context change was later measured to be the wrong lever — see 1.7.0.
+
+- **The packet is assembled with shell redirection, not `Read` + `Write`.** Composing it by reading each source into context and writing it back out put a full extra copy of the largest artifact in the system into the main session — the one context the packet exists to protect. Heredoc the manifest, then `git diff >>` and `cat >>`. Identical bytes out, nothing through the context window.
+- **The packet measures itself.** Size goes in its header line and in `verification.md`'s Summary. Target ≤120KB, ceiling 250KB, both added to `health-auditor`'s over-budget sweep in `/analyze` alongside the existing vault budgets. A 942KB packet should not be able to happen quietly.
+- **Only reflector gets the exploration narrative.** The packet keeps `exploration.md`'s blast radius and vault references — small, broadly useful. The long recon write-up (~27KB on a measured REQ) goes to `reflector` alone via its dispatch prompt, since it is the only agent whose mandate covers it. Four fewer copies to serve one reader.
+- **`Packet-gap` is narrowed until it means something.** `context/conventions.md` was the runaway top gap at **13 occurrences** — structurally, because it is quality-reviewer's declared source of truth and the packet never carried it. Adding it to the packet would have raised its cost from 2× to 5×; instead, required reading is now explicitly *expected* — in the packet manifest and in all three reviewer agents. A gap note now means the packet's own contents fell short, which is narrow enough to act on.
+- **Re-review rounds stop accumulating in the verdict file.** `verification.md` was over its 8KB budget on **52 of 60** REQs — not because v1.4.0's split failed (it works where it runs) but because each `fix` round appended a full narrative, and slim pipelines had no log to divert into. One REQ reached round 5 at 149KB. Now the log keeps every round uncollapsed, the verdict file collapses resolved findings to one digest line, `/task` and `/bugfix` create a log at the first re-review, and from round 3 the gate card leads with the round number and the verdict file's size. The loop is still yours to run — it just stops being silent.
+- **Deliberately not changed:** no new agent (`/review` already delegates correctly — every `Written by:` line in the corpus confirms real dispatch at `balanced` tier); no per-reviewer packets (that re-introduces the N× authoring cost the shared packet was built to remove); no cut to reviewer count or tier.
+
 ## [1.6.0] — 2026-08-13
 
 ### `specs/` stops being one long list **[protocol]** **[vault-format]** **[tooling]**
