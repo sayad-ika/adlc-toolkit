@@ -21,11 +21,13 @@ It exists for one reason hand-editing YAML can't satisfy: some settings have a *
 
 **C. Interactive (any other free text, or a bare request to "change settings").** Present the editable groups as labeled options (ETHOS principle 6 — use the assistant's structured-question UI if it has one). When the user picks a setting, present its **allowed values as options** with the current one marked. Confirm the before→after, then apply.
 
-**D. Migrate (`migrate`, `update`, or "pick up new settings after updating the toolkit").** Add keys/blocks the toolkit has gained since this vault was created, without changing any existing value, then **offer** a template refresh (mode E). See "Migrate" below. This is the supported way to refresh an existing `.adlc/` after a `git pull` of the toolkit — `/init` is one-shot and won't touch a populated vault.
+**D. Migrate (`migrate`, `update`, or "pick up new settings after updating the toolkit").** Add keys/blocks the toolkit has gained since this vault was created, without changing any existing value; append any `.gitattributes` lines the toolkit has gained; rebuild `knowledge/lesson-ledger.md`; then **offer** a template refresh (mode E). See "Migrate" below. This is the supported way to refresh an existing `.adlc/` after a `git pull` of the toolkit — `/init` is one-shot and won't touch a populated vault.
 
 **E. Refresh templates (`templates`, `refresh-templates`, or offered at the end of `migrate`).** Update this vault's `.adlc/templates/` copies to match the toolkit's current `templates/` after an update — gated, per file, never silent. See "Template refresh" below.
 
 **F. Budgets (`budgets`, or offered by `/status` when its strip shows `⚠`).** Bring the hot-path files back under the vault README's size budgets, gated per file, nothing deleted. See "Budgets" below.
+
+**G. Ledger (`ledger`).** Rebuild `knowledge/lesson-ledger.md` from the lesson files — the one-off repair after a merge left duplicated rows, or after lessons were added by hand. Whole-file rewrite, no gate needed (it is generated; nothing in it is authored). See "Derived-file sync" below.
 
 In every mode, **confirm before writing** when a value actually changes: show `key: old → new` and any derived-file re-sync that will follow, and proceed only on explicit confirmation. There's no formal gate, but a settings change is consequential — don't write silently.
 
@@ -119,7 +121,11 @@ Durable artifacts — lessons, ADRs, concept pages — reference REQs by **ID**,
 
 If the project config is already current, say so and write nothing.
 
-7. **Offer template refresh.** A toolkit update usually changes the templates too (e.g. new diagram sections), and those live in `.adlc/templates/`, not `config.yml`. After the config keys are handled, offer to run the template refresh (mode E / below) as a separate, clearly-labeled gated step. The user can decline it independently of the config migration.
+7. **Reconcile `.adlc/.gitattributes` — additive, like the config keys.** The vault's live `.gitattributes` is copied once at `/init` and is *not* covered by the template refresh below (mode E diffs `$TOOLKIT_PATH/templates/` against `.adlc/templates/`; the live file sits at the vault root). So do it here: for each non-comment line in `$TOOLKIT_PATH/templates/vault/.gitattributes` whose path is absent from `.adlc/.gitattributes`, append that line (with the toolkit's comment above it). Never remove, reorder, or change an existing line — a project may have added its own. Show the additions before writing; if there are none, say so. Then log: `## [DATE] config-migrate | gitattributes: +<paths>`.
+
+8. **Rebuild the lesson ledger** — part of derived-file sync (below). `knowledge/lesson-ledger.md` was added in 1.8.0; a vault created before that has none, and an existing one may carry union-duplicated rows. Rebuild it from the lesson files' header lines exactly as `/wrapup` step 4 does. A vault that already has a current ledger produces a byte-identical file — that's the no-op; say so rather than logging a change.
+
+9. **Offer template refresh.** A toolkit update usually changes the templates too (e.g. new diagram sections), and those live in `.adlc/templates/`, not `config.yml`. After the config keys are handled, offer to run the template refresh (mode E / below) as a separate, clearly-labeled gated step. The user can decline it independently of the config migration.
 
 ## Template refresh (vault templates vs. the toolkit's)
 
@@ -157,6 +163,8 @@ Never merge, summarize, or drop text in this mode. Every byte moves; the diff of
 After writing config, refresh anything that mirrors a setting:
 
 - **`git.mode` → `.adlc/CLAUDE.md` "### Git policy" section.** Replace that section's body with the canonical version from `$TOOLKIT_PATH/templates/vault/CLAUDE.md` (it already describes all three modes and the invariants, keyed off `git.mode`, so it's correct for any value). If the user's `.adlc/CLAUDE.md` has local edits around it, replace only the `### Git policy` section, not the whole file.
+
+- **`knowledge/lessons/*` → `knowledge/lesson-ledger.md`.** Not derived from a setting but from vault files, and it belongs here because it is the other thing that must be regenerated rather than edited. Rebuild it on `migrate` (mode D), and on any invocation where the user asks for it (`/config ledger`): one `grep` over the lesson files' header lines (`^# `, `| ID `, `| Tags `, `| Severity `, `| REQ `, and the `STATUS: superseded` banner), one row per file, whole-file rewrite, per `/wrapup` step 4. Never a partial edit — the file carries `merge=union` and a rewrite is what clears a duplicated row.
 
 No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived file, extend this section.
 

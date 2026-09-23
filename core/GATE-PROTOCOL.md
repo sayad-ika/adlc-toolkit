@@ -35,7 +35,7 @@ Decision →        the gate's options, each with its consequence
 - **`/spec`** — often just verdict + `CHECKS` + `MY READ` + decision (nothing structural to show).
 - **`/architect`** — `READY` with the task DAG in compact text (`T1,T2 → T3,T4 → T5`); `NEEDS YOU` for a proposed ADR or a stress-test finding that held up.
 - **`/review`** — leads with `FINDINGS` grouped by severity; the decision is which to fix vs. accept.
-- **`/wrapup`** — a `SHIP CHECKLIST` and the PR/lessons/vault state.
+- **`/wrapup`** — a `SHIP CHECKLIST` and the PR/lessons/vault state, including what the lesson dedup was compared against (`dedup vs origin/<base> as of <age>`).
 - **`/autopilot` final review** — opens with a `RUN SUMMARY` across every gate it auto-cleared.
 
 The spine (done → needs-you → recommend → decide) holds; the middle is the phase's to shape.

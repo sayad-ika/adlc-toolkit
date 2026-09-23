@@ -195,6 +195,7 @@ Copy from `$TOOLKIT_PATH/templates/vault/` to `.adlc/`:
 - `context/conventions.md` → `.adlc/context/conventions.md`
 - `context/project-overview.md` → `.adlc/context/project-overview.md`
 - `knowledge/gotchas.md` → `.adlc/knowledge/gotchas.md`
+- `knowledge/lesson-ledger.md` → `.adlc/knowledge/lesson-ledger.md`  (generated one-row-per-lesson table; `.gitattributes` gives it `merge=union`)
 
 Use file `Read` + `Write` to copy (placeholder substitution happens at step 7).
 
@@ -383,6 +384,7 @@ Notes on edge cases:
 - `requirement.md`, `architecture.md`, `exploration.md`, `verification.md`, `review-log.md`, `cancelled.md`, `revert-plan.md`, and `code-revert-plan.md` inside each REQ folder are **committed** — they're the why-trail and the audit record.
 - `tasks/` is committed; task plans serve as the "planned vs. shipped" trail.
 - `hot.md` is the shared activity log. It's **committed** and carries `merge=union` from `.adlc/.gitattributes`, so concurrent appends on different branches combine instead of conflicting — teams get a single shared history with no merge pain. (Newest-first ordering may interleave across a union merge, but every entry is dated, so the log stays readable.) `decisions.md` and `glossary.md` work the same way.
+- `knowledge/lessons/` is one committed file per lesson, and each lesson's ID is namespaced under the REQ that produced it (`LESSON-REQ-042-1`) — so two developers promoting lessons on parallel branches can't mint the same ID. `knowledge/lesson-ledger.md` is the generated one-row-per-lesson index; it also carries `merge=union` (a duplicated row after a merge is cleared by the next rebuild). `index.md` is deliberately *not* union-merged: it's hand-maintained, and union would silently keep both versions of a row two branches rewrote.
 - `now.md` is the **active-focus view** — small, mutable, edited in place, and therefore conflict-prone. It's gitignored and per-developer; `/status` and `/recover` regenerate the active-REQ picture from each REQ's `pipeline-state.json`, which is the real source of truth. Don't commit it.
 - `.adlc/ui-auth.env` holds local UI test credentials for the ui-reviewer (`ui.auth` in config) — per-developer, never committed.
 - Solo developers can additionally ignore `hot.md` if they don't want it in history; on a team, keep it committed for shared visibility — the union driver makes that safe.

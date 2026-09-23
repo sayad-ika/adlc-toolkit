@@ -240,10 +240,11 @@ Same as `/wrapup`, but with the bug-specific knowledge capture:
 Mirrors `/wrapup`'s "Process candidates" step, but bound to the bugfix folder:
 
 1. **Read `.adlc/<BUG_PATH>/lesson-candidates.md`.** If absent, sweep `bug.md`, `investigation.md`, and `verification.md` for capture-worthy patterns and write them as candidates before continuing.
-2. **For each candidate, verdict one of**: `promote` → new lesson, `demote-to-gotcha` → new gotcha entry, `discard` with one-line reason.
-3. **Append a `## Candidate verdicts` table** to the bottom of the candidates file with the verdicts and target/reason for each.
-4. **Mandatory minimum for bugfix:** at least one non-discard verdict (promote OR demote-to-gotcha). A bug fix that produced zero non-discard verdicts is a missed knowledge opportunity — push back on yourself before issuing the gate prompt; if you genuinely conclude there's nothing to keep, surface that explicitly in the gate prompt for the user's call.
-5. Write the resulting lessons (minimum-required fields only per the lesson template) to `knowledge/lessons/` and append gotchas to `knowledge/gotchas.md`.
+2. **Check candidates against existing lessons on this branch and on `origin/<base-branch>`** — exactly `/wrapup` step 2 (`git -C <workPath> ls-tree …`, the age line, the skip line when the ref is missing).
+3. **For each candidate, verdict one of**: `promote` → new lesson, `demote-to-gotcha` → new gotcha entry, `discard` with one-line reason.
+4. **Append a `## Candidate verdicts` table** to the bottom of the candidates file with the verdicts and target/reason for each.
+5. **Mandatory minimum for bugfix:** at least one non-discard verdict (promote OR demote-to-gotcha). A bug fix that produced zero non-discard verdicts is a missed knowledge opportunity — push back on yourself before issuing the gate prompt; if you genuinely conclude there's nothing to keep, surface that explicitly in the gate prompt for the user's call.
+6. Write the resulting lessons (minimum-required fields only per the lesson template) to `knowledge/lessons/` as `LESSON-<BUG_ID>-<n>-<slug>.md` — the ID is namespaced under this bug, scan per `core/VAULT-LAYOUT.md` → `mint(lesson)` with `<WORK_ID>` = the BUG ID — and append gotchas to `knowledge/gotchas.md`. Then rebuild `knowledge/lesson-ledger.md` as `/wrapup` step 4 does.
 
 ### Repo-doc sweep
 
@@ -269,7 +270,7 @@ Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes th
 Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
 
 - **Verdict** — "PR + vault ready — run the checklist".
-- **READY** — PR draft (`bug-fix-pr-draft.md`); merge checklist; vault capture in one line (candidates `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; hot entries).
+- **READY** — PR draft (`bug-fix-pr-draft.md`); merge checklist; vault capture in one line (candidates `<N>`; promoted `<L-BUG-NNN-n>`; gotchas `<^gNN>`; hot entries), then the dedup basis (`dedup vs origin/<base> as of <age>` / skipped).
 - **NEEDS YOU** — a drafted comment for the issue tracker, shown before sending (it is never sent without your OK); or, if no lesson or gotcha was kept at all, a confirmation — bug fixes usually teach something, so confirm that's right or reply `revise: capture` to take another pass through `bug.md` / `investigation.md` / `verification.md`. Omit if neither applies.
 - **CHECKS** — regression test in the diff · commit drafts landed in git log · no debug artifacts.
 - **MY READ** — recommendation + why.
@@ -311,4 +312,4 @@ Per `BUG-NNN-<slug>`:
 - `lesson-candidates.md` (created or appended to across phases 2-4; verdicts appended at Phase 5; persists as decision history)
 - `source-writeback.md` (only when `sources.write` is configured and a write-back was drafted at Phase 5)
 - `pipeline-state.json`
-- Vault updates: gotchas, lessons, hot.md, index.md
+- Vault updates: gotchas, lessons, lesson-ledger.md (rebuilt), hot.md, index.md

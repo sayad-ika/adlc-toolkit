@@ -42,9 +42,7 @@ One page per major module.
 
 ## Lessons
 
-| ID | Title | Domain | Severity |
-|---|---|---|---|
-| _(empty)_ | | | |
+See [[knowledge/lesson-ledger]] — generated, one row per lesson, rebuilt by every skill that writes a lesson. Not edited here.
 
 ## Gotchas
 

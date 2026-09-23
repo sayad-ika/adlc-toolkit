@@ -99,11 +99,14 @@ The vault has a size discipline: the hot-path files are loaded at every phase en
 
 - **Files over budget** — `CLAUDE.md` (5KB), each `context/*.md` (8KB), `now.md` (1KB), `hot.md` (500 lines), each REQ's `verification.md` (8KB — the verdict file; the narrative belongs in `review-log.md`), each REQ's `review-packet.md` (120KB target / 250KB ceiling — read in full by every dispatched reviewer, so its cost is multiplied by four or five). Report actual vs. budget, and say which mechanism should have held it: `/wrapup` step 4 (hot.md rotation, now.md), the Claude adapter's `adlc-budget.mjs` hook (refuses over-budget writes — note whether it is wired in the user's `settings.json`), or `/config budgets` (one-time repair).
 - **Uncited lessons** — a lesson no `exploration.md` or `verification.md` has referenced in the last 5 completed REQs. Not a deletion order — a "still earning its place?" question for the user (merge, demote to gotcha, or keep).
+- **Near-duplicate lessons** — pairs whose titles, "The lesson" sentence, or `Tags` + `Component` overlap strongly. Work from the header lines (`grep -h '^# \|^| Tags \|^| Component ' knowledge/lessons/LESSON-*.md`), open a file only to confirm a suspected pair. This is where cross-branch duplicates surface: two developers promoting the same lesson on parallel branches under different slugs, which `/wrapup`'s dedup could only catch if the other's was already on the base branch. Same framing as uncited — a question for the user (merge, mark one `Supersedes` the other, or keep both), never an auto-merge. Skip pairs where one already carries a `STATUS: superseded` banner.
+- **Untagged lessons** — any lesson whose `Tags` row is empty, missing, or still holds the template placeholder. Tags became required in 1.8.0 because the tiered-loading ADR filters on them; a lesson without tags is one the reflector will skip the day that ADR flips. List them by ID; the fix is a one-line edit per file.
+- **Stale ledger** — `knowledge/lesson-ledger.md` disagrees with `knowledge/lessons/`: a lesson file with no row, a row with no file, a duplicated row (union merge), or a superseded lesson not struck through. One finding, not one per row; the fix is `/config ledger`.
 - **Dead gotcha anchors** — gotchas whose named file no longer exists in the repo.
 - **Stale provisional marks** — `STATUS: needs verification` older than 30 days.
 - **Superseded-but-referenced ADRs** — ADRs with status `superseded` that other pages still wikilink as if in effect.
 - **Merged REQ folders still under `specs/`** — REQs merged more than 30 days ago whose folders sit alongside active work (archive candidates). Find them with VAULT-LAYOUT's `enumerate(active)` walk — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'` — which matches on each folder's own basename, so bucketed vaults list too. The `-not -path` is the point: a REQ already under `_archive/` is filed, not a candidate.
-- **Footprint report** — bytes and estimated tokens (bytes ÷ 4) per layer: hot path (`CLAUDE.md` + `config.yml` + nav files + `context/`), knowledge (`knowledge/` + accepted ADRs), active `specs/` folders (the same `enumerate(active)` walk — don't `du` `specs/`, that counts the archive). Include the tiered-loading trigger readout: `knowledge/ at <N>KB of 60KB · <N> of 30 lessons` (the trigger is defined in the toolkit's tiered-vault-loading ADR — when either bound is crossed, say so on its own line and point the user at that ADR).
+- **Footprint report** — bytes and estimated tokens (bytes ÷ 4) per layer: hot path (`CLAUDE.md` + `config.yml` + nav files + `context/`), knowledge (`knowledge/` + accepted ADRs), active `specs/` folders (the same `enumerate(active)` walk — don't `du` `specs/`, that counts the archive). Include the tiered-loading trigger readout: `knowledge/ at <N>KB of 60KB · <N> of 30 lessons · <N> untagged · <N> near-duplicate pairs` (the trigger is defined in the toolkit's tiered-vault-loading ADR — when either bound is crossed, say so on its own line and point the user at that ADR).
 
 ## Output format
 
@@ -165,7 +168,7 @@ Each finding:
 | Knowledge (knowledge/ + accepted ADRs) | <N> | <N> |
 | Active specs/ | <N> | <N> |
 
-Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons.
+Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons · <N> untagged · <N> near-duplicate pairs.
 
 Over-budget files, uncited lessons, dead anchors, stale STATUS marks, archive candidates — as findings above.
 

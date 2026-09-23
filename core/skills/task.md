@@ -163,9 +163,9 @@ Pass `Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md` and `Output file: 
 
 ### 2. Wrapup-lite — capture knowledge
 
-- Process lesson candidates: read `lesson-candidates.md`, issue a verdict on each (`promote` / `demote-to-gotcha` / `discard`), append the `## Candidate verdicts` table. **Unlike `/bugfix`, zero non-discard verdicts is allowed** — a small task may legitimately produce no lasting knowledge; sweep honestly and a clean "nothing to keep" is fine, no forced capture.
-- Write any promoted lessons / gotchas to the vault (minimum-required fields).
-- Update navigation: `hot.md` (req-ready entry + any artifacts), `index.md` (the new REQ, any lessons), `now.md` (clear active focus if this was it).
+- Process lesson candidates: read `lesson-candidates.md`, check each against existing lessons on this branch and on `origin/<base-branch>` (exactly `/wrapup` step 2 — `git -C <workPath> ls-tree …`, the age line, the skip line), issue a verdict on each (`promote` / `demote-to-gotcha` / `discard`), append the `## Candidate verdicts` table. **Unlike `/bugfix`, zero non-discard verdicts is allowed** — a small task may legitimately produce no lasting knowledge; sweep honestly and a clean "nothing to keep" is fine, no forced capture.
+- Write any promoted lessons / gotchas to the vault (minimum-required fields). Lesson IDs are `LESSON-<REQ_ID>-<n>` — scan per `core/VAULT-LAYOUT.md` → `mint(lesson)`, never a vault-wide count. Rebuild `knowledge/lesson-ledger.md` if a lesson was written (as `/wrapup` step 4).
+- Update navigation: `hot.md` (req-ready entry + any artifacts), `index.md` (the new REQ — lessons live in the ledger, not here), `now.md` (clear active focus if this was it).
 - Repo-doc sweep, same as `/wrapup` step 1: grep the doc surface for the changed symbols, list stale claims with corrected facts under NEEDS YOU, apply on approve.
 - Draft `pr-draft.md` (title + body, change summary, lessons captured) and `merge-checklist.md` — same shapes as `/wrapup`, slimmer body.
 - Source write-back (optional, gated): same rule as `/wrapup` step 5a — only if `sources.write` lists the tracker and this REQ links an issue; drafted, never auto-sent.
@@ -176,7 +176,7 @@ Emit per the gate protocol — one consolidated review + ship gate:
 
 - **Verdict** — "clean — recommend approve", or "`<k>` findings need a call".
 - **FINDINGS** (if any) — `crit / maj / min` + reviewer; this is the `NEEDS YOU`. Omit when clean.
-- **READY** — reviewers run (correctness, reflector, +ui if UI touched) with UI tier/counts or "n/a — no UI surface"; files changed `<N>` +a/-b, tests added/updated; commit drafted; knowledge (promoted `L-NNN` / gotcha `^gNN` / "nothing to keep — confirmed"); PR draft + merge checklist.
+- **READY** — reviewers run (correctness, reflector, +ui if UI touched) with UI tier/counts or "n/a — no UI surface"; files changed `<N>` +a/-b, tests added/updated; commit drafted; knowledge (promoted `L-REQ-NNN-n` / gotcha `^gNN` / "nothing to keep — confirmed"; dedup basis when a lesson was considered); PR draft + merge checklist.
 - **CHECKS** — acceptance met · tests pass · no debug artifacts.
 - **MY READ** — recommendation + why (never approve while a Critical stands).
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **fix** (`<ids>`, then re-verify), **revise**, **merged** (finalize after you merge), **abort**.
@@ -226,4 +226,4 @@ Per `REQ-NNN-<slug>` (kind: task):
 - `lesson-candidates.md` (with verdicts; zero non-discard allowed)
 - `source-writeback.md` (only when configured and an issue is linked)
 - `pipeline-state.json`
-- Vault updates: `hot.md`, `index.md`, `now.md`, and any promoted lessons/gotchas
+- Vault updates: `hot.md`, `index.md`, `now.md`, any promoted lessons/gotchas, and `lesson-ledger.md` when a lesson was written

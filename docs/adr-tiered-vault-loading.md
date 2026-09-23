@@ -20,13 +20,13 @@ At today's vault sizes this costs a few thousand tokens per REQ — noise. At ~5
 
 Switch both agents to a **ledger-first read**:
 
-1. `index.md` maintains a one-line-per-entry ledger for lessons and ADRs: ID, title, domain tags, and an optional `load-bearing: always-read` flag for entries the user marks as universally applicable.
+1. The lesson ledger already exists — `knowledge/lesson-ledger.md`, generated one row per lesson (ID · Title · Tags · Severity · REQ) since 1.8.0. The flip adds one column: an optional `load-bearing: always-read` flag for entries the user marks as universally applicable. ADRs get the same treatment via `decisions.md`.
 2. The reflector reads the full ledger, then the **full text** of: every `always-read` entry, every entry whose domain tags intersect the REQ's blast radius or components, and every gotcha (gotchas stay unfiltered — they're one consolidated file and file-scoped by nature).
 3. The architect reads `decisions.md` (the ADR ledger) in full, then full ADR text only where the ADR's domain intersects the REQ.
 
 ## The trade, stated plainly
 
-This trades a slice of the reflector's thoroughness for bounded per-REQ cost. A lesson whose domain tags are wrong or missing can be skipped when it would have applied — that's a real regression risk, and it's why this ADR is **not** implemented preemptively. Tag hygiene becomes load-bearing the day this flips on; the vault-health check should start flagging untagged lessons one release before.
+This trades a slice of the reflector's thoroughness for bounded per-REQ cost. A lesson whose domain tags are wrong or missing can be skipped when it would have applied — that's a real regression risk, and it's why this ADR is **not** implemented preemptively. Tag hygiene becomes load-bearing the day this flips on. Since 1.8.0 `Tags` is a required field in the lesson template and `/analyze` reports untagged lessons — a team with several developers reaches 30 lessons in months, not years, so the one-release-before window was pulled forward.
 
 ## Alternatives considered
 
@@ -36,4 +36,4 @@ This trades a slice of the reflector's thoroughness for bounded per-REQ cost. A 
 
 ## Consequences
 
-When accepted and implemented: reflector/architect required-reading sections change (their "don't filter prematurely" language is scoped to the post-trigger tiered rule), `index.md` gains the ledger columns, the lesson template gains domain tags as a required field, and `/analyze` reports tag coverage. Until then: nothing changes, and `/analyze` reports distance-to-trigger so the flip is a planned decision, not a surprise.
+When accepted and implemented: reflector/architect required-reading sections change (their "don't filter prematurely" language is scoped to the post-trigger tiered rule), the ledger gains the `always-read` column (the ledger itself, required tags, and the `/analyze` tag-coverage readout landed in 1.8.0 ahead of the flip). Until then: nothing changes, and `/analyze` reports distance-to-trigger so the flip is a planned decision, not a surprise.

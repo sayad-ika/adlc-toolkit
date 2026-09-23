@@ -109,7 +109,7 @@ Top 3 things worth fixing first (biggest payoff for the effort):
 
 Vault health:
   Footprint: hot path <N>KB · knowledge <N>KB · active specs <N>KB
-  Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons
+  Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons · <N> untagged · <N> near-duplicate pairs
   <over-budget / stale / dead-reference findings, one line each — or "all within budget">
 
 Trends since last audit (YYYY-MM-DD):

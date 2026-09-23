@@ -156,7 +156,7 @@ Alongside your findings in `review-log.md`, append candidate lesson entries to `
 
 - Pure one-off bugs in this code path (file the finding; nothing generalizes)
 - Style nits without a pattern claim
-- Findings that already cite an existing LESSON-N, `^gNN`, or ADR (already in the vault; don't duplicate)
+- Findings that already cite an existing lesson (`LESSON-…`), `^gNN`, or ADR (already in the vault; don't duplicate)
 
 ### Format
 

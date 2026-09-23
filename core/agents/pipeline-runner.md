@@ -124,8 +124,8 @@ When the user clears the verify gate, proceed.
 - Verify no `--no-verify`, no `.skip()`, no `console.log`, no `TODO` left from this REQ.
 - Draft `pr-draft.md` from the changes and the spec.
 - Draft `merge-checklist.md` with the git/gh commands the user runs.
-- Process the candidates file: read `lesson-candidates.md`, issue exactly one verdict per candidate (`promote` → write lesson, `demote-to-gotcha` → write gotcha entry, `discard` with one-line reason), and append verdicts to a `## Candidate verdicts` table at the bottom of the candidates file. Mirrors `/wrapup`'s "Process candidates" step.
-- Update vault: write lessons (minimum-required fields only per the lesson template), append gotchas, append to `hot.md`, update `index.md`, update or create concept/component pages.
+- Process the candidates file: read `lesson-candidates.md`, check each candidate against existing lessons on this branch and on `origin/<base-branch>` (`git -C <workPath> ls-tree --name-only origin/<base-branch>:<vaultDir>/knowledge/lessons/` — always with `-C <workPath>`; skip and say so if the ref is missing), issue exactly one verdict per candidate (`promote` → write lesson, `demote-to-gotcha` → write gotcha entry, `discard` with one-line reason), and append verdicts to a `## Candidate verdicts` table at the bottom of the candidates file. Mirrors `/wrapup`'s "Process candidates" step.
+- Update vault: write lessons as `LESSON-<REQ_ID>-<n>-<slug>.md` (minimum-required fields only per the lesson template; ID scan per `core/VAULT-LAYOUT.md` → `mint(lesson)`, never a vault-wide count), append gotchas, append to `hot.md`, rebuild `knowledge/lesson-ledger.md` from the lesson files' header lines, update `index.md`, update or create concept/component pages.
 - Update state: mark phase complete.
 
 **Gate.** Emit terminal claim `gate-blocked:ship`.
@@ -218,7 +218,7 @@ You produce knowledge across phases 3, 4, and 5. Append candidate lesson entries
 - The fact that you implemented something (that's the job)
 - One-off bugs that don't generalize
 - Style nits without a pattern claim
-- Anything that already cites an existing LESSON-N or `^gNN`
+- Anything that already cites an existing lesson (`LESSON-…`) or `^gNN`
 
 ### Format
 

@@ -1,16 +1,19 @@
-# {{TITLE}} ^L{{NN}}
+# {{TITLE}} ^L-{{WORK_ID}}-{{N}}
 
-> **Minimum required fields**: metadata table, "The lesson", and "Saw it in".
+> **File:** `knowledge/lessons/LESSON-{{WORK_ID}}-{{N}}-<slug>.md` — `{{WORK_ID}}` is the REQ or BUG ID this lesson came from, `{{N}}` counts within it (mint per `core/VAULT-LAYOUT.md` → `mint(lesson)`).
+> **Minimum required fields**: metadata table (including **Tags**), "The lesson", and "Saw it in".
 > Optional sections below are filled the first time the lesson recurs in a future REQ, or when reflector surfaces it as relevant — born minimal, grown on demand.
+> If this lesson replaces an older one, fill `Supersedes` here **and** put the banner `> **STATUS: superseded by [[knowledge/lessons/LESSON-…]]** — <date>` at the top of the old file; the reflector skips banner-marked lessons and the ledger strikes them through.
 
 | Field | Value |
 |---|---|
-| ID | LESSON-{{NN}} |
+| ID | LESSON-{{WORK_ID}}-{{N}} |
 | Captured | {{DATE}} |
-| REQ | {{REQ_ID}} |
+| REQ | {{WORK_ID}} |
 | Component | {{COMPONENT}} |
-| Tags | {{TAGS}} |
+| Tags | {{TAGS}} — required: 2–5 lowercase tokens, component names or domains as `exploration.md` / the blast radius name them (`payments`, `queue-handlers`, `auth`). This is what tiered loading will filter on. |
 | Severity | nice-to-know \| guideline (a rule to follow) \| trap (cost real time before) \| critical (must never repeat) |
+| Supersedes | _(optional)_ LESSON-… |
 
 ## The lesson
 
@@ -48,7 +51,7 @@ Edge cases or contexts where the rule is wrong. Important — over-applied lesso
 
 ### Related
 
-- Originating REQ: {{REQ_ID}} — resolve the folder per `core/VAULT-LAYOUT.md`; this lesson outlives the REQ, so it records the ID, not a path that archiving would break
+- Originating REQ: {{WORK_ID}} — resolve the folder per `core/VAULT-LAYOUT.md`; this lesson outlives the REQ, so it records the ID, not a path that archiving would break
 - Concepts: {{CONCEPT_LINKS}}
 - Components: {{COMPONENT_LINKS}}
 - See also: {{LESSON_LINKS}}

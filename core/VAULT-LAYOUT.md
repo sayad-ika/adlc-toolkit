@@ -113,6 +113,32 @@ For an explicit ID supplied by the user, run the same scan and collision-check a
 
 `~/.adlc/.global-next-req` (the cross-project counter `/sprint` uses) is outside this file's scope and unchanged.
 
+## `mint(lesson)` → new lesson ID
+
+Lessons are namespaced under the work item that produced them. There is no vault-wide lesson counter.
+
+| Piece | Form | Example |
+|---|---|---|
+| ID | `LESSON-<WORK_ID>-<n>` — `<WORK_ID>` is the originating REQ or BUG ID exactly as `req.id_scheme` minted it; `<n>` is 1-based within that work item | `LESSON-REQ-042-1`, `LESSON-REQ-sf-042-2`, `LESSON-PROJ-1234-1`, `LESSON-BUG-017-1` |
+| File | `knowledge/lessons/LESSON-<WORK_ID>-<n>-<slug>.md` | `LESSON-REQ-042-1-retry-idempotency.md` |
+| Anchor | `^L-<WORK_ID>-<n>` | `^L-REQ-042-1` |
+| Wikilink | `[[knowledge/lessons/LESSON-<WORK_ID>-<n>]]` | `[[knowledge/lessons/LESSON-REQ-042-1]]` |
+| Short form (`hot.md`, gate cards) | `L-<WORK_ID>-<n>` | `L-REQ-042-1` |
+
+**Scan** — scoped to the one work item, filenames only:
+
+```sh
+ls .adlc/knowledge/lessons/ | sed -n 's/^LESSON-<WORK_ID>-\([0-9][0-9]*\)-.*/\1/p' | sort -n | tail -1
+```
+
+→ that + 1, or `1` when nothing matches. `[0-9][0-9]*` is POSIX BRE on purpose — `\+` is a GNU extension and fails on BSD and busybox `sed`. The trailing `-` before `.*` is what keeps `REQ-0420` from matching a scan for `REQ-042`.
+
+**Why this is collision-proof, and what it leans on.** Two developers on parallel branches used to mint the same `LESSON-042` from the same `ls` count; different slugs meant git merged both cleanly and nothing noticed the duplicate ID. Scoping the count to the work item removes the shared counter: uniqueness of lesson IDs is now exactly the uniqueness of REQ IDs, which `req.id_scheme: ticket` or `prefixed` already guarantees across a team (and `sequential` guarantees for one developer — the documented solo trade-off; lessons add nothing new to it). The one assumption this makes load-bearing: **one wrap-up owner per work item.** Two people wrapping up the same REQ on two branches would both mint `-1`. That was already the pipeline's invariant; this is the place it now matters.
+
+**Legacy IDs.** Vaults created before this grammar hold `LESSON-NNN-<slug>.md` files with `^LNN` anchors. They are frozen as-is — never renumbered, never renamed, and the sequence is never continued. The first lesson promoted after the toolkit update uses the new grammar. The two forms cannot collide (`LESSON-042` vs `LESSON-REQ-042-1`), and both resolve the same way: by filename stem. Same rule as `layout.partition` — both shapes stay readable forever, so there is no migration and no sweep.
+
+**The ledger.** `knowledge/lesson-ledger.md` is a generated one-row-per-lesson table (ID · Title · Tags · Severity · REQ) rebuilt from the lesson files' header lines by every skill that writes a lesson (`/wrapup`, `/task`, `/bugfix`, `/recover`) and by `/config migrate`. It is never hand-edited and carries `merge=union` in `.gitattributes`: a union merge may leave a duplicated row, and the next rebuild removes it. It is the index; `index.md` only links to it. Lesson grammar is **not** in `core/manifest.json → layout` — that block describes the work-record trees, and nothing in `scripts/adlc.mjs` parses lesson IDs. Keep it that way.
+
 ## `enumerate(active | archived)` → `<REQ_PATH>` list
 
 `find` to depth 4, `-type d`, **matching on the folder's own basename** — `REQ-*` or `BUG-*`. Skip anything under `_archive/` unless `archived` was asked for.
@@ -164,6 +190,7 @@ Single-`*` versions of these silently stop matching the moment a vault partition
 | Artifact | Link form | Why |
 |---|---|---|
 | `knowledge/lessons/*`, `architecture/adr-*` | `[[REQ-042]]` — the ID, resolved at read time | These outlive the REQ. A path baked into them rots the moment the REQ is archived or the vault migrates, and nothing sweeps them. |
+| Anything citing a lesson | `[[knowledge/lessons/LESSON-REQ-042-1]]` or the anchor `^L-REQ-042-1` (legacy: `LESSON-007`, `^L07`) | The filename stem is the ID; the REQ inside it is what makes it unique. |
 | `<REQ_PATH>/tasks/*`, assumption pages | `{{REQ_PATH}}` | Live and die inside the REQ folder. |
 | `merge-checklist.md`, agent dispatch prompts | `.adlc/{{REQ_PATH}}/…` | Consumed once, immediately. |
 

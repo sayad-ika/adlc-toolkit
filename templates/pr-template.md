@@ -48,7 +48,7 @@ What this could affect that's worth flagging for the reviewer.
 
 Links to any new lesson, gotcha, ADR, or concept page created during this REQ.
 
-- [[knowledge/lessons/LESSON-NNN]] — short title
+- [[knowledge/lessons/LESSON-REQ-NNN-1]] — short title
 - [[knowledge/gotchas#^gNN|GNN]] — short title
 - [[architecture/adr-NNN-...]] — newly accepted
 

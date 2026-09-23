@@ -105,7 +105,7 @@ Each finding:
 
 **Recommendation:** What to do. Be specific — file + change, not "consider improving."
 
-**References:** [[knowledge/lessons/LESSON-007]], [[knowledge/gotchas#^g05|G05]] (if any apply)
+**References:** [[knowledge/lessons/LESSON-REQ-031-1]], [[knowledge/gotchas#^g05|G05]] (if any apply)
 ```
 
 ### Severity guidelines
@@ -142,7 +142,7 @@ Alongside your findings in `review-log.md`, append candidate lesson entries to `
 
 - Pure one-off bugs in this code path (file the finding; nothing generalizes)
 - Style nits without a pattern claim
-- Findings that already cite an existing LESSON-N or `^gNN` (already in the vault; don't duplicate)
+- Findings that already cite an existing lesson (`LESSON-…`) or `^gNN` (already in the vault; don't duplicate)
 
 ### Format
 

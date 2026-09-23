@@ -117,7 +117,7 @@ Pages from the knowledge vault relevant to this REQ:
 
 - [[knowledge/gotchas#^g05|G05]] — short note on why this matters here
 - [[concepts/foo]] — short note
-- [[knowledge/lessons/LESSON-007]] — short note
+- [[knowledge/lessons/LESSON-REQ-031-1]] — short note
 
 ## Open questions
 

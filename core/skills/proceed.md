@@ -135,7 +135,7 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
    | 2 — Architect | `architecture.md`, `tasks/`, any `exploration.md` content authored by /architect | — |
    | 3 — Implement | per-task implementation notes in `tasks/`; reset task completion flags in pipeline-state | — |
    | 4 — Review    | `verification.md` + `review-log.md` | — |
-   | 5 — Wrap up   | `pr-draft.md`, `merge-checklist.md` | `knowledge/lessons/L-*` entries this REQ added; `knowledge/gotchas.md` `^g##` anchors this REQ added; `architecture/adr-*` files this REQ added |
+   | 5 — Wrap up   | `pr-draft.md`, `merge-checklist.md` | `knowledge/lessons/LESSON-<REQ_ID>-*` files this REQ added (and the rebuilt `lesson-ledger.md`); `knowledge/gotchas.md` `^g##` anchors this REQ added; `architecture/adr-*` files this REQ added |
 
    Knowledge-layer entries authored by /wrapup are **tombstoned, not deleted** — they remain in the vault with a banner: `> **STATUS: retracted on YYYY-MM-DD via /proceed --revert from REQ-NNN-<slug>** — kept for historical reference.` Institutional memory is lossy on the way out, never silently wiped.
 
@@ -176,7 +176,7 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
 
    Append to `hot.md`: `## [DATE] req-reverted | REQ-NNN-<slug> | -<N> phases | <old-phase-name> → <new-phase-name>`.
 
-   If Phase 5 was included and knowledge entries were tombstoned, append per-entry: `## [DATE] knowledge-retracted | L-NNN — <title> (via revert)`.
+   If Phase 5 was included and knowledge entries were tombstoned, append per-entry: `## [DATE] knowledge-retracted | L-REQ-NNN-n — <title> (via revert)`.
 
 7. **On `revise`:** edit `revert-plan.md` per feedback, re-emit the approval prompt.
 

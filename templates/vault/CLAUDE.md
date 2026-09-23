@@ -12,7 +12,7 @@ The user is **{{USER_NAME}}** ({{USER_EMAIL}}). They make every decision. You do
 
 ## Read order at session start
 
-`now.md` (what's in flight) → `hot.md` (last 20 entries) → `config.yml` → `context/project-overview.md`, `context/conventions.md`, `context/architecture.md` → `index.md` only to find a specific page. Don't read every vault page — the index plus targeted lookups is faster and cheaper.
+`now.md` (what's in flight) → `hot.md` (last 20 entries) → `config.yml` → `context/project-overview.md`, `context/conventions.md`, `context/architecture.md` → `index.md` only to find a specific page. Don't read every vault page; look up what you need.
 
 ## What's authoritative
 
@@ -23,7 +23,7 @@ The user is **{{USER_NAME}}** ({{USER_EMAIL}}). They make every decision. You do
 | `config.yml` | Stack, paths, git/autonomy dials |
 | `context/*` | Project-wide architecture, conventions, overview |
 | `architecture/adr-*.md` (status: accepted) | Decisions in effect |
-| `knowledge/*` | Lessons, gotchas, concepts, components |
+| `knowledge/*` | Lessons (index: `lesson-ledger.md`), gotchas, concepts, components |
 | The REQ's own folder (status: validated and later) | The contract for that REQ |
 
 When two sources disagree, **stop and surface the contradiction**. Never silently pick one. Anything marked `STATUS: needs verification` is provisional — don't build on it without asking. ADRs with status `proposed` or `superseded` are not in effect.
@@ -47,7 +47,7 @@ When two sources disagree, **stop and surface the contradiction**. Never silentl
 ## File conventions
 
 - **Wikilinks** for cross-references: `[[concepts/idempotency]]`, `[[knowledge/gotchas#^g05|G05]]`. Name a REQ by its **ID** (`REQ-042`), never its folder path — lessons and ADRs outlive the REQ, and a baked-in path breaks when it's archived.
-- **Block anchors** for anything referenced from elsewhere: `^L##` (lessons), `^g##` (gotchas), `^ADR-##` (ADRs). Prefer block anchors over heading anchors — they survive renames.
+- **Block anchors** for anything referenced from elsewhere: `^L-<REQ_ID>-<n>` (lessons), `^g##` (gotchas), `^ADR-##` (ADRs). Prefer block anchors over heading anchors — they survive renames.
 - **`STATUS:` markers**: `needs verification` (assumed, not confirmed) · `deprecated` (don't build on) · `superseded by X` (X is the new truth).
 - **Field table** at the top of every spec, ADR, concept, and component page; **Related / Backlinks** sections at the bottom of substantive pages.
 

@@ -62,32 +62,49 @@ Knowledge capture happens in two halves: candidates were surfaced upstream (duri
 
 1. **Read `lesson-candidates.md`.** If the file doesn't exist, do a sweep over `verification.md` and `commits-draft.md` asking "did anything recurring or instructive surface that should become a candidate?" (Open `review-log.md` only if a verdict entry lacks the detail to judge.) Append any to `lesson-candidates.md`, then continue. A complete REQ that genuinely produced zero candidates is rare — the more common cause of an empty file is missed capture upstream.
 
-2. **For each candidate, issue exactly one verdict:**
+2. **Check each candidate against what already exists — on this branch and on the base branch.** Existing lessons are found by filename, not by reading them: `ls .adlc/knowledge/lessons/` for the working tree, and for the team's merged state:
+
+   ```sh
+   git -C <workPath> ls-tree --name-only origin/<base-branch>:<vaultDir>/knowledge/lessons/
+   git -C <workPath> log -1 --format=%cr origin/<base-branch>      # how stale that view is — goes in the gate card
+   ```
+
+   `<workPath>` and `<base-branch>` come from `pipeline-state.json` (you already used them at step 1). **Always the `git -C <workPath>` form**: run from a subdirectory, `ls-tree` exits 0 with *empty* output and the check silently passes everything. If `origin/<base-branch>` does not exist (no remote, not fetched) git exits 128 and touches nothing — skip this half and say so in the gate card (`cross-branch dedup skipped: origin/<base> not found`). These are git **reads**; the git-mutation ban does not cover `ls-tree` or `log`. Fetching is the user's job — the toolkit never runs a network git op — which is why the merge checklist starts with `git fetch`.
+
+   A candidate whose Claim matches a lesson that exists only on `origin/<base-branch>` is a duplicate of something a teammate already promoted: `discard — duplicate of LESSON-… (on <base>, not merged here yet)`.
+
+3. **For each candidate, issue exactly one verdict:**
    - **`promote`** — write a full lesson. See "Lessons" below.
    - **`demote-to-gotcha`** — write a file-scoped gotcha. See "Gotchas" below.
-   - **`discard`** — explain in one line why (trivial, already captured by LESSON-N, duplicate of CAND-M, etc.).
+   - **`discard`** — explain in one line why (trivial, already captured by LESSON-…, duplicate of CAND-M, etc.).
 
-3. **Append verdicts** to `lesson-candidates.md` under a `## Candidate verdicts` heading at the bottom:
+4. **Append verdicts** to `lesson-candidates.md` under a `## Candidate verdicts` heading at the bottom:
 
    ```markdown
    ## Candidate verdicts
 
    | Candidate | Verdict | Target / Reason |
    |---|---|---|
-   | CAND-001 | promote | LESSON-042 |
+   | CAND-001 | promote | LESSON-REQ-042-1 |
    | CAND-002 | demote-to-gotcha | ^g14 |
-   | CAND-003 | discard | duplicate of LESSON-007 |
+   | CAND-003 | discard | duplicate of LESSON-REQ-031-2 (on main, not merged here yet) |
    | CAND-004 | discard | trivial — one-off, no recurring pattern |
    ```
 
 #### Lessons
 
-- For each `promote` verdict, draft a new `.adlc/knowledge/lessons/LESSON-NNN-<slug>.md` from `templates/lesson-template.md`.
-- Use the **minimum required fields only** — title, metadata table, "The lesson", "Saw it in". The optional sections are filled when the lesson recurs in a future REQ, per the template's "born minimal, grown on demand" instruction.
-- Get the next sequential ID from a **directory listing** (`ls .adlc/knowledge/lessons/`) — never by reading the lesson files. Fill in the `^L##` anchor.
-- Add a row to `.adlc/index.md` under Lessons (open that file at step 4, at its Lessons section only).
+- For each `promote` verdict, draft a new `.adlc/knowledge/lessons/LESSON-<REQ_ID>-<n>-<slug>.md` from `templates/lesson-template.md`. The ID is namespaced under this REQ — grammar and scan in `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` → `mint(lesson)`:
 
-If the verify phase produced reflector findings tagged `vault-stale`, draft updates to existing lessons (don't auto-apply — show them to the user as part of the gate prompt).
+  ```sh
+  ls .adlc/knowledge/lessons/ | sed -n 's/^LESSON-<REQ_ID>-\([0-9][0-9]*\)-.*/\1/p' | sort -n | tail -1
+  ```
+
+  → that + 1, or `1`. Never a vault-wide count, and never by reading the lesson files. Legacy `LESSON-NNN` files in the vault are frozen; do not continue their sequence. Fill the `^L-<REQ_ID>-<n>` anchor.
+- Use the **minimum required fields only** — title, metadata table (Tags is required — 2–5 tokens naming the component or domain), "The lesson", "Saw it in". The optional sections are filled when the lesson recurs in a future REQ, per the template's "born minimal, grown on demand" instruction.
+- If the new lesson replaces an existing one, fill `Supersedes` and add the `STATUS: superseded by …` banner to the top of the old file (template header says how). Never delete the old file.
+- The ledger is rebuilt at step 4 — no `index.md` row to add.
+
+If the verify phase produced reflector findings tagged `vault-stale`, draft updates to existing lessons (don't auto-apply — show them to the user as part of the gate prompt). When the finding says a lesson is outdated rather than wrong, supersession is usually the right shape.
 
 #### Gotchas
 
@@ -125,7 +142,7 @@ Append:
 Plus one entry per artifact created:
 
 ```markdown
-## [YYYY-MM-DD] lesson | L-NNN — <title>
+## [YYYY-MM-DD] lesson | L-REQ-NNN-1 — <title>
 ## [YYYY-MM-DD] gotcha | G-NN — <title>
 ## [YYYY-MM-DD] adr-accepted | ADR-NNN — <title>
 ## [YYYY-MM-DD] concept | <name> — first captured
@@ -133,9 +150,19 @@ Plus one entry per artifact created:
 
 **Rotate past 500 lines — here, every time.** After appending, `wc -l`. If the file is over 500 lines, cut everything from the 501st line down (the oldest entries — newest are at the top) and prepend it to `.adlc/hot-archive-<YYYY>.md` (the year of the oldest cut entry; create with a one-line header if absent). Add or keep one row for the archive in `index.md`. Nothing is deleted; Obsidian still searches both. Measured before this rule: 3,860 lines, 754KB, "truncate when unwieldy" never fired because nobody was the one to call it unwieldy.
 
+#### `.adlc/knowledge/lesson-ledger.md` — rebuild, don't edit
+
+Whenever this REQ promoted or superseded a lesson, rewrite the ledger from the lesson files' header lines — one `grep`, never a read of the files:
+
+```sh
+grep -h '^# \|^| ID \|^| Tags \|^| Severity \|^| REQ \|^> \*\*STATUS: superseded' .adlc/knowledge/lessons/LESSON-*.md
+```
+
+One row per file — `| ID | Title | Tags | Severity | REQ |` — under the template's generated-file header (`$TOOLKIT_PATH/templates/vault/knowledge/lesson-ledger.md`). Title is the H1 minus its `^L…` anchor. A superseded lesson renders as `~~LESSON-…~~` with `→ LESSON-…` after the title. Order: legacy `LESSON-NNN` ascending, then `LESSON-<WORK_ID>-<n>` by work ID then `<n>`. **Replace the whole file** — it carries `merge=union`, and a union merge can leave a duplicated row; a full rewrite is what clears it. Nobody hand-edits this file; if it looks hand-edited, rebuild it anyway.
+
 #### `.adlc/index.md`
 
-Add rows for new specs, ADRs, lessons, concepts, components. Open it here, and read only the sections you're adding rows to.
+Add rows for new specs, ADRs, concepts, components. Open it here, and read only the sections you're adding rows to. Lessons are not rows here — `index.md` links to the ledger.
 
 #### `.adlc/decisions.md`
 
@@ -191,7 +218,7 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body i
 
 - **Header** — `Gate 5 of 5 · Wrap up · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "PR + vault ready — run the checklist when you're set", or flag if the final sanity check surfaced anything.
-- **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-NNN>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable).
+- **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-REQ-NNN-n>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable), then the dedup basis: `dedup vs origin/<base> as of <age>` or `cross-branch dedup skipped: origin/<base> not found`. The age is the honest signal — a week-old fetch makes the check weaker, and the card shows it rather than hiding it.
 - **NEEDS YOU** — only genuine calls: the repo-doc list from step 1 (`docs: <file> — <claim> → <fact>`, applied on approve); a drafted issue-tracker write-back awaiting your OK (never auto-sent); a "no knowledge captured — is that right?" confirmation; any unresolved final-sanity item. Omit if none.
 - **CHECKS** — final diff sanity as one compact `✓ / ⚠` line: blast radius matches architecture · user-facing docs swept (`N` stale claims listed / none / skipped) · no debug artifacts · no `--no-verify` · commit drafts all in git log.
 - **MY READ** — recommendation + one-line why.
@@ -205,7 +232,8 @@ GATE 5/5 · Wrap up · REQ-NNN-<slug>
 
 READY       PR: feat(pay): retry with backoff — pr-draft.md · 9 files, +240/-37
             merge-checklist.md
-            knowledge saved: lesson L-042 · gotcha g14 · ADR-007 confirmed
+            knowledge saved: lesson L-REQ-042-1 · gotcha g14 · ADR-007 confirmed
+            dedup vs origin/main as of 2 days ago · 1 candidate already on main
 NEEDS YOU   ⚠ drafted, not sent: comment on issue #842 and a move to
             'In Review' — see source-writeback.md
 
@@ -255,6 +283,7 @@ If `abort`:
 - **Vault updates** go on the REQ's feature branch: committed by you in `commit`/`commit+push`, or left for the user's final commit in `manual`.
 - **`pr-draft.md` is a draft.** The user can paste it into `gh pr create --body-file` or copy/paste into a web form. Don't auto-submit anywhere.
 - **Source write-back is off unless `sources.write` lists the tracker, and always gated.** Even when configured, the comment/transition is drafted to `source-writeback.md` and sent only on explicit approval — never as a silent side effect. It's an external write: it always stops for your OK, and under `/autopilot` it is further limited by `autonomy.sources`.
+- **Lessons are team artifacts.** They are namespaced under this REQ (never a vault-wide count), checked against the base branch before promotion, and land in the PR diff under `knowledge/lessons/` where the reviewer can push back on them like on code. A lesson that duplicates one already on the base branch is a discard, not a second copy.
 - **Capture liberally as candidates, prune deliberately at verdict.** Candidates are cheap — one line in a scratch file. Lessons are precious — the vault stays high-signal because the verdict step is rigorous, not because the candidate bar is high. Silent zero-capture is a failure mode: if no candidates surfaced upstream and the sweep over `verification.md` finds nothing either, ask the user at the gate — "We didn't capture any lessons from this one. Does that sound right, or should I take another look?" — don't pass silently.
 
 ## Output artifacts
@@ -263,6 +292,6 @@ If `abort`:
 - `.adlc/<REQ_PATH>/merge-checklist.md`
 - `.adlc/<REQ_PATH>/lesson-candidates.md` (now includes the `## Candidate verdicts` table appended at the bottom; retained after wrapup as decision history)
 - `.adlc/<REQ_PATH>/source-writeback.md` (only when `sources.write` is configured and a write-back was drafted at step 5a)
-- New / updated vault files: `lessons/`, `gotchas.md`, `concepts/`, `components/`, `architecture/`, `index.md`, `decisions.md`, `hot.md`, `now.md`, `glossary.md`
+- New / updated vault files: `lessons/`, `lesson-ledger.md` (rebuilt), `gotchas.md`, `concepts/`, `components/`, `architecture/`, `index.md`, `decisions.md`, `hot.md`, `now.md`, `glossary.md`
 - On `merged` + user approval: the REQ folder moved under `specs/_archive/` with its tail preserved (whole, nothing deleted) and its `Path` column in `index.md` repointed
 - Updates to `pipeline-state.json`

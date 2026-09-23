@@ -350,7 +350,7 @@ READY       4 reviewers ran · 3 possible lessons noted (decided at /wrapup)
             UI check skipped — nothing visual changed
 
 CHECKS      ✓ criteria 1–2 met · ⚠ criterion 3 — safe-retry not verified
-            ! past-mistakes check: repeats LESSON-007 (retry side effects)
+            ! past-mistakes check: repeats LESSON-REQ-031-1 (retry side effects)
 
 MY READ     fix — the critical finding must be fixed before this ships
 

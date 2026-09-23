@@ -14,7 +14,8 @@ This directory is the project's knowledge vault and ADLC workspace. It's an Obsi
 | Path | What lives here |
 |---|---|
 | `context/` | Project-wide architecture, conventions, overview |
-| `knowledge/lessons/` | One file per lesson, each with a `^L##` anchor (not a mirror of your source tree) |
+| `knowledge/lessons/` | One file per lesson, named `LESSON-<REQ_ID>-<n>-<slug>.md` with a `^L-<REQ_ID>-<n>` anchor — the ID carries the REQ that produced it, so two people can't mint the same one (not a mirror of your source tree) |
+| `knowledge/lesson-ledger.md` | Generated one-row-per-lesson index; rebuilt by every skill that writes a lesson, never hand-edited |
 | `knowledge/gotchas.md` | Consolidated codebase quirks with `^g##` anchors |
 | `knowledge/concepts/` | Patterns, invariants, domain models |
 | `knowledge/components/` | One page per major module |
@@ -40,7 +41,7 @@ Don't type these paths, and don't assume a shape. Refer to a REQ by its ID and l
 ## Conventions
 
 - **Wikilinks** for cross-references: `[[concepts/idempotency]]`, `[[knowledge/gotchas#^g05|G05]]`
-- **Block anchors** for stable references: `^L##` (lessons), `^g##` (gotchas), `^ADR-##` (ADRs)
+- **Block anchors** for stable references: `^L-<REQ_ID>-<n>` (lessons; older vaults also have `^L##`), `^g##` (gotchas), `^ADR-##` (ADRs)
 - **`STATUS: needs verification`** flags provisional content — never silently assume it's confirmed
 - **Field table at the top** of every spec, ADR, concept, and component page
 - **"Related" and "Backlinks" sections** at the bottom of substantive pages
@@ -59,7 +60,7 @@ The hot-path files are loaded at every phase entry — their size is a recurring
 | each REQ's `verification.md` | 8KB (verdict only — narrative goes in `review-log.md`) |
 | each REQ's `review-packet.md` | 120KB target, 250KB ceiling (read in full by every reviewer; `config.yml → review.packet.exclude` keeps generated code out) |
 | each reviewer section of `review-log.md` | 12KB |
-| `knowledge/` total | 60KB / 30 lessons — soft trigger for the toolkit's tiered-vault-loading ADR |
+| `knowledge/` total | 60KB / 30 lessons — soft trigger for the toolkit's tiered-vault-loading ADR (a team reaches it in months, not years — keep `Tags` filled) |
 
 ## How the pipeline writes here
 

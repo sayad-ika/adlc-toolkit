@@ -31,7 +31,7 @@ If you were given a `review-packet.md`, read it first — it contains the diff w
 
 1. The REQ spec and architecture
 2. The exploration report (`exploration.md`) — what vault references the explorer found
-3. **`.adlc/knowledge/lessons/`** — every lesson file
+3. **`.adlc/knowledge/lessons/`** — every lesson file, except those whose first lines carry a `> **STATUS: superseded by …**` banner: skip the body, count them as skipped in your summary line, and check the lesson they point to instead (it is in the same folder)
 4. **`.adlc/knowledge/gotchas.md`** — every gotcha entry
 5. **`.adlc/architecture/adr-*.md`** — every ADR with status `accepted`
 6. **`.adlc/knowledge/concepts/`** — concept pages relevant to the change
@@ -108,7 +108,7 @@ Each finding:
 | Effort | small \| medium \| large — rough cost to fix |
 | File | `src/foo/bar.ts:42` (if applicable) |
 | Category | repeated-mistake \| ignored-gotcha \| adr-conflict \| concept-drift \| re-derivation \| missing-vault-page \| vault-stale \| diagram-stale |
-| Vault reference | [[knowledge/lessons/LESSON-007]] |
+| Vault reference | [[knowledge/lessons/LESSON-REQ-031-1]] |
 
 **What:** One sentence describing the conflict.
 
@@ -143,7 +143,7 @@ Sometimes the new code is right and the vault is wrong — the lesson is outdate
 
 1. Flag the finding as `category: vault-stale`, severity `major`.
 2. Recommend the vault update (which file, which section), not a code change.
-3. Note that the user should consider whether the lesson/gotcha/ADR needs revision, supersession, or deletion.
+3. Note that the user should consider whether the lesson/gotcha/ADR needs revision, supersession, or deletion. For a lesson that is *outdated* rather than wrong, name supersession: this REQ's candidate replaces it, the new lesson's `Supersedes` row points back, and the old file gets the `STATUS: superseded` banner — nothing is deleted, and the next reflector skips it.
 
 Do not silently let the new code violate vault content. Surface the conflict either way — the human resolves whether to update the code or the vault.
 
@@ -166,7 +166,7 @@ Append candidates to `lesson-candidates.md` in the same REQ folder.
 
 ### What NOT to surface
 
-- Findings explicitly citing an existing LESSON-N, `^gNN`, or ADR (already in vault — your existing finding format already references them)
+- Findings explicitly citing an existing lesson (`LESSON-…`), `^gNN`, or ADR (already in vault — your existing finding format already references them)
 - Bug shapes that belong to correctness-reviewer's lens (let it surface those)
 - Style nits (quality-reviewer's lens)
 
@@ -195,11 +195,11 @@ Get the next sequential `CAND-NNN` by scanning existing entries (start at CAND-0
 
 Your review is complete when:
 
-- Every lesson in `knowledge/lessons/` has been considered against the diff
+- Every lesson in `knowledge/lessons/` has been considered against the diff (superseded ones skipped and counted)
 - Every gotcha in `knowledge/gotchas.md` has been considered against files in the diff
 - Every `accepted` ADR has been considered against the architecture/implementation
 - Concept and component pages for touched modules have been compared to the diff
 - Any Mermaid diagram in `architecture.md` or a touched vault page has been checked against the diff for drift
 - Findings are written to `review-log.md` under `## Reflection findings`
-- A summary line at the top reports counts by severity and category, including how many lessons/gotchas/ADRs were checked
+- A summary line at the top reports counts by severity and category, including how many lessons/gotchas/ADRs were checked (and how many lessons were skipped as superseded)
 - Vault-gap candidates have been appended to `lesson-candidates.md` (your primary producer role — empty output is rare and should be justified in the summary)

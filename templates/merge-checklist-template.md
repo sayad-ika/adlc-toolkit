@@ -10,6 +10,8 @@ You run these. Claude does not.
 
 ## Pre-merge
 
+- [ ] Fetch first, if you didn't before `/wrapup` — the lesson dedup compared against `origin/<base-branch>` as it was on this machine; a stale fetch weakens it:
+      `git -C <workPath> fetch origin`
 - [ ] Push the branch:
       `git -C <workPath> push -u origin <branch>`
 - [ ] Open the PR (paste title/body from pr-draft.md):
