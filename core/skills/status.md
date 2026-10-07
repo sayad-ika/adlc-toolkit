@@ -33,10 +33,11 @@ For each REQ found:
 
 - Read `pipeline-state.json` if it exists — on a fresh clone it won't; list the REQ with its state unknown rather than dropping it
 - Skip REQs where `prState == "merged"` and `mergedAt` is more than 7 days old (they're done)
+- A REQ at a cleared ship gate whose branch is merged (same signals as /recover) shows as `merged — not finalized (any pipeline command will finalize)`. /status writes nothing.
 - For each remaining REQ, collect:
   - REQ ID and title
   - Current phase
-  - Gate state (`awaiting` vs `cleared`)
+  - Gate state (`awaiting`, `cleared`, or `deferred`), `profile`, and gate position (`currentPhaseGate`'s place in `gates` over `gates.length`; absent = legacy, 5 gates)
   - Isolation mode (`branch` or `worktree`)
   - Work path (verify it exists; flag if missing)
   - In `worktree` mode also verify the worktree is registered with git; in `branch` mode verify the branch ref still exists
@@ -65,7 +66,7 @@ Active focus (from now.md):
   > <focus line from now.md>
 
 Active REQs:
-  REQ-NNN-<slug> | phase: <phase> | gate: <awaiting/cleared> | branch: <branch> | isolation: <mode>
+  REQ-NNN-<slug> | phase: <phase> | gate <n>/<N>: <awaiting/cleared/deferred> | profile: <p> | branch: <branch> | isolation: <mode>
     Work path: <path> [✓ exists / ⚠ missing]
     Files changed: <count>
     Findings: C<critical>/M<major>/m<minor> (if past Phase 4)

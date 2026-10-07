@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Draft and validate a requirement spec for a new REQ. Phase 1 of the /proceed pipeline. Ends in the spec gate — user must approve before /architect can run. Writes the REQ's requirement.md and pauses for review.
+description: Draft and validate a requirement spec for a new REQ. Phase 1 of the /proceed pipeline. Ends in the spec gate (full profile) or, under the standard profile, hands to /architect with the gate folded into the Plan gate. Writes the REQ's requirement.md and pauses for review.
 ---
 
 You are running Phase 1 of the ADLC pipeline: drafting and validating a requirement spec.
@@ -18,8 +18,8 @@ You are running Phase 1 of the ADLC pipeline: drafting and validating a requirem
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md`, `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`, `$TOOLKIT_PATH/core/VOICE.md`, and `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` (where work records live on disk — never hard-code a path under `specs/`, `bugs/`, or `sprints/`) into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6.
-2. **Read the vault basics.** Load `.adlc/CLAUDE.md`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries), `.adlc/config.yml`, `.adlc/context/project-overview.md`, `.adlc/context/conventions.md`.
+1. **Read the toolkit ETHOS** and **gate protocol.** Load `$TOOLKIT_PATH/ETHOS.md`, `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`, `$TOOLKIT_PATH/core/VOICE.md`, and `$TOOLKIT_PATH/core/VAULT-LAYOUT.md` (where work records live on disk — never hard-code a path under `specs/`, `bugs/`, or `sprints/`) into context (`$TOOLKIT_PATH` is the toolkit install dir, stamped into your command/adapter as a "Toolkit root:" line). The gate protocol is the shared gate-card format used at step 6. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
+2. **Read the vault basics.** Load `.adlc/CLAUDE.md`, `.adlc/now.md`, `.adlc/hot.md` (last 20 entries), `.adlc/config.yml`, `.adlc/context/project-overview.md`, `.adlc/context/conventions.md`. (same rule for .adlc/CLAUDE.md, config.yml, context/*.md — but always re-read now.md and hot.md, which change between phases)
 3. **Determine the REQ ID.** Read `config.yml` → `req.id_scheme` (default `sequential` if absent) and `req.prefix`. Every scheme mints off the one scan from VAULT-LAYOUT's `mint` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-*'` — where depth 4 covers every month bucket, every author folder, **and** `_archive/` in a single pass. Archived REQs still own their numbers; other people's folders hold live ones.
    - If the user passed an explicit ID, run the same scan first and refuse if it collides.
    - Otherwise mint one per the scheme:
@@ -72,6 +72,10 @@ Before locking the spec, scan the vault for relevant prior work:
 
 If you find anything, add the wikilinks to the "Related" section of the spec. If a lesson directly affects the acceptance criteria or assumptions, surface it in the chat and adjust the spec.
 
+### 2a. Profile triage
+
+Apply `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` → Profiles to what the spec and vault check show (sensitive surface, likely ADR, cross-repo, rough blast radius, UI ACs). `--profile=<p>` from the invocation wins over triage only when it sizes **up**; a lighter `--profile` is a user override — log it (`profile-override`). Record the choice and the one-line reason for step 3.
+
 ### 3. Initialize pipeline state
 
 Create `.adlc/<REQ_PATH>/pipeline-state.json`:
@@ -79,6 +83,9 @@ Create `.adlc/<REQ_PATH>/pipeline-state.json`:
 ```json
 {
   "req": "REQ-NNN-<slug>",
+  "profile": "<standard|full>",
+  "hardStop": false,
+  "gates": ["spec", "architect", "verify", "ship"],
   "createdAt": "<ISO timestamp>",
   "currentPhase": 1,
   "completedPhases": [0, 1],
@@ -92,6 +99,8 @@ Create `.adlc/<REQ_PATH>/pipeline-state.json`:
   "notes": []
 }
 ```
+
+`gates` per the Profiles table: `standard` → `["plan", "verify", "ship"]`; `full` as above, with `"implement"` before `"verify"` when `hardStop` is true. Under `standard`, once step 4 passes, set `gateState: "deferred"`, `currentPhaseGate: null`.
 
 `notes[]` is a log line per phase event, ≤160 characters each — `spec-gate-cleared 2026-09-08`, `TASK-003 done: 41 passed · hatch precedes translator`. It is read in full by every phase preflight and by `/status`, `/proceed --resume`, and `/recover`, so a paragraph here is paid dozens of times. Narrative belongs in the artifact it describes (task file, `verification.md`, `hot.md` entry).
 
@@ -108,9 +117,11 @@ Before writing the gate marker, walk this checklist yourself:
 - [ ] **No design.** The spec describes what, not how. If the draft creeps into how, push the design content into a TODO for `/architect`.
 - [ ] **Non-goals exist.** If the draft has none, you haven't thought enough about scope. Add at least one.
 
-Each item is reported in the gate prompt with a tick or a flag.
+Each item is reported in the gate prompt with a tick or a flag. A blocker (an open question that must be answered to validate the spec) **always** stops here, in every profile — ask it as a choice (ETHOS #6) before any exploration is dispatched.
 
 ### 5. Write the gate marker
+
+**Full profile only.** Under `standard`, skip steps 5–6: emit one line — `Spec validated · profile: standard (<reason>) · moving to design; you'll review spec and design together` — and hand to `/architect` (when run by `/proceed`, the walk continues).
 
 Create `.adlc/<REQ_PATH>/.awaiting-approval` with content:
 
@@ -126,20 +137,20 @@ Files:
 
 Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A spec gate is one of the leanest — often just verdict + `CHECKS` + `MY READ` + decision, since there's nothing structural to show. Map:
 
-- **Header** — `Gate 1 of 5 · Spec · REQ-NNN-<slug>`.
+- **Header** — `GATE 1/<N> · Spec · REQ-NNN-<slug>`.
 - **Verdict** — "clean — nothing flagged, recommend approve", or "ready — `<k>` item(s) need your call".
 - **NEEDS YOU** (only if any) — open questions that bear on scope, or a vault lesson that should change an acceptance criterion. Omit when there are none.
-- **CHECKS** — the step-4 inline validation, one compact line: criteria testable · goal specific · assumptions explicit · no design · non-goals present. Note any vault references found (`[[…]]`) here or under READY.
+- **CHECKS** — the step-4 inline validation, one compact line: criteria testable · goal specific · assumptions explicit · no design · non-goals present · `profile: full (<reason>)`. Note any vault references found (`[[…]]`) here or under READY.
 - **MY READ** — your recommendation + one-line why.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (ready for `/architect`), **revise** (describe the change), **abort** (discard this REQ). Mark approve *(Recommended)* per `MY READ`.
 
 Example shape:
 
 ```
-GATE 1/5 · Spec · REQ-NNN-<slug>
+GATE 1/4 · Spec · REQ-NNN-<slug>
    clean — nothing flagged, recommend approve
 
-CHECKS   ✓ criteria testable · ✓ goal specific · ✓ assumptions explicit · ✓ no design · ✓ non-goals present
+CHECKS   ✓ criteria testable · ✓ goal specific · ✓ assumptions explicit · ✓ no design · ✓ non-goals present · profile: full (new ADR likely)
 
 MY READ  approve — spec is tight; the one open question is non-blocking
 
@@ -173,6 +184,7 @@ If the user replies `abort`:
 - **Never overwrite an existing requirement.md** without explicit confirmation.
 - **Never proceed past the gate** without an `approve` response.
 - **Don't draft architecture or implementation details.** Resist the urge.
+- **Validation never defers.** A deferred spec gate moves the human review to the Plan gate; the step-4 checks and blockers run now.
 
 ## Output artifacts
 

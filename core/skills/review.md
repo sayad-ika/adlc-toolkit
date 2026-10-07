@@ -7,14 +7,14 @@ You are running Phase 4 of the ADLC pipeline: reviewing the implemented code thr
 
 ## When to use
 
-- The implement gate has been cleared and the user has run the drafted commits.
+- The implement phase is complete (its gate cleared, or deferred under the REQ's profile).
 - The user invokes `/review REQ-NNN-<slug>` directly, or `/proceed` is moving past the implement gate.
 
 ## Preflight
 
-1. **Resolve the REQ folder, then verify the implement gate cleared and code is committed.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Read `.adlc/<REQ_PATH>/pipeline-state.json` (`currentPhase >= 3`, `gateState: "cleared"` for implement). Check that `git -C <workPath> log <base-branch>..<branch> --oneline` shows commits — if the branch has no commits past the base, **stop and remind** the user to run the commits first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 9.
-3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `<REQ_PATH>/requirement.md`, `architecture.md`, `commits-draft.md`.
+1. **Resolve the REQ folder, then verify the implement gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Read `.adlc/<REQ_PATH>/pipeline-state.json` (`currentPhase >= 3`). Accept the implement phase as `"cleared"` or `"deferred"`. If the branch has no commits past the base, review the working tree instead: `git.mode: manual` leaves the drafted commits for the user to run before `/wrapup`, which checks them against the git log. Record `baseCommit` (`git -C <workPath> merge-base <base-branch> HEAD`) in `pipeline-state.json` for the packet's diff. If there are no commits **and** no working-tree changes, stop: there is nothing to review.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 9. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
+3. **Load context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `<REQ_PATH>/requirement.md`, `architecture.md`, `commits-draft.md`. (same rule for .adlc/CLAUDE.md, config.yml, context/*.md — but always re-read now.md and hot.md, which change between phases)
 4. **Verify the work path and branch.** Read `pipeline-state.json.workPath`, `isolation`, and `branch`. Check `workPath` is a valid directory. Verify the branch ref exists: `git -C <workPath> rev-parse --verify <branch>`. (In `branch` mode, HEAD may be on a different branch — that's fine; comparisons below use `<branch>` by name.)
 5. **Identify the diff.** Determine the base branch from `config.yml` (default `main`). Capture the list of changed files: `git -C <workPath> diff --name-only <base-branch>...<branch>`.
 6. **Decide whether the UI reviewer runs.** Condition (a) is mandatory: `config.yml` → `stack.frontends` must be non-empty (the project has a frontend at all). If it's empty, never dispatch — there is no UI to review. With a frontend present, dispatch if **either** of these holds:
@@ -240,6 +240,7 @@ For each finding across all reviewer sections (including UI/UX findings when the
 - Tag with originating reviewer(s)
 - Mark each finding's disposition: **actionable** (a code change a task-implementer can apply) or **needs-decision** — a reflector `vault-stale` (the vault should change, not the code), an `adr-conflict`, a proposed new ADR, or an open design question. `fix all` acts on the actionable set only; needs-decision findings are the user's by definition — an implementer "fixing" one would be making the decision for them.
 - Group by file
+- When the implement gate was deferred, take implement step 5's flags (debug prints, TODO without link, `.skip()`/commented tests — the `notes[]` entry has the count; re-run that scan on the diff for locations) as **minor, actionable** findings with IDs `d1, d2…`, source `implement-scan`. Commit drafts missing for a task → a **major** finding.
 
 ```markdown
 ## Findings at a glance
@@ -327,7 +328,7 @@ Files:
 
 Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads with findings** — that's its `NEEDS YOU` — and swaps in its own options (`fix` alongside approve/revise/abort). Map:
 
-- **Header** — `Gate 4 of 5 · Review · REQ-NNN-<slug>`.
+- **Header** — `GATE <n>/<N> · Review · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "`<total>` findings — `<k>` need a call", or "clean — no findings, recommend approve".
 - **FINDINGS** — the consolidated list, one line each, prefixed by severity `crit / maj / min` (drop trivial to a count) and the originating reviewer; group the Critical + Major at the top. Suffix needs-decision findings with `— your call`, so the scope of `fix all` is visible on the card. This block *is* the `NEEDS YOU` for this gate.
 - **READY** (brief) — `<4 or 5>` reviewers ran; `<total>` possible lessons noted (you decide what to keep at `/wrapup`); how the UI was checked + counts (or "UI check skipped — nothing visual changed"; omit entirely when the project has no frontend); when any doc is now out of date, name it ("docs now stale: docs/auth.md — update it in this branch before merging").
@@ -335,7 +336,9 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A review gate **leads w
 - **MY READ** — recommendation + one-line why. **Never recommend approve while a Critical is unaddressed** — that's a `fix` or `revise`.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (accept findings as-is → `/wrapup`), **fix all** (every actionable finding gets fixed, affected reviewers re-run, gate comes back — needs-decision findings return named), **fix** (`<ids>` or `all-major` — same loop, scoped), **revise** (other changes to the review), **abort** (escalate; halt). `fix all` is always offered whenever at least one actionable finding exists. Mark the recommended one per `MY READ`.
 
-Example shape:
+**Build & Review (implement gate deferred).** Header `GATE <n>/<N> · Build & Review · <REQ>`. Add a `BUILD` block above FINDINGS: `<N> tasks in <T> stages · tests <X> passed / <Y> added · <c> commits drafted · diff <files> +a/-b`, and the implement CHECKS line (`no debug prints · no untracked TODO · no skipped tests · all tests pass`). Note that drafted commits are run before wrap-up.
+
+Example shape (legacy, or full + hardStop):
 
 ```
 GATE 4/5 · Review · REQ-NNN-<slug>
@@ -366,7 +369,7 @@ If `approve` (no fixes needed):
 1. Delete `.awaiting-approval`.
 2. Update `pipeline-state.json`: `gateState: "cleared"`.
 3. Append to `hot.md`: `## [DATE] verify-gate-cleared | REQ-NNN-<slug> | findings: C<critical>/M<major>/m<minor>`.
-4. Tell the user: ready for `/wrapup`.
+4. Tell the user: run the drafted commits (if `git.mode` is `manual`), then `/wrapup`. In `commit`/`commit+push` with the implement gate deferred, commit the implement and fix drafts now, per `/implement` Constraints.
 
 If `fix: <ids>`, `fix: all-major`, or `fix: all`:
 
@@ -405,7 +408,7 @@ If `abort`:
 - **Surface vault-stale findings — and route them, don't fix them.** Reflector findings recommending the vault (not the code) change (`vault-stale`, `concept-drift`, `missing-vault-page`, `diagram-stale`) are needs-decision: the user decides whether the lesson/gotcha/ADR/page changes, and `/wrapup` step 3 is where that edit happens. They never trigger a fix round or a task-implementer.
 - **`verification.md` is the verdict file — keep it lean.** Target ≤8KB. Every later reader (`/wrapup`, the gate packets, `/status`) loads the verdict file and only that; per-finding essays belong in `review-log.md`. If the consolidated section starts reading like the log, you're writing in the wrong file.
 - **`review-packet.md` is read in full by every dispatched reviewer — its cost is multiplied by four or five.** Target ≤120KB, ceiling 250KB. It is the largest artifact the pipeline produces and the only one paid for that many times; a packet over ceiling is a fact about the REQ worth surfacing, not a detail. Record the measured size on the gate card and in the Summary.
-- **Review applies code fixes but does not itself commit.** Committing follows `git.mode` (`.adlc/config.yml`, default `manual`) and happens at the implement/wrapup gate boundaries — never here, and never on a protected branch.
+- **Review applies code fixes but does not itself commit.** Committing follows `git.mode` (`.adlc/config.yml`, default `manual`) and happens at gate clearance — the implement gate, this gate's approval when implement was deferred, and wrapup — never mid-review, and never on a protected branch.
 
 ## Output artifacts
 

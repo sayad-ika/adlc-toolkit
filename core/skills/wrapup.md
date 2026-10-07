@@ -13,7 +13,7 @@ You are running Phase 5 of the ADLC pipeline: drafting the PR, capturing knowled
 ## Preflight
 
 1. **Resolve the REQ folder, then verify the verify gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Read `.adlc/<REQ_PATH>/pipeline-state.json`: `currentPhase >= 4`, `gateState: "cleared"` for verify.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 8.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 8. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
 3. **Load only what the steps below actually read.** `requirement.md` (goal + acceptance criteria), `verification.md` (reflector findings, follow-ups), and `architecture.md`'s **blast-radius section only**. `commits-draft.md` is step 2's input — but run the git-log check (next item) first; if the commit subjects plus `--stat` already tell the change story, don't open the draft. Do **not** load `tasks/*.md`, `exploration.md`, or `review-log.md`: no step below reads them, and `exploration.md` is usually the largest file in the REQ folder. If a step turns out to need one, open it *at that step* and add a `**Packet-gap:**` line to the gate card so this list gets tightened.
 
    **Do not pre-load the vault write targets.** `hot.md`, `index.md`, `now.md`, `decisions.md`, and `glossary.md` are step 4's *outputs*, and a typical REQ touches two of them. Open each at the step that writes it, and read only the section being edited. Pre-loading the set costs the same tokens on every REQ and grows as the vault does — exactly backwards: wrap-up must not get more expensive the better the vault gets.
@@ -252,14 +252,16 @@ If `approve`:
 1. Delete `.awaiting-approval`.
 2. Update `pipeline-state.json`: `gateState: "cleared"`, `prState: "awaiting-user-action"`.
 3. Append to `hot.md`: `## [DATE] ship-gate-cleared | REQ-NNN-<slug>`.
-4. Remind user: run the merge checklist; reply `merged` when done.
+4. Remind user: run the merge checklist. I'll notice the merge the next time a pipeline command runs (or reply `merged`).
 
 If `revise: ...`:
 
 1. Apply revisions to pr-draft.md or vault updates.
 2. Re-emit the gate prompt.
 
-If `merged`:
+If `merged` (replied, or detected):
+
+**Detected** = a pipeline skill's preflight (`/proceed`, `/task`, `/bugfix`, `/autopilot`) loads a REQ whose `currentPhaseGate` is `ship`, `gateState` `cleared`, `prState` not `merged`, and `/recover`'s merge signals ("Branch merged into base" / "PR merged") show it merged. Then run items 1–6 below once, asking only the archive question.
 
 1. Verify the merge: `gh pr view <pr-url> --json state,mergedAt` (if user provided a URL or if it's discoverable).
 2. Update `pipeline-state.json`: `prState: "merged"`, `mergedAt: <timestamp>`, terminal status.

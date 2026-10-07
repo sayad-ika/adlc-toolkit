@@ -27,7 +27,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 
 ## Preflight
 
-1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the final review uses the shared card format.
+1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the final review uses the shared card format. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
 4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → resolve its folder per `VAULT-LAYOUT.md`'s `resolve` rule and load `.adlc/<REQ_PATH>/pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask. `<REQ_PATH>` is vault-relative — no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`.
@@ -144,7 +144,7 @@ NEEDS YOU     1. review run-report.md and the diff
 MY READ       <e.g. "safe to land — all gates auto-approved, no near-misses"
                — or — "look closely at the review gate — it took two tries to pass">
 
-When merged, tell Claude `merged REQ-NNN-<slug>` to finalize state and log it.
+When merged, any pipeline command finalizes it (or tell Claude `merged REQ-NNN-<slug>`).
 ```
 
 ## `run-report.md`

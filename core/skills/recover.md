@@ -46,7 +46,7 @@ For each REQ/BUG/sprint, gather signals.
 
 **From `pipeline-state.json` (or sprint registry):**
 
-- `currentPhase`, `gateState`, `currentPhaseGate`
+- `currentPhase`, `gateState`, `currentPhaseGate`, `profile`, `gates` (absent = legacy five gates)
 - `isolation`, `workPath`, `worktree`, `branch`
 - `prState`, `mergedAt`, `terminal` (if present)
 - `recoveredAt`, `recoveryNotes` (if previously recovered)
@@ -78,6 +78,8 @@ Inventory which artifact files exist: `requirement.md`, `architecture.md`, `task
 | No branch, no merge detected, no commits in base referencing the REQ, work path missing | **abandoned** | mark aborted with reconciliation note |
 | State claims shipped (`prState == "merged"`) but branch is alive and unmerged | **divergent** | surface raw signals; user decides |
 | Sprint registry `status: "running"`, all its REQs already classified non-running | **sprint-stuck** | mark sprint ended |
+
+`gateState: "deferred"` counts as complete for that phase — artifacts must match it, but no marker is expected.
 
 If signals don't cleanly fit any bucket, classify as `divergent` and surface the raw signals — let the user judge. Never guess.
 

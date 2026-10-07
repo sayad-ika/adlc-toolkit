@@ -35,6 +35,7 @@ Decision →        the gate's options, each with its consequence
 - **`/spec`** — often just verdict + `CHECKS` + `MY READ` + decision (nothing structural to show).
 - **`/architect`** — `READY` with the task DAG in compact text (`T1,T2 → T3,T4 → T5`); `NEEDS YOU` for a proposed ADR or a stress-test finding that held up.
 - **`/review`** — leads with `FINDINGS` grouped by severity; the decision is which to fix vs. accept.
+- **Combined gates** (`plan`, Build & Review, `/bugfix` `diagnose`) — one heading per covered phase, each with its own CHECKS line (see Profiles).
 - **`/wrapup`** — a `SHIP CHECKLIST` and the PR/lessons/vault state, including what the lesson dedup was compared against (`dedup vs origin/<base> as of <age>`).
 - **`/autopilot` final review** — opens with a `RUN SUMMARY` across every gate it auto-cleared.
 
@@ -50,6 +51,25 @@ Use **one** small vocabulary across every card — no other glyphs, no emoji:
 - Severities spelled out: `critical` / `major` / `minor`; show trivial only as a count (`+3 trivial`).
 
 The same symbol means the same thing at every gate, so the user reads cards without relearning them.
+
+## Profiles — which phase boundaries get a gate
+
+Phases never change; how many gates sit between them does. Each REQ carries `profile`, `hardStop`, and `gates` (the ordered gate list) in `pipeline-state.json`. **No `profile` = legacy:** five gates `spec · architect · implement · verify · ship`, exactly as before 1.9.0.
+
+| Pipeline | Gates (`currentPhaseGate`, in order — phases each covers) |
+|---|---|
+| `/task` (`easy`) | `plan` (1–2) · `ship` (3–5) |
+| `/bugfix` | `diagnose` (1–2) · `ship` (3–5); `verify` (3–4) is inserted before `ship` when review leaves a critical/major open |
+| `/proceed` `standard` | `plan` (1–2) · `verify` (3–4) · `ship` (5) |
+| `/proceed` `full` | `spec` · `architect` · `implement` (only when `hardStop`) · `verify` · `ship` |
+
+**Triage — one list for the whole toolkit.** Sensitive surface = `config.yml → autonomy.hard_stops`, else: auth, security, secrets, data/schema migration, public API contract, anything irreversible. `full` if any holds: sensitive surface (also `hardStop: true`), a new ADR is needed, cross-repo, blast radius ~8+ files or 3+ modules/layers, a significant UI surface, or `--profile=full`. Otherwise `standard`. (`/task` keeps its own, stricter entry triage.)
+
+**Upgrade only.** A phase that finds a trigger the profile didn't cover upgrades the REQ, rewrites `gates`, appends `## [DATE] profile-upgraded | <REQ> | <from>→<to> | <trigger>` to `hot.md`, and names it on the next card. Upgrades change only gates not yet reached. Nothing downgrades on its own; a user who picks a lighter profile at a card is logged as `profile-override` and shown on every later card.
+
+**Deferred gates.** A phase whose boundary has no gate ends with `gateState: "deferred"` instead of a marker and card. The next phase's preflight accepts `cleared` or `deferred`. Everything the deferred card would have shown moves to the next card under that phase's own heading — **a combined card keeps every covered phase's CHECKS line**; to stay short it moves READY detail into files, never checks. Target ≤20 lines, ≤28 for a combined card.
+
+**Numbering.** `GATE <n>/<N>` with `N = gates.length` — a standard REQ reads `GATE 2/3 · Build & Review`.
 
 ## Diagrams
 

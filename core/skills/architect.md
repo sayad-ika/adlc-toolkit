@@ -1,20 +1,20 @@
 ---
 name: architect
-description: Design the architecture and task breakdown for a REQ. Phase 2 of /proceed. Dispatches codebase-explorer to inform the design, then drafts architecture.md and tasks/TASK-*.md. On high-stakes REQs, dispatches the architecture-adversary to attack the design before the gate so the user reviews a stress-tested plan. Ends in the architecture gate — user must approve before /implement.
+description: Design the architecture and task breakdown for a REQ. Phase 2 of /proceed. Dispatches codebase-explorer to inform the design, then drafts architecture.md and tasks/TASK-*.md. On high-stakes REQs, dispatches the architecture-adversary to attack the design before the gate so the user reviews a stress-tested plan. Ends in the architecture gate (full profile) or, under the standard profile, the combined Plan gate — user must approve before /implement.
 ---
 
 You are running Phase 2 of the ADLC pipeline: designing the architecture and breaking the work into tasks.
 
 ## When to use
 
-- The spec gate has been cleared for the REQ.
-- The user invokes `/architect REQ-NNN-<slug>` directly, or `/proceed` is moving past the spec gate.
+- The spec phase is complete for the REQ (its gate cleared, or deferred under the standard profile).
+- The user invokes `/architect REQ-NNN-<slug>` directly, or `/proceed` is moving past the spec phase.
 
 ## Preflight
 
-1. **Resolve the REQ folder, then verify the spec gate cleared.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Then read `.adlc/<REQ_PATH>/pipeline-state.json`. If `currentPhase < 1` or `gateState != "cleared"` for the spec phase, **stop** — direct the user to run `/spec` first.
-2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 10.
-3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `<REQ_PATH>/requirement.md`.
+1. **Resolve the REQ folder, then verify the spec phase is complete.** Resolve the REQ per `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`'s `resolve` rule. The result is `<REQ_PATH>` — vault-relative, no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`. Then read `.adlc/<REQ_PATH>/pipeline-state.json`. If `currentPhase < 1`, or the spec phase's `gateState` is neither `"cleared"` nor `"deferred"`, **stop** — direct the user to run `/spec` first.
+2. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the shared gate-card format used at step 10. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
+3. **Load vault context.** `.adlc/CLAUDE.md`, `now.md`, `config.yml`, `context/architecture.md`, `context/conventions.md`, all accepted ADRs in `architecture/`, the spec at `<REQ_PATH>/requirement.md`. (same rule for .adlc/CLAUDE.md, config.yml, context/*.md — but always re-read now.md and hot.md, which change between phases)
 4. **Establish the work path.** If `pipeline-state.json.workPath` is null:
 
    a. Read `config.yml.workflow.isolation` (default: `auto`).
@@ -147,6 +147,8 @@ The cost is proportional to the stakes — don't attack a trivial change.
 - The change touches a sensitive surface: auth, security, secrets, a data/schema migration, a public API contract, or anything irreversible.
 - The REQ has a significant **UI surface** — UI-facing acceptance criteria in the spec, frontend files in the blast radius, or a design reference resolved at preflight step 5.
 
+If a full-pass trigger holds and `profile` is `standard`, upgrade to `full` per GATE-PROTOCOL → Profiles (sensitive surface also sets `hardStop`). The spec gate was already folded into this one, so this gate stays combined: rewrite `gates` as `["plan", …]`, adding `"implement"` before `"verify"` when `hardStop`; only later gates change.
+
 Otherwise run the **quick self-check** (no dispatch): you yourself ask the sharpest questions of the plan — what acceptance criterion has no task, what failure mode is unhandled, what's the rollback story, what decision is implicit, and (when there's a UI) what screen state has no plan — and fix or note anything that surfaces. One short paragraph in the gate prompt; move on.
 
 **Full pass — dispatch the adversary.** Launch the `architecture-adversary` agent (read-only) with the following — again, substitute the resolved path before sending; the agent resolves nothing:
@@ -188,6 +190,8 @@ The gate prompt (step 10) reports what was attacked, what survived, and how each
 "currentPhaseGate": "architect"
 ```
 
+`currentPhaseGate` is `"architect"` (full) or `"plan"` (standard, or any REQ whose spec gate was deferred). Legacy REQs (no profile): `"architect"`.
+
 ### 9. Write the gate marker
 
 Create `.awaiting-approval` with:
@@ -204,22 +208,26 @@ Files:
   - .adlc/architecture/adr-NNN-<slug>.md (if drafted)
 ```
 
+At the Plan gate write `Phase: plan` and add `.adlc/<REQ_PATH>/requirement.md` to Files.
+
 ### 10. Emit the gate card
 
 Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (the shared card format). Map this phase's content into it:
 
-- **Header** — `Gate 2 of 5 · Architect · REQ-NNN-<slug>`.
+- **Header** — `GATE 2/<N> · Architect · REQ-NNN-<slug>` (see the Plan gate paragraph below when the spec gate was deferred).
 - **Verdict** — "ready to review — `<k>` items need your call", or "clean — nothing flagged, recommend approve".
 - **READY** — `architecture.md` (blast radius, approach); `<N>` tasks / `<M>` tiers; `exploration.md`; new ADR if drafted. Include the task DAG in compact text form: `T1,T2 → T3,T4 → T5` (the rendered diagram lives in `architecture.md` — don't restate it here).
 - **NEEDS YOU** — a proposed ADR awaiting accept/reject; each surviving adversary finding and how it was handled (ask the user to confirm the fix); unresolved open questions from `architecture.md`. Omit the block if none.
 - **CHECKS** — the step-6 inline validation as one compact `✓ / ⚠` line (criteria covered · no cycles · conventions · tests concrete · lessons/ADRs referenced), then the adversarial-hardening depth (full pass / quick self-check) and surviving-finding count.
 - **MY READ** — your recommendation and a one-line why. **Never recommend approve while a critical adversary finding is unaddressed** — that is a `revise`.
-- **Decision** — on Claude, an `AskUserQuestion` with: **approve** (clear the gate, ready for `/implement`), **revise** (describe what to change), **abort** (discard this architecture, keep the spec). Mark approve *(Recommended)* per `MY READ`. A proposed ADR's accept/reject is confirmed at clearance (Gate clearance step 3).
+- **Decision** — on Claude, an `AskUserQuestion` with: **approve** (clear the gate, ready for `/implement`), **revise** (describe what to change), **abort** (discard this architecture, keep the spec). Mark approve *(Recommended)* per `MY READ`. When an ADR was proposed, the decision asks it in the same turn: (Claude) a second question in the same `AskUserQuestion` call — `accept ADR-NNN` / `keep proposed` / `reject`; (other assistants) combined inline options — `approve + accept ADR-NNN` · `approve, ADR stays proposed` · `revise` · `abort`.
 
-Example shape (fill from the real REQ):
+**Plan gate (standard, or any REQ whose spec gate was deferred).** Header `GATE 1/<N> · Plan · <REQ>`. Lead with a `SPEC` block — the spec card's CHECKS line (criteria testable · goal specific · assumptions explicit · no design · non-goals present) plus any spec NEEDS-YOU — then this phase's READY / NEEDS YOU / CHECKS. Add `profile: <p> (<reason>)` to CHECKS. Decision adds **revise spec** (re-validate the spec, then re-run this phase's steps the change touches).
+
+Example shape (full profile; fill from the real REQ):
 
 ```
-GATE 2/5 · Architect · REQ-014-payment-retries
+GATE 2/4 · Architect · REQ-014-payment-retries
    ready to review — 2 items need your call
 
 READY       architecture.md · 6 tasks in 3 stages · new decision ADR-007
@@ -246,8 +254,8 @@ If `approve`:
 
 1. Delete `.awaiting-approval`.
 2. Update `pipeline-state.json`: `gateState: "cleared"`.
-3. If an ADR was proposed, prompt: "Mark ADR-NNN as `accepted`?" (separate confirmation). Update its status and `decisions.md` if yes.
-4. Append to `hot.md`: `## [DATE] architect-gate-cleared | REQ-NNN-<slug>`.
+3. If an ADR was proposed, apply the ADR answer given with the decision (accepted → update status and `decisions.md`; rejected → mark `rejected`; proposed → leave). No separate prompt.
+4. Append to `hot.md`: `## [DATE] architect-gate-cleared | REQ-NNN-<slug>` (full) or `plan-gate-cleared` (standard).
 5. Tell the user: ready for `/implement REQ-NNN-<slug>` or `/proceed` to continue.
 
 If `revise: ...`:
@@ -258,7 +266,7 @@ If `revise: ...`:
 
 If `abort`:
 
-1. Confirm explicitly.
+1. Confirm explicitly. On a Plan gate, ask whether to keep the spec (`architect-abort`, as today) or discard the REQ (spec abort — `/spec`'s abort flow).
 2. Surface the cleanup commands the user must run. The set depends on `pipeline-state.isolation`:
 
    **`branch` mode** (Claude cannot run any of these — all mutate working-tree or branch state):

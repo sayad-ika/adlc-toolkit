@@ -1,11 +1,11 @@
 # ADLC Toolkit — pipeline conventions
 
-This repository uses the **ADLC toolkit**: a spec-driven development pipeline with a human approval gate at every phase boundary. You are running inside Claude Code.
+This repository uses the **ADLC toolkit**: a spec-driven development pipeline with human approval gates sized to the risk of the change. You are running inside Claude Code.
 
 **Knowledge vault:** `.adlc/` holds specs, architecture, conventions, decisions (ADRs), lessons, gotchas, and glossary. Read `.adlc/context/conventions.md`, `.adlc/context/project-overview.md`, and `.adlc/now.md` before non-trivial work. The toolkit itself lives at `.adlc-toolkit/`. Work records under `specs/`, `bugs/`, and `sprints/` may be flat or bucketed by month and author — `.adlc-toolkit/core/VAULT-LAYOUT.md` is the only place that grammar is written down; resolve paths through it rather than assuming a shape.
 
 **The seven principles (full text: `.adlc-toolkit/ETHOS.md`):**
-1. **You decide; the assistant drafts.** Every phase boundary pauses for the user. Git writes follow `.adlc/config.yml` → `git.mode` (default `manual` = the assistant drafts; you run git).
+1. **You decide; the assistant drafts.** Every gate pauses for the user; the REQ's risk profile decides how many gates it gets. Git writes follow `.adlc/config.yml` → `git.mode` (default `manual` = the assistant drafts; you run git).
 2. **Spec first, code second.** Never implement without a validated spec.
 3. **Read-only reviewers.** Review/audit agents are read-only on your code — they write only their own findings, never source. The user decides what gets fixed.
 4. **Knowledge compounds.** Every change leaves the vault smarter — lessons, gotchas, concepts, ADRs.

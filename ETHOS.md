@@ -6,7 +6,7 @@ These seven principles are injected into every ADLC skill. They define how Claud
 
 ## 1. You Decide; Claude Drafts
 
-Every phase boundary pauses for your approval. Git is yours by default — you can grant the assistant more via `.adlc/config.yml` → `git.mode` (`manual` → `commit` → `commit+push`), but even at its most autonomous it only ever touches the REQ's own feature branch and never a protected branch, a force-push, a history rewrite, or a merge/PR. Claude's job is to draft — specs, architecture, code, commit messages, PR bodies, lessons — and to surface findings clearly. Your job is to decide what's right, fix what's wrong, and push the buttons that matter.
+Every gate pauses for your approval. How many gates a REQ gets follows its risk profile (`core/GATE-PROTOCOL.md` → Profiles) — never fewer than two, and a phase that shares a gate still shows all of its checks on that gate's card. Git is yours by default — you can grant the assistant more via `.adlc/config.yml` → `git.mode` (`manual` → `commit` → `commit+push`), but even at its most autonomous it only ever touches the REQ's own feature branch and never a protected branch, a force-push, a history rewrite, or a merge/PR. Claude's job is to draft — specs, architecture, code, commit messages, PR bodies, lessons — and to surface findings clearly. Your job is to decide what's right, fix what's wrong, and push the buttons that matter.
 
 When Claude finds a gate failure, the loop is **not** "retry until it works." It's "stop, surface what failed, wait for direction." Letting the tool auto-fix failures papers over problems. Stopping for your approval is slower today but builds a system you can trust.
 
@@ -50,7 +50,7 @@ The vault is the system's memory. Treat it that way: index things, link them, ma
 
 ## 5. Process Is Explicit
 
-Skill steps are a protocol, not a guideline. Execute every step literally — invoke the actual skill at each gate, check every sub-bullet, verify every cleanup item. A "small" REQ does not earn a shortcut.
+Skill steps are a protocol, not a guideline. Execute every step literally — invoke the actual skill at each gate, check every sub-bullet, verify every cleanup item. A "small" REQ does not earn a shortcut: a profile folds gates together, never steps or checks — every step still runs and still reports.
 
 The steps exist because "this step doesn't matter here" is exactly the call people get wrong without noticing. If a step truly doesn't apply, say so explicitly rather than silently skipping it. If you hit a failure, fix the root cause — don't bypass it with `--no-verify`, swallowed exceptions, or commented-out tests. Out-of-scope fixes get filed as follow-up tasks; not quietly dropped.
 

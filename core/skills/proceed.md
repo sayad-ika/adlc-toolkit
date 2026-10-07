@@ -1,6 +1,6 @@
 ---
 name: proceed
-description: End-to-end pipeline orchestrator. Runs /spec → /architect → /implement → /review → /wrapup in sequence with gate-pause between every phase. Resumable from any phase via pipeline-state.json. Use this when you want the full pipeline rather than invoking each phase skill separately.
+description: End-to-end pipeline orchestrator. Runs /spec → /architect → /implement → /review → /wrapup in sequence pausing at each gate the REQ's profile defines (standard: 3, full: 4–5; see core/GATE-PROTOCOL.md → Profiles). Resumable from any phase via pipeline-state.json. Use this when you want the full pipeline rather than invoking each phase skill separately.
 ---
 
 You are the `/proceed` orchestrator. Your job is to walk a REQ through all five phases of the ADLC pipeline, pausing at every gate for human approval, and resuming cleanly across sessions.
@@ -15,6 +15,7 @@ Invocation patterns:
 - `/proceed` — pick up the active REQ from `now.md` if there's one in flight; otherwise ask the user.
 - `/proceed REQ-NNN-<slug>` — resume the named REQ from wherever its pipeline-state left off.
 - `/proceed <free-text feature description>` — start a new REQ from scratch.
+- `/proceed <description|REQ> --profile=standard|full` — set the profile (sizing up always allowed; a lighter choice is logged as an override).
 - `/proceed [REQ-NNN-<slug>] --resume` — show a catch-up summary (what changed while you were away, recent activity, the pending gate question, a menu) before continuing. Use after a break, a session crash, or any time you want context before pressing forward.
 - `/proceed [REQ-NNN-<slug>] --revert~1` / `--revert~2` / `--revert~3` — walk back N completed phases via a `revert-plan.md` you approve. N is capped at 3; further walkbacks usually mean `--cancel` and re-running is cleaner.
 - `/proceed [REQ-NNN-<slug>] --cancel` — abandon the REQ; writes a `cancelled.md` tombstone with a user-provided reason, frees the worktree (worktree mode), and drafts branch cleanup commands for the user to run.
@@ -25,10 +26,10 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 
 ## Preflight
 
-1. **Read the toolkit ETHOS.**
+1. **Read the toolkit ETHOS.** Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
 1a. **Read the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — the path grammar for `specs/`, `bugs/`, and `sprints/`. This skill resolves and lists work folders, and a vault may hold flat and bucketed folders at the same time. Never hard-code a path under those trees; use its `resolve` / `enumerate` rules.
 2. **Read `.adlc/CLAUDE.md`** for the per-project schema doc, and the navigation files: `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
-3. **Determine REQ identity.** Strip any `--resume`, `--revert~N`, or `--cancel` tokens out of the argument list before parsing the rest — flags are not REQ IDs and not free-text descriptions.
+3. **Determine REQ identity.** Strip any `--resume`, `--revert~N`, `--cancel`, or `--profile=…` tokens out of the argument list before parsing the rest — flags are not REQ IDs and not free-text descriptions.
    - If a REQ ID was given, resolve its folder per VAULT-LAYOUT's `resolve` rule — `find .adlc/specs -maxdepth 4 -type d -name 'REQ-NNN-*'`, which covers flat, bucketed, and archived shapes in one pass. No hit: say so and stop. Two hits: show both and ask; never take the first. The hit minus the leading `.adlc/` is `<REQ_PATH>`, and every path below reads `.adlc/<REQ_PATH>/…`. Load `.adlc/<REQ_PATH>/pipeline-state.json`. If the only hit is under `specs/_archive/`, it's completed and archived — report its final state in one line and stop; archived REQs are read-only history (a follow-up change is a new REQ).
    - If a free-text description was given (and no flag was set), treat as a brand-new REQ — skip ahead to Phase 1 via `/spec`.
    - If only a flag was given, or no argument at all:
@@ -38,11 +39,12 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 4. **Route on invocation flags.** If any of `--resume`, `--revert~1`/`~2`/`~3`, or `--cancel` was set, dispatch to the matching protocol in **Invocation flags** below and exit this skill's main flow. The flag protocols own their own gate prompts and state updates; the standard phase walk does not run when a flag was invoked.
 
 5. **Determine starting phase** (no flag set).
+   - Read `profile` / `gates`. **Absent → legacy:** behave exactly as before (five gates). `gateState: "deferred"` means the phase finished without its own gate — run the next phase.
    - For a new REQ, start at Phase 1 (spec).
    - For an existing REQ, read `pipeline-state.json.currentPhase` and `.gateState`:
      - If `gateState: "awaiting"`, you're paused at a gate — re-emit the gate prompt for that phase.
      - If `gateState: "cleared"`, the next phase is ready to run.
-     - If `currentPhase == 5` and `gateState: "cleared"`, the REQ is shipped — surface that and ask whether to mark `merged`.
+     - If `currentPhase == 5` and `gateState: "cleared"`, the REQ is shipped — check for the merge per /wrapup "If merged (replied, or detected)"; finalize if merged, else say it's waiting on the merge.
 
 ## Invocation flags
 
@@ -56,7 +58,7 @@ Use after a break, a session crash, or any time you want context before pressing
 
 ```
 RESUME — REQ-NNN-<slug>
-  Phase <N> (<name>) · gate: <awaiting / cleared> · last activity <X ago>
+  Phase <N> (<name>) · gate <n>/<N> (<awaiting / cleared / deferred>) · profile <p> · last activity <X ago>
   Pending: <the gate question compressed to one line — or "none">
   <only when a drift check is non-clean: ⚠ <what> — consider /recover>
 ```
@@ -166,8 +168,8 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
    {
      "currentPhase": <new-phase>,
      "completedPhases": <truncated to phases 1..new-phase>,
-     "gateState": "cleared",
-     "currentPhaseGate": "<new-phase-gate-name>",
+     "gateState": "<cleared, or deferred if the new phase's boundary is not in gates>",
+     "currentPhaseGate": "<new-phase-gate-name, or null when deferred>",
      "revertedAt": "<now>",
      "revertedFrom": <old-phase>,
      "revertCount": <N>
@@ -182,7 +184,7 @@ Use when state is in sync but you've decided the most recent phase(s) need to be
 
 8. **On `abort`:** leave pipeline-state unchanged. Append `> ABORTED — not executed.` to `revert-plan.md`. Append `## [DATE] revert-aborted | REQ-NNN-<slug>` to hot.md so the trail records the consideration.
 
-After execution, the REQ is at the predecessor phase's "cleared" state, ready for normal `/proceed` to advance forward again from there.
+After execution, the REQ is at the predecessor phase's "cleared" (or "deferred") state, ready for normal `/proceed` to advance forward again from there. Reverting across a deferred boundary walks back both phases' artifacts — e.g. reverting a standard REQ's Plan gate (`--revert~1` from phase 2) leaves phase 1 "deferred" with requirement.md intact.
 
 ### `--cancel` — deliberate abandonment of a REQ
 
@@ -284,19 +286,13 @@ For each phase, in order, follow this protocol:
 ### Phase advance loop
 
 ```
-while currentPhase < 5:
+while not (currentPhase == 5 and gateState == "cleared"):
     if gateState == "awaiting":
-        re-emit the gate prompt for currentPhase
-        WAIT for user response
-        continue (loop)
-
-    if gateState == "cleared":
-        nextPhase = currentPhase + 1
-        invoke the skill for nextPhase
-        # The skill writes .awaiting-approval and sets gateState = "awaiting"
-        re-emit the gate prompt
-        WAIT for user response
-        continue (loop)
+        re-emit the gate card for currentPhaseGate; WAIT; route the reply; continue
+    # "cleared" or "deferred" → the next phase runs
+    invoke the skill for currentPhase + 1
+    # the skill ends "awaiting" (its boundary is in `gates`) or "deferred" (it isn't)
+    re-read pipeline-state.json   # a phase may have upgraded the profile
 ```
 
 The phase-to-skill mapping:
@@ -309,12 +305,14 @@ The phase-to-skill mapping:
 | 4 — Review | `/review` |
 | 5 — Wrap up | `/wrapup` |
 
+Which phases end in a gate is `pipeline-state.gates` — never decide it here. A profile upgrade mid-walk is read from state at the next iteration.
+
 Each phase skill knows how to:
 
 - Read `pipeline-state.json` to confirm preconditions
 - Do its work
 - Write `.awaiting-approval`
-- Update `gateState` to `"awaiting"`
+- Update `gateState` to `"awaiting"` (or `"deferred"` when its boundary has no gate)
 - Emit its gate prompt
 
 Your job as `/proceed` is the **outer loop**: invoke the skill, wait for user response, route the response (approve / revise / abort) to the right handler.
@@ -339,7 +337,7 @@ Sessions get interrupted. Context compresses. The user closes the window. When `
 2. Verify the work path: `pipeline-state.workPath` should exist as a directory. In `worktree` mode, also verify the worktree is still registered (`git -C <repo-path> worktree list`). In `branch` mode, verify the branch ref still exists (`git -C <workPath> rev-parse --verify <branch>`). If anything is missing, ask the user whether to recreate.
 3. Check `.awaiting-approval`:
    - If present → you're paused at a gate. Re-emit the gate prompt for `pipeline-state.currentPhaseGate`.
-   - If absent → the most recent gate was cleared. Advance to the next phase.
+   - If absent → the most recent gate was cleared. Advance to the next phase. If gateState is "deferred", the next phase runs — there's no marker to look for.
 4. Read `hot.md`'s last 20 entries to refresh on what's happened.
 
 Never skip a phase silently. If the state suggests a phase was skipped (e.g., `currentPhase` jumped from 2 to 4), halt and surface.
@@ -374,7 +372,8 @@ This is read-only and doesn't change pipeline state.
 - **`--revert` never touches code.** The vault is rolled back; code rollback is drafted as `code-revert-plan.md` for the user to execute. If the user declines to run the git ops, the vault and code are now divergent — that's a `/recover` case.
 - **`--cancel` is REQ-wide.** Distinct from the gate-time `abort` response, which only aborts the current phase's work. `--cancel` terminates the entire REQ with a tombstone.
 - **You never auto-fix gate failures.** A reviewer flag, a test failure, a missing artifact → surface to the user.
-- **You never collapse two gates into one.** Each gate is a discrete approval moment.
+- **You never collapse gates beyond the REQ's profile.** Each gate in `pipeline-state.gates` is a discrete approval moment; a deferred phase still runs every step.
+- **Profile only sizes up on its own.** Never downgrade without the user's explicit choice; log any override.
 - **You never assume context.** Re-read `pipeline-state.json` at every phase boundary. State is the source of truth.
 
 ## Done condition
