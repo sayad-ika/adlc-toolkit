@@ -22,6 +22,22 @@
       "summary": "Bootstrap the .adlc/ vault in a new repo."
     },
     {
+      "name": "adlc",
+      "category": "pipeline",
+      "gate": true,
+      "agents": [
+        "codebase-explorer",
+        "architecture-adversary",
+        "task-implementer",
+        "correctness-reviewer",
+        "quality-reviewer",
+        "architecture-reviewer",
+        "reflector",
+        "ui-reviewer"
+      ],
+      "summary": "The one entry point: classify as Easy/Medium (2 steps, 1 gate) or Hard (3 steps, 3 gates), then run that path."
+    },
+    {
       "name": "spec",
       "category": "phase",
       "phase": 1,
