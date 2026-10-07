@@ -1,6 +1,6 @@
 # Gate Protocol — the base for every human gate
 
-This is the **shared spine** every gate uses to hand a decision back to the user — **not a fixed template.** Gates differ: a spec gate has no task DAG, a review gate is almost all findings, `/wrapup` is a ship checklist, `/autopilot`'s final review summarizes a whole run. So each skill **adapts** this base to what its phase actually produced. What's constant is the spine and the principles below; the sections are a palette, not a mold.
+This is the **shared spine** every gate uses to hand a decision back to the user — **not a fixed template.** Gates differ: a design gate shows a plan, a build gate is almost all findings, a ship gate is a checklist, `/autopilot`'s final review summarizes a whole run. So each step **adapts** this base to what it actually produced. What's constant is the spine and the principles below; the sections are a palette, not a mold.
 
 Load it at preflight (with `ETHOS.md` and `core/VOICE.md`) from `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. It governs **presentation, not semantics** — `approve` / `revise` / `abort` do whatever each skill defines.
 
@@ -19,10 +19,10 @@ The card is the chat-facing twin of the `.awaiting-approval` file marker. The ma
 ## The base skeleton (adapt per gate)
 
 ```
-GATE <n>/<N> · <Phase> · <REQ> — <short title>
+GATE <n>/<N> · <Gate> · <REQ> — <short title>
    <verdict — one line: what's ready, and whether anything needs a call>
 
-<WHAT'S DONE>     terse, FYI — the artifacts / counts this phase produced
+<WHAT'S DONE>     terse, FYI — the artifacts / counts this step produced
 <WHAT NEEDS YOU>  the decision-bearing items, prioritized by consequence (omit if none)
 <CHECKS>          this gate's validation, compact — if it has any
 
@@ -30,15 +30,14 @@ MY READ           the recommendation + one-line why
 Decision →        the gate's options, each with its consequence
 ```
 
-`READY` / `NEEDS YOU` / `CHECKS` / `MY READ` are the common vocabulary — use the names that fit the phase, drop any that don't apply, and **add sections when the work calls for it.** For example:
+`READY` / `NEEDS YOU` / `CHECKS` / `MY READ` are the common vocabulary — use the names that fit the gate, drop any that don't apply, and **add sections when the work calls for it.** For example:
 
-- **`/spec`** — often just verdict + `CHECKS` + `MY READ` + decision (nothing structural to show).
-- **`/architect`** — `READY` with the task DAG in compact text (`T1,T2 → T3,T4 → T5`); `NEEDS YOU` for a proposed ADR or a stress-test finding that held up.
-- **`/review`** — leads with `FINDINGS` grouped by severity; the decision is which to fix vs. accept.
-- **`/wrapup`** — a `SHIP CHECKLIST` and the PR/lessons/vault state, including what the lesson dedup was compared against (`dedup vs origin/<base> as of <age>`).
+- **Design** (Hard) — `READY` with the task DAG in compact text (`T1,T2 → T3,T4 → T5`); `NEEDS YOU` for a proposed ADR or a stress-test finding that held up.
+- **Build** (Hard) — leads with `FINDINGS` grouped by severity; the decision is which to fix vs. accept.
+- **Ship** — the PR/lessons/vault state, including what the lesson dedup was compared against (`dedup vs origin/<base> as of <age>`). On the Easy path it also leads with `FINDINGS`, since it's the only gate.
 - **`/autopilot` final review** — opens with a `RUN SUMMARY` across every gate it auto-cleared.
 
-The spine (done → needs-you → recommend → decide) holds; the middle is the phase's to shape.
+The spine (done → needs-you → recommend → decide) holds; the middle is the step's to shape.
 
 ## Markers
 

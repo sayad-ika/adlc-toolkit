@@ -4,7 +4,7 @@ A table of contents for the vault. Claude reads this when answering "what do we 
 
 ## How this file is maintained
 
-Updated by `/wrapup` at the end of each REQ. You can also edit it manually. When a new artifact is created, add a row in the appropriate section with a one-line description.
+Updated by the ship step at the end of each REQ. You can also edit it manually. When a new artifact is created, add a row in the appropriate section with a one-line description.
 
 ---
 
@@ -12,7 +12,7 @@ Updated by `/wrapup` at the end of each REQ. You can also edit it manually. When
 
 _(REQ pages by id, with a one-line summary)_
 
-`Path` is vault-relative and is the one place a REQ's folder location is written down — `/wrapup` repoints it when a REQ is archived, and `/config migrate` repoints it when folders are bucketed. Everything else refers to a REQ by **ID** and resolves the path at read time.
+`Path` is vault-relative and is the one place a REQ's folder location is written down — the ship step repoints it when a REQ is archived, and `/config migrate` repoints it when folders are bucketed. Everything else refers to a REQ by **ID** and resolves the path at read time.
 
 | REQ | Title | Status | Path |
 |---|---|---|---|

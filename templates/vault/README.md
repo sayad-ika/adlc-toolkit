@@ -49,7 +49,7 @@ Don't type these paths, and don't assume a shape. Refer to a REQ by its ID and l
 
 ## Size budgets
 
-The hot-path files are loaded at every phase entry — their size is a recurring token tax, so each has a budget. Three things hold them: `/wrapup` rotates `hot.md` and keeps `now.md` to its table on every REQ; the Claude adapter's optional `adlc-budget.mjs` hook refuses a write that leaves a file over budget; `/config budgets` repairs a vault that drifted, gated per file and moving text rather than deleting it. `/status` prints the strip; `/analyze` reports the history.
+The hot-path files are loaded at every preflight — their size is a recurring token tax, so each has a budget. Three things hold them: the ship step rotates `hot.md` and keeps `now.md` to its table on every REQ; the Claude adapter's optional `adlc-budget.mjs` hook refuses a write that leaves a file over budget; `/config budgets` repairs a vault that drifted, gated per file and moving text rather than deleting it. `/status` prints the strip; `/analyze` reports the history.
 
 | File | Budget |
 |---|---|
@@ -64,12 +64,11 @@ The hot-path files are loaded at every phase entry — their size is a recurring
 
 ## How the pipeline writes here
 
-Each phase of `/proceed` creates or updates artifacts in this vault. `<REQ>` below is that REQ's own folder — `specs/REQ-042-slug/` in a flat vault, `specs/2026-08/sf/REQ-042-slug/` in a bucketed one. The skills resolve it from the ID; you never type it.
+`/adlc` classifies each piece of work as Easy/Medium (2 steps, 1 gate) or Hard (3 steps, 3 gates) and writes here as it goes. `<REQ>` below is that REQ's own folder — `specs/REQ-042-slug/` in a flat vault, `specs/2026-08/sf/REQ-042-slug/` in a bucketed one. The skills resolve it from the ID; you never type it.
 
-1. `/spec` → `<REQ>/requirement.md`
-2. `/architect` → `<REQ>/architecture.md`, `<REQ>/tasks/TASK-*.md`
-3. `/implement` → code changes (in your repo, not the vault) + `commits-draft.md`
-4. `/review` → `<REQ>/verification.md` (compact verdict) + `review-log.md` (full narratives)
-5. `/wrapup` → `pr-draft.md`, updates to `lessons/`, `gotchas.md`, `concepts/`, `index.md`, `hot.md`
+- **Plan** (Easy step 1, Hard design step) → `<REQ>/requirement.md` (or `bug.md`); Hard adds `architecture.md`, `tasks/TASK-*.md`, `exploration.md`, any ADR
+- **Build** → code changes (in your repo, not the vault) + `commits-draft.md`
+- **Review** → `<REQ>/verification.md` (compact verdict) + `review-log.md` (full narratives)
+- **Ship** → `pr-draft.md`, `merge-checklist.md`, updates to `lessons/`, `gotchas.md`, `concepts/`, `index.md`, `hot.md`
 
 By default you commit everything yourself (`git.mode: manual`). You can let the assistant commit or push on the feature branch — see `config.yml` → Git policy.

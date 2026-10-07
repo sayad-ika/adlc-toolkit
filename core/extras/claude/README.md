@@ -7,10 +7,10 @@ silent when there is nothing to say.
 ## What you get
 
 - **Statusline** — a persistent line at the bottom of your terminal:
-  `ADLC REQ-014-payment-retries · phase 3 (implement) · GATE WAITING`.
+  `ADLC REQ-014-payment-retries · hard 2/3 (build) · GATE WAITING`.
   Your pipeline state stops living only in scrollback. Costs zero tokens.
 - **Gate notification** — a desktop toast when the pipeline pauses at a gate,
-  so you can look away during long phases: `ADLC gate ready: REQ-014 (review)`.
+  so you can look away during long steps: `ADLC gate ready: REQ-014 (hard build)`.
 - **Vault budgets** — the vault's size budgets become refusals instead of
   `/analyze` findings. A write that leaves `now.md` over 1KB is bounced back
   with the fix; a `Read` of a generated file the review packet excludes is
@@ -88,7 +88,7 @@ What it enforces, and what it only warns about:
 | PostToolUse | `now.md` | 1KB | **block** (exit 2) — move narrative to `sprints/` or the REQ folder |
 | PostToolUse | `CLAUDE.md` | 5KB | **block** |
 | PostToolUse | `context/*.md` (not `*-rationale.md`) | 8KB | **block** — `/config budgets` splits rulebook from rationale |
-| PostToolUse | `hot.md` | 500 lines | warn — `/wrapup` rotates |
+| PostToolUse | `hot.md` | 500 lines | warn — the ship step rotates |
 | PostToolUse | any `verification.md` | 8KB | warn — narrative belongs in `review-log.md` |
 | PreToolUse | files matching `config.yml → review.packet.exclude` | — | **deny** the Read |
 | PreToolUse | `hot.md` without a `limit` | — | **deny** — read the top N, never the whole file |

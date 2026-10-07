@@ -12,7 +12,7 @@
 Two load paths scale linearly with vault age, and they are the only two:
 
 - The **reflector** reads every lesson, every gotcha, every accepted ADR, and the relevant concept/component pages on every REQ. Its instructions say so on purpose: "Read every applicable lesson and gotcha. Don't filter prematurely." That unfiltered pass is the agent's whole value — it's the memory of the system.
-- The **architect** loads all accepted ADRs at every `/architect` run.
+- The **architect** loads all accepted ADRs at every Hard design step.
 
 At today's vault sizes this costs a few thousand tokens per REQ — noise. At ~50 lessons plus grown gotchas and ADRs it becomes a five-figure token cost *per REQ*, paid on every run, forever.
 

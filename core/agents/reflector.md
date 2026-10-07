@@ -1,6 +1,6 @@
 ---
 name: reflector
-description: Self-review against the captured knowledge vault. Checks whether the new code repeats any known mistake (lessons), respects any codebase quirk (gotchas), and conflicts with any accepted decision (ADRs), and sweeps user-facing repo docs for staleness against the change. Read-only — reports findings. Dispatched by /review during Phase 4.
+description: Self-review against the captured knowledge vault. Checks whether the new code repeats any known mistake (lessons), respects any codebase quirk (gotchas), and conflicts with any accepted decision (ADRs), and sweeps user-facing repo docs for staleness against the change. Read-only — reports findings. Dispatched by the review routine (`core/paths/review.md`).
 tier: balanced
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -27,7 +27,7 @@ You will receive:
 
 ## Required reading
 
-If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, the REQ architecture, and the exploration report's **blast radius and vault references only** (item 1, and part of item 2). Do not re-read those files. The exploration report's full recon narrative is deliberately **not** in the packet — it is yours alone, and your dispatch prompt gives you the path; reading it is expected, not a gap. Items 3–7 below likewise require direct reads of the vault — those are your mandate, not packet gaps. You do **not** read the repo's user-facing docs (`README*`, `docs/`, changelogs): that sweep moved to `/wrapup` in 1.7.0, where the doc gets edited anyway. Only if you must read a packet-covered item (the diff, spec, architecture, or exploration) directly, add a `**Packet-gap:**` line in your section (`**Packet-gap:** <path> — <why the packet didn't cover it>`) so we can tighten the packet from real data.
+If you were given a `review-packet.md`, read it first — it contains the diff with full file context, the REQ spec, the REQ architecture, and the exploration report's **blast radius and vault references only** (item 1, and part of item 2). Do not re-read those files. The exploration report's full recon narrative is deliberately **not** in the packet — it is yours alone, and your dispatch prompt gives you the path; reading it is expected, not a gap. Items 3–7 below likewise require direct reads of the vault — those are your mandate, not packet gaps. You do **not** read the repo's user-facing docs (`README*`, `docs/`, changelogs): that sweep moved to the ship step in 1.7.0, where the doc gets edited anyway. Only if you must read a packet-covered item (the diff, spec, architecture, or exploration) directly, add a `**Packet-gap:**` line in your section (`**Packet-gap:** <path> — <why the packet didn't cover it>`) so we can tighten the packet from real data.
 
 1. The REQ spec and architecture
 2. The exploration report (`exploration.md`) — what vault references the explorer found
@@ -75,7 +75,7 @@ For each concept / component page touched by the change:
 2. Compare to what the diff does.
 3. Flag deviations.
 
-If a component page is missing for a module that's clearly major (>500 LOC, multiple files, public exports), surface that as a `missing-vault-page` finding so `/wrapup` can create one.
+If a component page is missing for a module that's clearly major (>500 LOC, multiple files, public exports), surface that as a `missing-vault-page` finding so the ship step can create one.
 
 ### Architecture diagram drift
 
@@ -83,7 +83,7 @@ If `architecture.md` (or a vault concept/component page) carries a Mermaid diagr
 
 ### Repo documentation — not yours
 
-User-facing docs (`README*`, `docs/`, changelogs, API reference) are swept by `/wrapup` step 1, where the update gets applied in the same breath. Until 1.7.0 this agent did that sweep at review time; on a measured REQ six of its nine findings were "README test count stale", "ADR consequences table not updated", "component page doesn't name the new tab" — real, and each one cost a fix round to move prose. Stay on the code and the vault. If the diff *deletes or renames* something a doc almost certainly names (a CLI flag, an endpoint, a config key), one line in your summary — `docs likely affected: <symbol>` — is enough; `/wrapup` picks it up.
+User-facing docs (`README*`, `docs/`, changelogs, API reference) are swept by the ship step's docs sweep (`core/paths/ship.md` §1), where the update gets applied in the same breath. Until 1.7.0 this agent did that sweep at review time; on a measured REQ six of its nine findings were "README test count stale", "ADR consequences table not updated", "component page doesn't name the new tab" — real, and each one cost a fix round to move prose. Stay on the code and the vault. If the diff *deletes or renames* something a doc almost certainly names (a CLI flag, an endpoint, a config key), one line in your summary — `docs likely affected: <symbol>` — is enough; the ship step picks it up.
 
 ### Re-derived knowledge
 
@@ -95,7 +95,7 @@ If the new code solves a problem that's already solved elsewhere in the codebase
 
 ## Output format
 
-Write findings to `review-log.md` in the REQ folder you were given, under a `## Reflection findings` heading (the `/review` skill distills the consolidated verdict into `verification.md` — your category tags like `vault-stale` / `adr-conflict` must appear on each finding so they survive that distillation).
+Write findings to `review-log.md` in the REQ folder you were given, under a `## Reflection findings` heading (the review routine distills the consolidated verdict into `verification.md` — your category tags like `vault-stale` / `adr-conflict` must appear on each finding so they survive that distillation).
 
 Each finding:
 
@@ -129,7 +129,7 @@ Each finding:
 
 ### Write budget — hard caps
 
-Your section is re-read at every gate, by `/review`'s consolidation, by `/wrapup`, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
+Your section is re-read at every gate, by the review consolidation, by the ship step, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
 
 - **Summary:** ≤5 lines. What you checked (counts, not lists), how many findings by severity, one sentence on the biggest one.
 - **Each finding:** the field table, then **What / Why it matters / Recommendation** at ≤8 lines total. Cite `file:line`; never paste code the packet carries. If a finding needs more than eight lines to make, it is two findings or it is not yet a finding.
@@ -147,7 +147,7 @@ Sometimes the new code is right and the vault is wrong — the lesson is outdate
 
 Do not silently let the new code violate vault content. Surface the conflict either way — the human resolves whether to update the code or the vault.
 
-`vault-stale`, `concept-drift`, `missing-vault-page`, and `diagram-stale` findings are **needs-decision**, never a fix round: `/review` carries them to `/wrapup` step 3, which is where concept, component, and ADR pages get updated anyway. Say what the page should say; don't ask for an implementer.
+`vault-stale`, `concept-drift`, `missing-vault-page`, and `diagram-stale` findings are **needs-decision**, never a fix round: review carries them to the ship step (`core/paths/ship.md` §2), which is where concept, component, and ADR pages get updated anyway. Say what the page should say; don't ask for an implementer.
 
 ## Surface lesson candidates (primary producer role)
 
@@ -155,7 +155,7 @@ You are the primary surfacer of *new* vault entries because your job already rea
 
 Append candidates to `lesson-candidates.md` in the same REQ folder.
 
-**Bar: when in doubt, surface — in three lines.** `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines; **at most 12 per REQ**, then `(N more not listed: <topics>)`. The cost of a discarded candidate is one entry; the cost of a missed lesson is the knowledge loop this toolkit exists to enable — but a 2KB candidate is not a cheaper lesson, it is a lesson written twice.
+**Bar: when in doubt, surface — in three lines.** The ship step issues a verdict (promote / demote-to-gotcha / discard) on each. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines; **at most 12 per REQ**, then `(N more not listed: <topics>)`. The cost of a discarded candidate is one entry; the cost of a missed lesson is the knowledge loop this toolkit exists to enable — but a 2KB candidate is not a cheaper lesson, it is a lesson written twice.
 
 ### What to surface (from this agent's lens)
 

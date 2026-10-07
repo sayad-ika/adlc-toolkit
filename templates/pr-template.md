@@ -1,4 +1,4 @@
-<!-- ADLC template — pr-draft.md. Read at /wrapup step 2, never at preflight.
+<!-- ADLC template — pr-draft.md. Read at ship.md §3, never at preflight.
      Placeholders in <angle brackets> are substituted when the draft is written.
      Safe to customize per project: title format, section order, extra sections. -->
 
@@ -27,7 +27,7 @@ One-paragraph what-and-why. Pull from the spec's Goal section, rewritten in past
 
 ### Acceptance criteria
 
-Reproduce the checklist from the spec, with each item marked ✓ as verified during /review.
+Reproduce the checklist from the spec, with each item marked ✓ as verified at review.
 
 - [✓] Criterion 1 — short note on how it was verified
 - [✓] Criterion 2 — short note

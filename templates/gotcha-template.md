@@ -30,7 +30,7 @@ This is the shape of a single entry to append to `.adlc/knowledge/gotchas.md`. D
 
 ## How to use this template
 
-When `/wrapup` (or a reviewer) identifies a gotcha to capture:
+When the ship step (or a reviewer) identifies a gotcha to capture:
 
 1. Open `.adlc/knowledge/gotchas.md`.
 2. Find the highest existing `^g##` anchor and increment.

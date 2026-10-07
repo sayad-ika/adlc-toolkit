@@ -14,11 +14,11 @@ project:
 #   prefixed    — REQ-<prefix>-NNN, numbered within your own prefix. Per-person
 #                 namespace — no coordination, works offline. Set `prefix`.
 #   ticket      — derive the ID from the tracker issue the REQ implements:
-#                 `/spec #842` (or an issue URL) with `sources.issues` set yields
+#                 `/adlc #842` (or an issue URL) with `sources.issues` set yields
 #                 REQ-842 (or the native key like PROJ-842 for Jira/Linear).
 #                 Always unique — the tracker already guarantees it — recommended for teams. With no
 #                 issue ref it falls back to `prefixed` (if `prefix` set) else
-#                 `sequential`. The same scheme applies to BUG IDs in /bugfix.
+#                 `sequential`. The same scheme applies to BUG IDs in /adlc --bug.
 req:
   id_scheme: sequential
   # prefix: <your-initials>   # used by `prefixed` (and as the ticket fallback)
@@ -45,7 +45,7 @@ layout:
 #                  commit message (commits-draft.md), PR body (pr-draft.md), and
 #                  merge-checklist.md; you run every git command yourself.
 #   commit       — the assistant may `git add` + `git commit` on the REQ's feature
-#                  branch, after that phase's gate is approved, using the drafted
+#                  branch, after that step's gate is approved, using the drafted
 #                  message. You still push and open/merge the PR.
 #   commit+push  — also `git push` the REQ's feature branch (fast-forward only).
 #                  You still open and merge the PR.
@@ -67,7 +67,7 @@ stack:
   backends: [<node|dotnet|django|cloud-run|lambda|...>]   # optional
   databases: [<postgres|firestore|sqlserver|...>]   # optional
 
-# Review packet — what /review bundles for its reviewers. Every dispatched
+# Review packet — what review bundles for its reviewers. Every dispatched
 # reviewer reads the packet in full, so each file you exclude is saved four or
 # five times over. Excluded files never enter the packet; the manifest lists
 # them as `<path> (+N/-M)` and a reviewer who needs one reads it directly.
@@ -82,10 +82,10 @@ review:
       - "**/*.snap"
       # - "frontend/src/types/api/index.ts"   # generated API client
 
-# User-facing repo documentation. These are the docs /wrapup's repo-doc sweep
+# User-facing repo documentation. These are the docs the ship step's repo-doc sweep
 # (step 1) checks for drift when a REQ changes documented behavior, and edits
 # once you approve the list at the ship gate — DISTINCT from the .adlc/
-# knowledge vault, which /wrapup also owns. List the paths (files or directories) that describe behavior to
+# knowledge vault, which the ship step also owns. List the paths (files or directories) that describe behavior to
 # humans: READMEs, a docs site, API reference, changelogs. Globs allowed.
 #
 # Omit the block entirely and the sweep falls back to a default scan of
@@ -96,7 +96,7 @@ review:
 #   - docs/
 #   - CHANGELOG.md
 
-# UI/UX runtime review. When `stack.frontends` is set, /review dispatches the
+# UI/UX runtime review. When `stack.frontends` is set, the review routine dispatches the
 # ui-reviewer if the change touches UI either directly (components/pages/views/
 # styles/templates) OR indirectly — a back-end API the frontend consumes changed
 # (renamed field, new error, changed shape), which can break a screen with no UI
@@ -149,20 +149,20 @@ review:
 # silent side effect. /autopilot's autonomy.sources ceiling is capped by this list,
 # exactly as autonomy.git is capped by git.mode.
 #
-# Invocation once a service is set: `/spec #8`, `/bugfix #8`, `/proceed #8`, or a
-# full issue URL. The same resolver serves /spec and /bugfix.
+# Invocation once a service is set: `/adlc #8`, `/adlc --bug #8`, or a
+# full issue URL. The same resolver serves /adlc.
 # sources:
 #   issues:  github            # github | linear | jira | none
-#   design:  figma             # figma | none   (used by /architect)
-#   repo:    <owner/name>      # default repo for bare refs like `/spec #8`
+#   design:  figma             # figma | none   (used by the Hard path's design step)
+#   repo:    <owner/name>      # default repo for bare refs like `/adlc #8`
 #   write:   []                # services the pipeline may write back to (default: none)
 #   mechanism: auto            # auto (default) | gh | mcp | url
 
-# Isolation strategy for in-flight REQs. Determines whether /architect and
-# /bugfix create an isolated git worktree per REQ or work directly on a
+# Isolation strategy for in-flight REQs. Determines whether /adlc creates
+# an isolated git worktree per REQ or works directly on a
 # feature branch in the user's current checkout.
 #
-#   auto      — default. Branch for single-REQ skills (/proceed, /bugfix);
+#   auto      — default. Branch for single-REQ work (/adlc, /autopilot);
 #               worktree for /sprint (parallelism requires it) and for
 #               cross-repo REQs (mode is forced regardless of this setting).
 #   branch    — always use a branch on the current checkout. /sprint and
@@ -176,8 +176,8 @@ review:
 # Worktree mode tolerates a dirty main checkout but each REQ start is a
 # folder switch in your editor.
 #
-# `edits` — how much per-edit friction the implementer carries WITHIN a phase.
-# The phase-boundary gates are unaffected either way; this only governs editing
+# `edits` — how much per-edit friction the implementer carries WITHIN a step.
+# The gates between steps are unaffected either way; this only governs editing
 # inside the REQ's blast radius (its worktree/branch and the files its tasks name).
 #
 #   confirm-out-of-scope  — (default) the implementer edits freely inside the
@@ -194,7 +194,7 @@ workflow:
   edits: confirm-out-of-scope
 
 # Autonomy — used by /autopilot (the autonomous pipeline) and by /sprint's gate
-# queue. /proceed ignores this block and always pauses at every gate.
+# queue. /adlc ignores this block and always pauses at every gate.
 #
 # /sprint reads `gates` (plus escalation, the rework caps, confidence_floor,
 # packet_max_bytes, hard_stops) to decide who clears each runner's gate:

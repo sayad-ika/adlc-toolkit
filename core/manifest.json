@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "vaultDir": ".adlc",
   "$layoutComment": "On-disk shape of the work-record trees. The prose contract — resolve/mint/enumerate, the four depths, the gitignore set — lives in core/VAULT-LAYOUT.md. Change both together.",
   "layout": {
@@ -79,7 +79,7 @@
         "ui-reviewer",
         "decision-maker"
       ],
-      "summary": "Autonomous pipeline — runs all five phases, routing each gate through the decision-maker; ends in one final human review."
+      "summary": "Autonomous pipeline — runs the classified path, routing each gate through the decision-maker; ends in one final human review."
     },
     {
       "name": "sprint",
@@ -253,19 +253,19 @@
   },
   "tierVerified": "2026-07-21",
   "sources": {
-    "$comment": "External systems a project can SEED artifacts from. Declared per project in .adlc/config.yml -> sources; this catalog tells /init what to offer and tells skills which phases may use each service, with what read/write capability, via which mechanisms (auto-resolved at runtime, first that works wins). Reads are default-on for a declared service; writes require the service in config sources.write and are always gated.",
+    "$comment": "External systems a project can SEED artifacts from. Declared per project in .adlc/config.yml -> sources; this catalog tells /init what to offer and tells skills which steps may use each service, with what read/write capability, via which mechanisms (auto-resolved at runtime, first that works wins). Reads are default-on for a declared service; writes require the service in config sources.write and are always gated.",
     "kinds": {
       "issues": {
-        "phases": ["spec", "bugfix", "wrapup"],
+        "steps": ["easy:do", "hard:design", "ship"],
         "services": ["github", "linear", "jira"],
         "capability": "read+write",
-        "comment": "Read seeds /spec and /bugfix Phase 1 from a ticket; write (gated, opt-in) posts PR links / transitions issues at /wrapup and /bugfix Phase 5."
+        "comment": "Read seeds the plan (Easy step 1, Hard design) from a ticket; write (gated, opt-in) posts PR links / transitions issues at ship."
       },
       "design": {
-        "phases": ["architect"],
+        "steps": ["hard:design"],
         "services": ["figma"],
         "capability": "read",
-        "comment": "Read seeds /architect UI/component specs from a frame."
+        "comment": "Read seeds the Hard design step's UI/component specs from a frame."
       }
     },
     "mechanisms": {

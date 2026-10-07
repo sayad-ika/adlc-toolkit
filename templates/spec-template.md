@@ -4,7 +4,7 @@
 |---|---|
 | REQ | {{REQ_ID}} |
 | Status | drafting \| validated \| in-progress \| complete \| blocked |
-| Phase | spec \| architect \| implement \| review \| wrapup |
+| Path | easy \| hard |
 | Created | {{DATE}} |
 | Primary repo | {{REPO_ID}} |
 | Touched repos | {{REPO_LIST}} |
@@ -32,7 +32,7 @@ Bulleted list of testable statements. Each one is a thing that must be true for 
 
 ## Flow (optional)
 
-Include a small diagram **only** when the behavior has states or branches that are hard to hold in the head from prose — a multi-step user journey, a state machine (draft → submitted → approved), a decision with several outcomes. Skip it for straightforward CRUD or a single happy path; a diagram that just restates a sentence is noise. This stays at the *what* level (user-visible states and transitions), not the *how* — leave components and sequencing to `/architect`. Use Mermaid so it renders everywhere; delete this section if it doesn't earn its place.
+Include a small diagram **only** when the behavior has states or branches that are hard to hold in the head from prose — a multi-step user journey, a state machine (draft → submitted → approved), a decision with several outcomes. Skip it for straightforward CRUD or a single happy path; a diagram that just restates a sentence is noise. This stays at the *what* level (user-visible states and transitions), not the *how* — leave components and sequencing to the design step. Use Mermaid so it renders everywhere; delete this section if it doesn't earn its place.
 
 ```mermaid
 stateDiagram-v2
@@ -70,4 +70,4 @@ Adjacent work that's tempting but separate. Filed here so it's visible but not b
 
 ## Backlinks
 
-_(populated by /wrapup or manually)_
+_(populated by the ship step or manually)_

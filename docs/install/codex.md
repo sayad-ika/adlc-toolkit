@@ -54,13 +54,13 @@ If the repo already has an `AGENTS.md`, append the ADLC block — Codex concaten
 ```
 codex
 > /init        → creates .adlc/
-> /spec         → start a REQ
-> /proceed      → full gated pipeline
+> /adlc <what you want>  → classify, then run the Easy or Hard path
+> /status                → what is in flight
 ```
 
 ## Verify
 
-- `/` lists the ADLC prompts (`init`, `spec`, …).
+- `/` lists the ADLC prompts (`init`, `adlc`, …).
 - `codex` picks up `AGENTS.md` at startup (shown in the session context).
 - The agents in `~/.codex/agents/` carry `read_only = true` for every reviewer; the implementer is `false`.
 - After `/init`, `.adlc/` exists.

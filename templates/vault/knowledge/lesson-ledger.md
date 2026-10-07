@@ -1,7 +1,7 @@
 # Lesson ledger
 
 <!-- GENERATED from knowledge/lessons/ — do not hand-edit.
-     Rebuilt (whole file) by /wrapup, /task, /bugfix, /recover, and /config migrate,
+     Rebuilt (whole file) by the ship step, /recover, and /config migrate,
      from each lesson's header lines only:
        grep -h '^# \|^| ID \|^| Tags \|^| Severity \|^| REQ \|^> \*\*STATUS: superseded' knowledge/lessons/LESSON-*.md
      This file carries merge=union in .adlc/.gitattributes: a parallel merge can leave a

@@ -9,7 +9,7 @@
 
 > STATUS: needs verification — seeded from the observed de facto system by `/ux-doctor`. Sections describe what the code *does*, not yet what the team has *decided*. Confirm or correct each section, then set Status to `agreed`.
 
-This file is the UI contract the toolkit audits against: `/ux-doctor` measures drift from it, the `ui-reviewer` design-matches against it in `/review`, and the `architecture-adversary`'s UX lens checks plans against it in `/architect`. Keep it honest — a stale rule here produces false findings everywhere.
+This file is the UI contract the toolkit audits against: `/ux-doctor` measures drift from it, the `ui-reviewer` design-matches against it at review, and the `architecture-adversary`'s UX lens checks plans against it in the Hard path's design step. Keep it honest — a stale rule here produces false findings everywhere.
 
 ## Tokens
 

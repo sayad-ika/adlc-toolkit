@@ -1,6 +1,6 @@
 ---
 name: architecture-reviewer
-description: "Layering, separation of concerns, API contracts. Read-only."
+description: "Reviews code changes for layering compliance, separation of concerns, API contracts, and integration with existing patterns. Read-only — reports findings without modifying code. Dispatched by the review routine (`core/paths/review.md`)."
 model: sonnet
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---

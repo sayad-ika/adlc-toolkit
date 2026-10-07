@@ -1,6 +1,6 @@
 # ADLC Toolkit
 
-**A spec-driven pipeline that makes building with AI fast, accountable, and cumulative.** ADLC (AI Development Life Cycle) turns any AI coding assistant into a disciplined engineering partner: the assistant drafts specs, architecture, code, and reviews; you approve at every phase gate; and what it learns about your codebase compounds in a knowledge vault instead of evaporating with the session.
+**A spec-driven pipeline that makes building with AI fast, accountable, and cumulative.** ADLC (AI Development Life Cycle) turns any AI coding assistant into a disciplined engineering partner: the assistant drafts specs, architecture, code, and reviews; you approve at every gate — one for easy work, three for hard; and what it learns about your codebase compounds in a knowledge vault instead of evaporating with the session.
 
 Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**, on **macOS, Windows, and Linux**, for **teams or solo**. One workflow, one shared knowledge vault, five AI tools.
 
@@ -11,9 +11,9 @@ Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**
 AI assistants generate code faster than most teams can responsibly absorb it. The hard part was never the code — it's everything around the code: the spec that says what to build, the review that catches what's wrong, the memory of why decisions were made, the process a whole team can share. ADLC supplies that structure, so the speed is yours to keep:
 
 <details>
-<summary><b>Nothing ships un-decided</b> — five phases, five human gates</summary>
+<summary><b>Nothing ships un-decided</b> — ceremony sized to the risk, never zero</summary>
 
-Work moves through spec → architect → implement → review → wrap-up, and each phase ends in a [gate](docs/gate-cards.md) where _you_ approve, redirect, or halt. Gates live at phase boundaries, not between keystrokes — smooth inside, hard stop at the line. The gate is the product, not the overhead.
+Every piece of work is classified first. **Easy/Medium** work runs in two steps with one [gate](docs/gate-cards.md) before it ships; **Hard** work — sensitive, a new decision, spread wide, or unclear — runs in three steps with a gate after each, so you approve the design before any code exists. At every gate _you_ approve, redirect, or halt. Gates live between steps, not between keystrokes — smooth inside, hard stop at the line. The gate is the product, not the overhead.
 
 </details>
 
@@ -108,33 +108,44 @@ Work records get one folder each under `specs/` (and `bugs/`). On a long-running
 
 ```mermaid
 flowchart LR
-    spec([spec]) --> g1{{"⛩"}} --> arch([architect]) --> g2{{"⛩"}} --> impl([implement]) --> g3{{"⛩"}} --> rev([review]) --> g4{{"⛩"}} --> wrap([wrapup]) --> g5{{"⛩ merge"}}
+    req([/adlc request]) --> c{classify}
+    c -- "Easy/Medium" --> e1([1 · do]) --> e2([2 · check & ship]) --> eg{{"⛩ ship"}}
+    c -- "Hard" --> h1([1 · design]) --> hg1{{"⛩"}} --> h2([2 · build & verify]) --> hg2{{"⛩"}} --> h3([3 · ship]) --> hg3{{"⛩"}}
+    e1 -. "risk appears" .-> h1
 ```
 
-Every `⛩` is a **human gate**: the pipeline stops, presents a [gate card](docs/gate-cards.md) with the decision and its evidence, and waits. Each gate also drops a `.awaiting-approval` file marker, so you can walk away and resume across sessions.
+**One entry point, two paths.** `/adlc` takes a description, an issue reference, or a bug report and classifies it in about a minute — no agent call:
 
-Run phases one at a time, or chain them with `proceed` (gates between each), `autopilot` (a decision-maker agent adjudicates the inner gates, one final human review at the end), or `sprint` (parallel multi-REQ, each runner pausing at its gates). Bugs take the slimmer `bugfix` pipeline; small changes take `task`, which triages itself and escalates to the full pipeline when the change turns out bigger than claimed.
+- **Hard** if any of these hold: it touches a sensitive area (auth, security, secrets, payments, migrations, a public API, anything irreversible — `autonomy.hard_stops`), needs a new architectural decision, likely spans more than ~5 files or 2 modules or more than one repo, has more than 3 acceptance criteria, or is too unclear to code without design. **Risk wins over size** — a one-line auth change is Hard.
+- **Easy/Medium** otherwise.
+
+| Path | Steps | Gates | Reviewers |
+|---|---|---|---|
+| **Easy/Medium** | **1 · Do** — short plan (goal, 1–3 criteria, files), the change, tests · **2 · Check & ship** — review, PR draft, lessons | 1 (ship) | correctness (+ UI, + reflector when the vault has a matching lesson) |
+| **Hard** | **1 · Design** — spec + architecture + task plan, explorer and adversary · **2 · Build & verify** — task DAG in parallel tiers, full review · **3 · Ship** — PR, lessons, vault | 3 (design, build, ship) | correctness, quality, architecture, reflector (+ UI) |
+
+Easy work **upgrades to Hard** the moment a risk signal shows up mid-flight; nothing is lost, because the REQ folder exists from the start. Hard never downgrades.
+
+Every `⛩` is a **human gate**: the pipeline stops, presents a [gate card](docs/gate-cards.md) with the decision and its evidence, and waits. Each gate also drops a `.awaiting-approval` file marker, so you can walk away and resume across sessions (`/adlc <ID>`, or `--resume` for a catch-up first).
+
+Chain without pausing via `autopilot` (a decision-maker agent adjudicates the gates, one final human review at the end), or run several REQs at once with `sprint` (each runner pausing at its gates).
 
 ## Skills
 
-Five phase skills, three orchestrators, two slim pipelines, and a set of standalone audits and utilities — each installed as a slash command in your assistant.
+One pipeline entry point, two orchestrators, and a set of standalone audits and utilities — each installed as a slash command in your assistant. No skill has more than three steps.
 
 <details>
-<summary><b>All 18 skills</b></summary>
+<summary><b>All 14 skills</b></summary>
 
 | Skill            | What it does                                                                                                               | Ends in gate? |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | `init`           | Bootstrap `.adlc/` vault in a repo                                                                                         | No            |
-| `spec`           | Draft + validate a requirement                                                                                             | Yes           |
-| `architect`      | Design + task breakdown + validate                                                                                         | Yes           |
-| `implement`      | Execute task DAG                                                                                                           | Yes           |
-| `review`         | Dispatch reviewers, consolidate findings                                                                                   | Yes           |
-| `wrapup`         | Draft PR + lessons + vault updates + git checklist                                                                         | Yes           |
-| `proceed`        | Run all five phase skills with gates between                                                                               | —             |
-| `autopilot`      | Autonomous pipeline — routes each gate through the decision-maker; ends in one final human review                          | —             |
+| `adlc`           | Classify the work, then run the Easy/Medium (2 steps) or Hard (3 steps) path; `--resume`, `--revert~N`, `--cancel`         | Yes           |
+| `proceed`        | Alias for `adlc --hard`                                                                                                    | Yes           |
+| `task`           | Alias for `adlc --easy` (still upgrades to Hard on a risk signal)                                                          | Yes           |
+| `bugfix`         | Alias for `adlc --bug` — a defect, classified like any other work                                                          | Yes           |
+| `autopilot`      | Autonomous `adlc` — routes each gate through the decision-maker; ends in one final human review                            | —             |
 | `sprint`         | Parallel multi-REQ orchestrator (gate-pause)                                                                               | —             |
-| `bugfix`         | Slimmer pipeline for bugs                                                                                                  | Yes           |
-| `task`           | Slim self-triaging pipeline for small changes; escalates to `proceed` when large                                           | Yes           |
 | `analyze`        | Standalone codebase health audit                                                                                           | No            |
 | `optimize`       | Standalone performance/cost scan                                                                                           | No            |
 | `ux-doctor`      | Standalone UX & design-system audit — static source pass + runtime browser pass; segments large apps into resumable phases | No            |
@@ -151,11 +162,11 @@ Skills orchestrate; agents do the focused work. The map below shows the main dis
 
 ```mermaid
 flowchart LR
-    subgraph phases["Phase skills"]
-        architect2([architect])
-        implement2([implement])
+    subgraph steps["/adlc steps"]
+        architect2([design])
+        implement2([build])
         review2([review])
-        wrapup2([wrapup])
+        wrapup2([ship])
     end
     subgraph reviewers["Read-only reviewers"]
         cr[correctness-reviewer]
@@ -290,11 +301,11 @@ The default `req.id_scheme: sequential` numbers REQs by scanning the vault (`REQ
 
 | `req.id_scheme`                    | ID looks like          | When                                                                                                               |
 | ---------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `ticket` _(recommended for teams)_ | `REQ-842` / `PROJ-842` | You wire up `sources.issues`; `/spec #842` derives the ID from the tracker issue. Globally unique by construction. |
+| `ticket` _(recommended for teams)_ | `REQ-842` / `PROJ-842` | You wire up `sources.issues`; `/adlc #842` derives the ID from the tracker issue. Globally unique by construction.|
 | `prefixed`                         | `REQ-sf-007`           | No shared tracker. `req.prefix` (your initials) gives each person a private number space. Works offline.           |
 | `sequential` _(default)_           | `REQ-007`              | Solo.                                                                                                              |
 
-The same scheme governs `BUG-*` IDs in `/bugfix`. The scheme is the whole fix, and it works in a flat vault — the ID is what has to be unique, not the directory it sits in.
+The same scheme governs `BUG-*` IDs for bugs. The scheme is the whole fix, and it works in a flat vault — the ID is what has to be unique, not the directory it sits in.
 
 </details>
 
@@ -318,7 +329,7 @@ How much git the assistant runs is **your choice per project**, set at `init` an
 
 | `git.mode`         | Behavior                                                                                                                                                                                                                      |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `manual` (default) | The assistant runs no git writes. It reads git state, creates the REQ's worktree/feature branch, and drafts `commits-draft.md` (after `implement`) and `pr-draft.md` (after `wrapup`). You run every commit, push, and merge. |
+| `manual` (default) | The assistant runs no git writes. It reads git state, creates the REQ's worktree/feature branch, and drafts `commits-draft.md` (while building) and `pr-draft.md` (at ship). You run every commit, push, and merge. |
 | `commit`           | The assistant also `git add` + `git commit`s the approved work on the REQ's feature branch at each gate. You push and open/merge the PR.                                                                                      |
 | `commit+push`      | The assistant also `git push`es the feature branch (fast-forward only). You open and merge the PR.                                                                                                                            |
 
@@ -326,7 +337,7 @@ These rules hold in **every** mode: the assistant only ever touches the REQ's ow
 
 ## Philosophy
 
-The seven principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **spec first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask with concrete options, not open-ended questions**; **speak plainly**.
+The seven principles in [ETHOS.md](ETHOS.md), injected into every skill: **you decide / the assistant drafts**; **plan first, code second**; **read-only reviewers**; **knowledge compounds**; **process is explicit**; **ask with concrete options, not open-ended questions**; **speak plainly**.
 
 ## Contributing / extending
 

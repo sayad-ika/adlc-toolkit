@@ -3,7 +3,7 @@ name: config
 description: View and change ADLC project settings in .adlc/config.yml — git policy, isolation, how freely the assistant may edit, external sources, autonomy levels, stack, protected branches, repos — through guided options, then re-sync any derived files. Also migrates an existing vault's config to pick up new keys after a toolkit update. Use to change how the pipeline behaves without hand-editing YAML. Vault-only; never commits.
 ---
 
-You are viewing or changing this project's ADLC settings in `.adlc/config.yml`. This is a utility skill: no phase, no gate, no sub-agents. It edits **only** the vault, never source code, and never runs git.
+You are viewing or changing this project's ADLC settings in `.adlc/config.yml`. This is a utility skill: no pipeline step, no gate, no sub-agents. It edits **only** the vault, never source code, and never runs git.
 
 It exists for one reason hand-editing YAML can't satisfy: some settings have a **derived file** — a second copy elsewhere that must stay in sync (changing `git.mode` must also refresh the git-policy block in `.adlc/CLAUDE.md`). This skill owns "validate → write → re-sync → report."
 
@@ -42,13 +42,13 @@ Validate against this. Allowed values are closed sets unless noted "free text."
 | `git.mode` | `manual` \| `commit` \| `commit+push` | **derived-file sync** (see below). Lowering it below `autonomy.git` silently caps `/autopilot`; mention that. |
 | `git.protect` | list of branch globs | must be non-empty; warn (don't block) if `main`/`master` is removed |
 | `workflow.isolation` | `auto` \| `branch` \| `worktree` | explain the trade-off when changing (branch keeps the editor session; worktree tolerates a dirty checkout) |
-| `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | how often the implementer asks before editing within a phase. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
+| `workflow.edits` | `confirm-out-of-scope` \| `confirm-each` | how often the implementer asks before editing within a step. `confirm-out-of-scope` = free inside the REQ's blast radius, stop at the edge; `confirm-each` = surface every write. **Phase gates are unaffected either way** — say so when changing. |
 | `layout.partition` | `none` \| `month-author` | on-disk shape of `specs/`, `bugs/`, `sprints/` — see `$TOOLKIT_PATH/core/VAULT-LAYOUT.md`. Changing it affects **new** folders only; existing ones move when the user runs `/config migrate` (mode D, layout step). Both shapes stay readable, so a half-migrated vault is fine. |
 | `layout.author` | free text, `[a-z0-9-]`, 1–8 chars | initials used as the folder bucket under `month-author`. Falls back to `req.prefix`, then initials from `git config user.name`, then `_`. Lowercase it; if the user gives something outside the charset, offer the sanitized form rather than writing it raw. |
-| `sources.issues` | `github` \| `linear` \| `jira` \| `none` | issue tracker `/spec` and `/bugfix` seed from. Setting non-`none` enables read-seeding (mechanism auto-resolved: CLI → MCP → URL). If set, prompt for `sources.repo` too. |
-| `sources.design` | `figma` \| `none` | design tool `/architect` seeds UI/component specs from. |
-| `sources.repo` | free text (`owner/name`) | default repo for bare refs like `/spec #8`. |
-| `sources.write` | list — subset of the configured services | **default empty (reads only).** Listing a service enables gated write-back (`/wrapup`, `/bugfix` P5). **Warn before enabling:** this permits external writes (issue comments/transitions); every write is still drafted and approved at a gate, never silent. |
+| `sources.issues` | `github` \| `linear` \| `jira` \| `none` | issue tracker `/adlc` seeds from. Setting non-`none` enables read-seeding (mechanism auto-resolved: CLI → MCP → URL). If set, prompt for `sources.repo` too. |
+| `sources.design` | `figma` \| `none` | design tool the design step seeds UI/component specs from. |
+| `sources.repo` | free text (`owner/name`) | default repo for bare refs like `/adlc #8`. |
+| `sources.write` | list — subset of the configured services | **default empty (reads only).** Listing a service enables gated write-back (the ship step). **Warn before enabling:** this permits external writes (issue comments/transitions); every write is still drafted and approved at a gate, never silent. |
 | `sources.mechanism` | `auto` \| `gh` \| `mcp` \| `url` | override the auto resolution order. Rarely needed; default `auto`. |
 | `autonomy.gates` | `manual` \| `assisted` \| `auto` | only consumed by `/autopilot` |
 | `autonomy.git` | `read-only` \| `commit` \| `commit+push` | **capped by `git.mode`** — refuse to set it higher than `git.mode` (offer to raise `git.mode` too, or set the capped value) |
@@ -123,7 +123,7 @@ If the project config is already current, say so and write nothing.
 
 7. **Reconcile `.adlc/.gitattributes` — additive, like the config keys.** The vault's live `.gitattributes` is copied once at `/init` and is *not* covered by the template refresh below (mode E diffs `$TOOLKIT_PATH/templates/` against `.adlc/templates/`; the live file sits at the vault root). So do it here: for each non-comment line in `$TOOLKIT_PATH/templates/vault/.gitattributes` whose path is absent from `.adlc/.gitattributes`, append that line (with the toolkit's comment above it). Never remove, reorder, or change an existing line — a project may have added its own. Show the additions before writing; if there are none, say so. Then log: `## [DATE] config-migrate | gitattributes: +<paths>`.
 
-8. **Rebuild the lesson ledger** — part of derived-file sync (below). `knowledge/lesson-ledger.md` was added in 1.8.0; a vault created before that has none, and an existing one may carry union-duplicated rows. Rebuild it from the lesson files' header lines exactly as `/wrapup` step 4 does. A vault that already has a current ledger produces a byte-identical file — that's the no-op; say so rather than logging a change.
+8. **Rebuild the lesson ledger** — part of derived-file sync (below). `knowledge/lesson-ledger.md` was added in 1.8.0; a vault created before that has none, and an existing one may carry union-duplicated rows. Rebuild it from the lesson files' header lines exactly as `core/paths/ship.md` §2 does. A vault that already has a current ledger produces a byte-identical file — that's the no-op; say so rather than logging a change.
 
 9. **Offer template refresh.** A toolkit update usually changes the templates too (e.g. new diagram sections), and those live in `.adlc/templates/`, not `config.yml`. After the config keys are handled, offer to run the template refresh (mode E / below) as a separate, clearly-labeled gated step. The user can decline it independently of the config migration.
 
@@ -148,13 +148,13 @@ This skill replaces whole template files; it does **not** merge. If a user wants
 
 ## Budgets (bring the hot path back under budget)
 
-The budgets are in the vault README ("Size budgets"). `/wrapup` keeps `hot.md` and `now.md` inside them on every REQ from 1.7.0 on, and the Claude adapter's `adlc-budget.mjs` hook refuses over-budget writes — but a vault that predates 1.7.0, or one that drifted, needs a one-time repair. Measure first, then offer one action per file, each with a preview and its own approve:
+The budgets are in the vault README ("Size budgets"). The ship step keeps `hot.md` and `now.md` inside them on every REQ from 1.7.0 on, and the Claude adapter's `adlc-budget.mjs` hook refuses over-budget writes — but a vault that predates 1.7.0, or one that drifted, needs a one-time repair. Measure first, then offer one action per file, each with a preview and its own approve:
 
 - **`now.md` > 1KB** → keep the active-REQ table and one-line focus; move every other section verbatim to `sprints/<SPRINT-ID>.md` (if it describes a sprint) or `<REQ_PATH>/notes.md` (if it describes one REQ), leaving a one-line pointer. Show what moves where.
-- **`hot.md` > 500 lines** → cut from line 501 down into `hot-archive-<YYYY>.md`, newest-first order preserved, one `index.md` row. Same rotation `/wrapup` step 4 does.
+- **`hot.md` > 500 lines** → cut from line 501 down into `hot-archive-<YYYY>.md`, newest-first order preserved, one `index.md` row. Same rotation the ship step does (`core/paths/ship.md` §3).
 - **`context/<name>.md` > 8KB** → split into the rulebook (what reviewers enforce: rules, names, patterns, do/don't) and `context/<name>-rationale.md` (why, history, examples, discussion), read on demand. Propose the split by section heading; the user moves headings between the two lists before approving. The rulebook keeps every rule; nothing is summarized.
 - **`CLAUDE.md` > 5KB** → same split into `README.md` (explanation) and `CLAUDE.md` (rules).
-- **`review-packet.md` / `verification.md` over budget in active REQs** → report only; those are `/review`'s to fix on the next round.
+- **`review-packet.md` / `verification.md` over budget in active REQs** → report only; those are the review routine's to fix on the next round.
 
 Never merge, summarize, or drop text in this mode. Every byte moves; the diff of the pair is zero. Log one `hot.md` line: `## [DATE] config-budgets | <file>: <before> → <after>, moved to <target>`.
 
@@ -164,9 +164,9 @@ After writing config, refresh anything that mirrors a setting:
 
 - **`git.mode` → `.adlc/CLAUDE.md` "### Git policy" section.** Replace that section's body with the canonical version from `$TOOLKIT_PATH/templates/vault/CLAUDE.md` (it already describes all three modes and the invariants, keyed off `git.mode`, so it's correct for any value). If the user's `.adlc/CLAUDE.md` has local edits around it, replace only the `### Git policy` section, not the whole file.
 
-- **`knowledge/lessons/*` → `knowledge/lesson-ledger.md`.** Not derived from a setting but from vault files, and it belongs here because it is the other thing that must be regenerated rather than edited. Rebuild it on `migrate` (mode D), and on any invocation where the user asks for it (`/config ledger`): one `grep` over the lesson files' header lines (`^# `, `| ID `, `| Tags `, `| Severity `, `| REQ `, and the `STATUS: superseded` banner), one row per file, whole-file rewrite, per `/wrapup` step 4. Never a partial edit — the file carries `merge=union` and a rewrite is what clears a duplicated row.
+- **`knowledge/lessons/*` → `knowledge/lesson-ledger.md`.** Not derived from a setting but from vault files, and it belongs here because it is the other thing that must be regenerated rather than edited. Rebuild it on `migrate` (mode D), and on any invocation where the user asks for it (`/config ledger`): one `grep` over the lesson files' header lines (`^# `, `| ID `, `| Tags `, `| Severity `, `| REQ `, and the `STATUS: superseded` banner), one row per file, whole-file rewrite, per `core/paths/ship.md` §2. Never a partial edit — the file carries `merge=union` and a rewrite is what clears a duplicated row.
 
-No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by `/implement`, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived file, extend this section.
+No other setting currently has a derived file — `workflow.isolation`, `workflow.edits`, the `sources.*` block, and the `autonomy.*` dials are all read from `config.yml` at runtime (by the build step, the seed/write-back steps, and `/autopilot` respectively). If a future setting gains a derived file, extend this section.
 
 ## After applying
 

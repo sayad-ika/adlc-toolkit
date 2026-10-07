@@ -79,15 +79,15 @@ In global mode the stubs hold an absolute toolkit path, so `core/` resolves from
 ```
 claude
 > /init          # in a project repo — creates .adlc/
-> /spec           # start your first REQ
-> /proceed        # or run the whole gated pipeline
+> /adlc <what you want>   # classifies it, then runs the Easy or Hard path
+> /status                 # what is in flight
 ```
 
 ## Verify
 
-- `/help` (or the command picker) lists `init`, `spec`, `architect`, … `recover`.
+- `/help` (or the command picker) lists `init`, `adlc`, `autopilot`, … `recover`.
 - After `/init`, `.adlc/` exists with `context/`, `knowledge/`, `specs/`, `config.yml`.
-- During `/review`, the reviewer sub-agents are read-only on your code: they may write only their findings into `.adlc/` (e.g. `review-log.md`, `lesson-candidates.md`), never source files. After a review pass, `git status` should show only `.adlc/` changes — never edits to your source or repo files.
+- During review, the reviewer sub-agents are read-only on your code: they may write only their findings into `.adlc/` (e.g. `review-log.md`, `lesson-candidates.md`), never source files. After a review pass, `git status` should show only `.adlc/` changes — never edits to your source or repo files.
 
 ## Notes
 
@@ -97,4 +97,4 @@ claude
 
 ## Optional: statusline, gate notifications, vault budgets
 
-Three Claude-only extras. Two make the pipeline visible without reading scrollback: a **statusline** showing the active REQ, phase, and whether a gate is waiting, and a **desktop notification** when the pipeline pauses at a gate. The third, **vault budgets**, is the one worth wiring on day one: it turns the vault's size budgets into refusals (an over-budget `now.md` write is bounced back with the fix; a `Read` of generated code the review packet excludes is denied; a reviewer section over 12KB blocks the reviewer's stop until trimmed) and prints a budget strip at session start. Setup is three `settings.json` snippets — see [`adapters/claude/extras/README.md`](../../adapters/claude/extras/README.md). The pipeline works the same without them.
+Three Claude-only extras. Two make the pipeline visible without reading scrollback: a **statusline** showing the active REQ, its path and step, and whether a gate is waiting, and a **desktop notification** when the pipeline pauses at a gate. The third, **vault budgets**, is the one worth wiring on day one: it turns the vault's size budgets into refusals (an over-budget `now.md` write is bounced back with the fix; a `Read` of generated code the review packet excludes is denied; a reviewer section over 12KB blocks the reviewer's stop until trimmed) and prints a budget strip at session start. Setup is three `settings.json` snippets — see [`adapters/claude/extras/README.md`](../../adapters/claude/extras/README.md). The pipeline works the same without them.

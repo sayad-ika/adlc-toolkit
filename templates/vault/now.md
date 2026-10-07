@@ -4,12 +4,12 @@ What's actively in flight. One source of truth, scanned at the start of every Cl
 
 ## Active REQs
 
-_(empty — populated by /proceed, /sprint, /bugfix)_
+_(empty — populated by /adlc, /sprint)_
 
 <!-- Example shape:
-| REQ | Phase | Gate state | Blockers | Isolation | Work path |
+| REQ | Path · step | Gate state | Blockers | Isolation | Work path |
 |---|---|---|---|---|---|
-| REQ-001 | implement | in-progress | — | branch | `D:/repos/myapp` |
+| REQ-001 | hard 2/3 | working | — | branch | `D:/repos/myapp` |
 | REQ-002 | review | awaiting approval | — | worktree | `D:/repos/myapp/.worktrees/REQ-002` |
 -->
 

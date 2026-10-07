@@ -27,6 +27,6 @@ Not a step on its own. Load only what each part reads, at the part that reads it
 
 ## On `merged` (a ship-gate reply)
 
-Check it if you can (`gh pr view --json state,mergedAt`), set `prState: "merged"`, `terminal: "merged"`, log `req-merged`, drop it from `now.md`. Offer once to archive: `mkdir -p` the mirror path (`specs/_archive/<same tail>`) and plain `mv` (not `git mv`), repoint `index.md`, log `req-archived`.
+Check it if you can (`gh pr view --json state,mergedAt`), set `prState: "merged"`, `terminal: "merged"`, log `req-merged`, drop it from `now.md`. Offer once to archive: `mkdir -p` the mirror path (`specs/_archive/` or `bugs/_archive/` + the same tail) and plain `mv` (not `git mv`), repoint `index.md`, log `req-archived`.
 
 Never: `git add/commit/push` in `manual` mode, `gh pr create`/`merge`, or a branch delete — in any mode.

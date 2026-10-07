@@ -1,5 +1,5 @@
 ---
-description: "Standalone performance/cost scan."
+description: "Standalone performance and cost audit. Dispatches the performance-scanner agent and produces a dated report in .adlc/audits/. Finds LLM/API cost hotspots, DB performance issues, latency drivers and caching opportunities. No gates — read-only."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -12,4 +12,4 @@ Read that file in full and follow **every step literally**. It is a protocol, no
 
 This skill relies on the agents (performance-scanner). Cursor has no isolated read-only subagents — run each role sequentially in your own context, and honor a read-only agent's constraint by NOT editing files during its pass.
 
-**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that phase's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.
+**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that step's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.

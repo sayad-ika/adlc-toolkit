@@ -10,7 +10,14 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 const DIM = '\x1b[2m', YEL = '\x1b[33m', RST = '\x1b[0m';
+// 2.0 state carries path/step/gate; pre-2.0 state carries currentPhase until /adlc rewrites it.
 const PHASE = { 1: 'spec', 2: 'architect', 3: 'implement', 4: 'review', 5: 'wrap up' };
+const where = (st) =>
+  st.step
+    ? `${st.path} ${st.step}/${st.path === 'easy' ? 2 : 3}${st.gate ? ` (${st.gate})` : ''}`
+    : PHASE[st.currentPhase]
+      ? `phase ${st.currentPhase} (${PHASE[st.currentPhase]})`
+      : 'in progress';
 
 function findVault(start) {
   let dir = start;
@@ -67,7 +74,7 @@ function scan(vault) {
     // pipeline-state.json is gitignored. Show it rather than dropping it.
     try { st = JSON.parse(readFileSync(join(folder, 'pipeline-state.json'), 'utf8')); } catch {}
     if (st.prState === 'merged' || st.aborted) continue;
-    out.push({ id, phase: st.currentPhase, waiting: existsSync(join(folder, '.awaiting-approval')) });
+    out.push({ id, where: where(st), waiting: existsSync(join(folder, '.awaiting-approval')) });
   }
   return { reqs: out, strays };
 }
@@ -91,9 +98,8 @@ try {
   if (reqs.length === 0) process.exit(0);
   if (reqs.length === 1) {
     const r = reqs[0];
-    const phase = PHASE[r.phase] ? `phase ${r.phase} (${PHASE[r.phase]})` : 'in progress';
     const gate = r.waiting ? ` · ${YEL}GATE WAITING${RST}` : '';
-    process.stdout.write(`${DIM}ADLC${RST} ${r.id} · ${phase}${gate}`);
+    process.stdout.write(`${DIM}ADLC${RST} ${r.id} · ${r.where}${gate}`);
   } else {
     const waiting = reqs.filter((r) => r.waiting).length;
     const gates = waiting ? ` · ${YEL}${waiting} gate${waiting > 1 ? 's' : ''} waiting${RST}` : '';

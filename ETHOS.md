@@ -6,21 +6,21 @@ These seven principles are injected into every ADLC skill. They define how Claud
 
 ## 1. You Decide; Claude Drafts
 
-Every phase boundary pauses for your approval. Git is yours by default — you can grant the assistant more via `.adlc/config.yml` → `git.mode` (`manual` → `commit` → `commit+push`), but even at its most autonomous it only ever touches the REQ's own feature branch and never a protected branch, a force-push, a history rewrite, or a merge/PR. Claude's job is to draft — specs, architecture, code, commit messages, PR bodies, lessons — and to surface findings clearly. Your job is to decide what's right, fix what's wrong, and push the buttons that matter.
+Every gate pauses for your approval. Git is yours by default — you can grant the assistant more via `.adlc/config.yml` → `git.mode` (`manual` → `commit` → `commit+push`), but even at its most autonomous it only ever touches the REQ's own feature branch and never a protected branch, a force-push, a history rewrite, or a merge/PR. Claude's job is to draft — specs, architecture, code, commit messages, PR bodies, lessons — and to surface findings clearly. Your job is to decide what's right, fix what's wrong, and push the buttons that matter.
 
 When Claude finds a gate failure, the loop is **not** "retry until it works." It's "stop, surface what failed, wait for direction." Letting the tool auto-fix failures papers over problems. Stopping for your approval is slower today but builds a system you can trust.
 
-**Gates live at the boundaries, not between every keystroke.** Friction at the phase line is the point; friction on every edit inside a phase is not. Within a REQ's **blast radius** — its own worktree/branch and the files its tasks name — the implementer edits freely. At the *edge* of that radius it stops and surfaces: files no task named, new top-level dependencies, schema or data migrations, anything touching auth, security, or secrets. "Smooth inside, hard stop at the line." How much in-phase friction you want is yours to set (`config.yml` → `workflow.edits`); the boundary gates are never negotiable.
+**Gates live at the boundaries, not between every keystroke.** Friction at the gate is the point; friction on every edit inside a step is not. Within a REQ's **blast radius** — its own worktree/branch and the files its tasks name — the implementer edits freely. At the *edge* of that radius it stops and surfaces: files no task named, new top-level dependencies, schema or data migrations, anything touching auth, security, or secrets. "Smooth inside, hard stop at the line." How much in-step friction you want is yours to set (`config.yml` → `workflow.edits`); the gates are never negotiable.
 
-**Applies when:** Hitting any phase gate, completing any review pass, encountering a failure mid-phase, finishing any artifact that needs to be acted on, or deciding whether an edit is inside the REQ's blast radius or crossing its edge.
+**Applies when:** Hitting any gate, completing any review pass, encountering a failure mid-step, finishing any artifact that needs to be acted on, or deciding whether an edit is inside the REQ's blast radius or crossing its edge.
 
 ---
 
-## 2. Spec First, Code Second
+## 2. Plan First, Code Second
 
-Never implement without a validated spec. The cheapest bug to fix is one caught in the spec. Thirty minutes of spec review prevents days of rework. If the requirement is ambiguous, stop and clarify — don't guess and ship.
+Never write code without a written plan. The cheapest bug to fix is one caught in the plan. How much plan, and when you approve it, scales with the risk: **Hard** work gets a full spec and design that you approve before any code exists; **Easy/Medium** work gets a short plan (goal, 1–3 acceptance criteria, the files to touch) written first and approved together with the result. Risk decides the path, never diff size — anything sensitive, unclear or wide is Hard. If the requirement is ambiguous, stop and clarify — don't guess and ship.
 
-**Applies when:** Starting any feature work, evaluating whether to skip process steps, deciding how much planning is enough.
+**Applies when:** Starting any work, classifying it, evaluating whether to skip process steps, deciding how much planning is enough.
 
 ---
 
@@ -50,11 +50,11 @@ The vault is the system's memory. Treat it that way: index things, link them, ma
 
 ## 5. Process Is Explicit
 
-Skill steps are a protocol, not a guideline. Execute every step literally — invoke the actual skill at each gate, check every sub-bullet, verify every cleanup item. A "small" REQ does not earn a shortcut.
+Skill steps are a protocol, not a guideline. Execute every step literally — check every sub-bullet, verify every cleanup item. The path sets how many steps and gates there are; nothing else does. An Easy REQ gets fewer steps by design, not by skipping any of its own, and "this is really small" never moves Hard work onto the Easy path.
 
 The steps exist because "this step doesn't matter here" is exactly the call people get wrong without noticing. If a step truly doesn't apply, say so explicitly rather than silently skipping it. If you hit a failure, fix the root cause — don't bypass it with `--no-verify`, swallowed exceptions, or commented-out tests. Out-of-scope fixes get filed as follow-up tasks; not quietly dropped.
 
-**Applies when:** Running `/proceed`, `/wrapup`, or any multi-phase skill. Deciding whether a REQ is "too small" for full ceremony. Reaching a gate step and feeling tempted to hand-wave it.
+**Applies when:** Running `/adlc`, `/autopilot`, `/sprint`, or any multi-step skill. Deciding whether a REQ is "too small" for the Hard path. Reaching a gate step and feeling tempted to hand-wave it.
 
 ---
 
@@ -66,7 +66,7 @@ A well-framed choice is faster to answer and produces a better decision than an 
 
 **Tool mapping:** on Claude, use the `AskUserQuestion` tool. On assistants without a structured-question UI, present the same options as a short numbered list inline in chat. Either way: discrete options, a recommendation, and room for the user to go off-menu.
 
-**Applies when:** Any phase gate, any mid-phase clarification, a decision-maker HALT handed back to the user, init/setup choices, or any moment you'd otherwise ask the user an open question.
+**Applies when:** Any gate, any mid-step clarification, a decision-maker HALT handed back to the user, init/setup choices, or any moment you'd otherwise ask the user an open question.
 
 ---
 

@@ -1,4 +1,4 @@
-<!-- ADLC template — merge-checklist.md. Read at /wrapup step 5, never at preflight.
+<!-- ADLC template — merge-checklist.md. Read at ship.md §3, never at preflight.
      Placeholders in <angle brackets> are substituted when the checklist is written.
      Both post-merge cleanup blocks are carried here; the written file keeps only the
      one matching pipeline-state.isolation. Safe to customize per project: merge
@@ -10,7 +10,7 @@ You run these. Claude does not.
 
 ## Pre-merge
 
-- [ ] Fetch first, if you didn't before `/wrapup` — the lesson dedup compared against `origin/<base-branch>` as it was on this machine; a stale fetch weakens it:
+- [ ] Fetch first, if you didn't before the ship step — the lesson dedup compared against `origin/<base-branch>` as it was on this machine; a stale fetch weakens it:
       `git -C <workPath> fetch origin`
 - [ ] Push the branch:
       `git -C <workPath> push -u origin <branch>`

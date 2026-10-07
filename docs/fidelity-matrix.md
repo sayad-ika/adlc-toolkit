@@ -17,7 +17,7 @@ All five assistants converged on the same three primitives — a memory/context 
 
 | Capability | Claude | Cursor | Copilot | Codex | Gemini |
 |---|---|---|---|---|---|
-| Slash commands (`/spec` etc.) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Slash commands (`/adlc` etc.) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Auto-loaded project memory | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Isolated sub-agents | ✅ | ⚠️ inline | ✅ | ✅ | ✅ |
 | **Reviewer read-only on source** | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction | ⚠️ instruction |
@@ -35,7 +35,7 @@ All five assistants converged on the same three primitives — a memory/context 
 
 **Inline agents on Cursor.** Cursor has no sub-agent process, so the reviewer/explorer/implementer roles run sequentially inside the main session. The generated `adlc-agent-*` command files let you invoke a role on demand, and the orchestration stubs instruct the main agent to run each role's checklist in its own pass. You lose isolation (each role sees the others' context) but keep the substance.
 
-**Vault budgets.** Every adapter carries the budgets as protocol: `/wrapup` rotates `hot.md` and keeps `now.md` to its table, `/status` prints the strip, `/config budgets` repairs drift. Only Claude Code has a hook surface that can refuse a write, so only there is a budget a guarantee rather than an instruction. On the other tools, run `/status` and act on `⚠`.
+**Vault budgets.** Every adapter carries the budgets as protocol: the ship step rotates `hot.md` and keeps `now.md` to its table, `/status` prints the strip, `/config budgets` repairs drift. Only Claude Code has a hook surface that can refuse a write, so only there is a budget a guarantee rather than an instruction. On the other tools, run `/status` and act on `⚠`.
 
 **Per-agent model tier.** Claude/Codex/Gemini/Copilot can assign a cheaper model to the recon pass and a stronger one to implementation. Cursor uses one model for the session. Tier defaults live in `core/manifest.json` → `tierToModel` and are overridable in `.adlc/config.yml`.
 
@@ -49,7 +49,7 @@ All five assistants converged on the same three primitives — a memory/context 
 
 ## External sources (issues / designs)
 
-Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugfix` can **seed** a draft from a tracker issue and `/architect` from a design frame; `/wrapup` and `/bugfix` Phase 5 can optionally **write back** (gated). The *service* is fixed at `/init`; the *mechanism* — how a skill reaches that service — is auto-resolved at runtime, first that works wins. This degrades gracefully: with no mechanism available, the skill says so in one line and you author the artifact manually, exactly as a project with no integrations always has.
+Optional. When `.adlc/config.yml` declares a `sources` block, `/adlc` can **seed** its plan from a tracker issue and the Hard design step from a design frame; the ship step can optionally **write back** (gated). The *service* is fixed at `/init`; the *mechanism* — how a skill reaches that service — is auto-resolved at runtime, first that works wins. This degrades gracefully: with no mechanism available, the skill says so in one line and you author the artifact manually, exactly as a project with no integrations always has.
 
 | Mechanism | What it needs | Typical availability |
 |---|---|---|
@@ -59,10 +59,10 @@ Optional. When `.adlc/config.yml` declares a `sources` block, `/spec` and `/bugf
 
 | Capability | Notes |
 |---|---|
-| Read-seed (`/spec`, `/bugfix`, `/architect`) | First-class wherever any one mechanism resolves. The same resolver serves `/spec` and `/bugfix`. |
-| Write-back (`/wrapup`, `/bugfix` P5) | Off unless `sources.write` lists the service. Always drafted to `source-writeback.md` and sent only on approval. Under `/autopilot`, additionally capped by `autonomy.sources`. External writes always stop for your explicit OK. |
+| Read-seed (`/adlc` plan, Hard design step) | First-class wherever any one mechanism resolves. One resolver serves features and bugs. |
+| Write-back (ship step) | Off unless `sources.write` lists the service. Always drafted to `source-writeback.md` and sent only on approval. Under `/autopilot`, additionally capped by `autonomy.sources`. External writes always stop for your explicit OK. |
 
-Bottom line, as everywhere else on this page: integrations only ever **add** convenience. The self-contained, no-integrations pipeline always works; a missing CLI, unattached MCP, or unreachable URL never blocks a phase — it just means you type the draft yourself.
+Bottom line, as everywhere else on this page: integrations only ever **add** convenience. The self-contained, no-integrations pipeline always works; a missing CLI, unattached MCP, or unreachable URL never blocks a step — it just means you type the draft yourself.
 
 ## Notes on accuracy
 

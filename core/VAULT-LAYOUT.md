@@ -30,7 +30,7 @@ A vault holds all of these at once, forever. Which one a *new* folder gets is se
 | 2 | `specs/_archive/REQ-042-slug/` | archived, from a flat vault |
 | 4 | `specs/_archive/2026-08/sf/REQ-042-slug/` | archived, from a partitioned vault |
 
-`bugs/` takes the same four shapes. `bugs/_archive/` does not exist yet — `/bugfix` has no `merged` terminal state to hang it on.
+`bugs/` takes the same four shapes. `bugs/_archive/` mirrors `specs/_archive/`: a merged bug archives to the same tail under it (`core/paths/ship.md` → On merged).
 
 `sprints/` is month-only, no author segment:
 
@@ -137,7 +137,7 @@ ls .adlc/knowledge/lessons/ | sed -n 's/^LESSON-<WORK_ID>-\([0-9][0-9]*\)-.*/\1/
 
 **Legacy IDs.** Vaults created before this grammar hold `LESSON-NNN-<slug>.md` files with `^LNN` anchors. They are frozen as-is — never renumbered, never renamed, and the sequence is never continued. The first lesson promoted after the toolkit update uses the new grammar. The two forms cannot collide (`LESSON-042` vs `LESSON-REQ-042-1`), and both resolve the same way: by filename stem. Same rule as `layout.partition` — both shapes stay readable forever, so there is no migration and no sweep.
 
-**The ledger.** `knowledge/lesson-ledger.md` is a generated one-row-per-lesson table (ID · Title · Tags · Severity · REQ) rebuilt from the lesson files' header lines by every skill that writes a lesson (`/wrapup`, `/task`, `/bugfix`, `/recover`) and by `/config migrate`. It is never hand-edited and carries `merge=union` in `.gitattributes`: a union merge may leave a duplicated row, and the next rebuild removes it. It is the index; `index.md` only links to it. Lesson grammar is **not** in `core/manifest.json → layout` — that block describes the work-record trees, and nothing in `scripts/adlc.mjs` parses lesson IDs. Keep it that way.
+**The ledger.** `knowledge/lesson-ledger.md` is a generated one-row-per-lesson table (ID · Title · Tags · Severity · REQ) rebuilt from the lesson files' header lines by every skill that writes a lesson (the ship step and `/recover`) and by `/config migrate`. It is never hand-edited and carries `merge=union` in `.gitattributes`: a union merge may leave a duplicated row, and the next rebuild removes it. It is the index; `index.md` only links to it. Lesson grammar is **not** in `core/manifest.json → layout` — that block describes the work-record trees, and nothing in `scripts/adlc.mjs` parses lesson IDs. Keep it that way.
 
 ## `enumerate(active | archived)` → `<REQ_PATH>` list
 
@@ -150,7 +150,7 @@ find .adlc/specs -maxdepth 4 -type d -name 'REQ-*' -not -path '*/_archive/*'
 **The sentinel is the name, not a file inside the folder.** Both obvious alternatives are broken:
 
 - `pipeline-state.json` is gitignored, so on a teammate's fresh clone every folder looks empty and the enumerate returns nothing.
-- `requirement.md` doesn't exist in bug folders — `/bugfix` writes `bug.md`. A `requirement.md` sentinel finds zero bugs, permanently.
+- `requirement.md` doesn't exist in bug folders — a bug writes `bug.md`. A `requirement.md` sentinel finds zero bugs, permanently.
 
 Take the display ID from the REQ folder's basename. Under a partitioned vault, the child of `specs/` is a month (`2026-08`), not an ID.
 
@@ -216,6 +216,6 @@ grep -rn "\.adlc/specs/REQ-\|\.adlc/bugs/BUG-\|\.adlc/specs/_archive/REQ-" \
 
 Clean means the centralization still holds.
 
-It matches on the **consumption** form — the `.adlc/` prefix — deliberately. A path being *used* always carries that prefix, so this catches exactly the regression that matters. A bare `specs/REQ-042-slug` with no prefix is a *description* of a shape, which is legitimate in three places and nowhere else: the mint steps in `/spec` and `/task` (they define the shape, so they must state it), this file, and user-facing comments in `config-template.yml`. `dist/` and `adapters/` are generated — rebuild rather than editing them.
+It matches on the **consumption** form — the `.adlc/` prefix — deliberately. A path being *used* always carries that prefix, so this catches exactly the regression that matters. A bare `specs/REQ-042-slug` with no prefix is a *description* of a shape, which is legitimate in three places and nowhere else: the mint rule in `core/PREFLIGHT.md` (it defines the shape, so it must state it), this file, and user-facing comments in `config-template.yml`. `dist/` and `adapters/` are generated — rebuild rather than editing them.
 
 A non-empty result means some file has learned a path again, and the next layout change will cost thirty edits instead of one.

@@ -3,7 +3,7 @@
 //
 // The vault's hot-path files have size budgets (see the vault README, "Size
 // budgets"). Until 1.7.0 nothing enforced them: on a measured vault now.md sat
-// at 68KB against a 1KB budget for two months, loaded at every phase start.
+// at 68KB against a 1KB budget for two months, loaded at every preflight.
 // This hook turns a budget into a refusal. Wire it to four events — see
 // ../README.md — and it does one thing per event:
 //
@@ -155,13 +155,13 @@ function postToolUse(payload, vault) {
     over(BUDGET['CLAUDE.md'], 'CLAUDE.md is the rulebook every session loads. Move explanation and history to README.md or context/, keep the rules.');
   }
   if (/^context\/[^/]+\.md$/.test(vrel) && size > BUDGET['context/*.md']) {
-    over(BUDGET['context/*.md'], `context/*.md are loaded at every phase preflight. Keep the rules reviewers enforce; move rationale and history to ${vrel.replace(/\.md$/, '-rationale.md')} (read on demand). \`/config budgets\` does the split.`);
+    over(BUDGET['context/*.md'], `context/*.md are loaded at every preflight. Keep the rules reviewers enforce; move rationale and history to ${vrel.replace(/\.md$/, '-rationale.md')} (read on demand). \`/config budgets\` does the split.`);
   }
   if (vrel === 'hot.md') {
     let n = 0;
     try { n = lineCount(fp); } catch {}
     if (n > HOT_MAX_LINES) {
-      warn(`hot.md is ${n} lines against a ${HOT_MAX_LINES}-line budget. /wrapup step 4 rotates entries past the budget into hot-archive-<YYYY>.md; if you are in /wrapup, do that now.`);
+      warn(`hot.md is ${n} lines against a ${HOT_MAX_LINES}-line budget. The ship step (core/paths/ship.md §3) rotates entries past the budget into hot-archive-<YYYY>.md; if you are shipping, do that now.`);
     }
   }
   if (/(^|\/)verification\.md$/.test(vrel) && size > BUDGET['verification.md']) {

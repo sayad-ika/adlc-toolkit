@@ -1,6 +1,6 @@
 # Decisions Index
 
-Catalog of all ADRs (architecture decision records). Updated by `/wrapup` when an ADR is accepted, superseded, or rejected.
+Catalog of all ADRs (architecture decision records). Updated by the ship step when an ADR is accepted, superseded, or rejected.
 
 | ID | Title | Status | Decided | Supersedes | Superseded by |
 |---|---|---|---|---|---|

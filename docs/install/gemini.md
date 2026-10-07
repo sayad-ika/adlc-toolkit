@@ -58,8 +58,8 @@ cp ~/code/adlc-toolkit/adapters/gemini/GEMINI.md ~/.gemini/GEMINI.md
 gemini
 > /commands reload     # if you added commands while the CLI was running
 > /init                 → creates .adlc/
-> /spec                 → start a REQ
-> /proceed              → full gated pipeline
+> /adlc <what you want>  → classify, then run the Easy or Hard path
+> /status                → what is in flight
 ```
 
 Direct a single role with `@`, e.g. `@correctness-reviewer review the diff`.
@@ -74,5 +74,5 @@ Direct a single role with `@`, e.g. `@correctness-reviewer review the diff`.
 
 - **Read-only is advisory on Gemini** — the agent stub instructs the model not to edit, but it isn't blocked at the tool layer. Review the diff after a review pass. (See [fidelity matrix](../fidelity-matrix.md).)
 - **`/sprint`** uses Gemini's sub-agents and works as designed.
-- Commands carry `{{args}}`, so `/spec add OAuth login` passes your text through to the protocol.
+- Commands carry `{{args}}`, so `/adlc add OAuth login` passes your text through to the protocol.
 - Command/agent files are pointer stubs reading `.adlc-toolkit/core/...` at runtime — keep the toolkit present at the stamped path.

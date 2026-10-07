@@ -5,7 +5,7 @@
 | ID | ASSUMPTION-{{NN}} |
 | Status | unverified \| confirmed \| disproven |
 | Made | {{DATE}} |
-| Made during | {{REQ_ID}}, {{PHASE}} phase |
+| Made during | {{REQ_ID}}, {{GATE}} step |
 | Owner | who validates this |
 | Check by | {{DATE_OR_EVENT}} |
 

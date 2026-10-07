@@ -1,11 +1,11 @@
 ---
 name: task
-description: "Slim self-triaging pipeline for small changes; escalates to /proceed when large."
+description: "Alias for /adlc --easy — the 2-step, 1-gate path (upgrades to Hard on a risk signal)."
 ---
 
 Toolkit root: .adlc-toolkit
 
-Execute the ADLC **task** protocol — defined in `.adlc-toolkit/core/skills/task.md` — against the `.adlc/` vault in the current repository.
+This is an alias: execute the ADLC **adlc** protocol — defined in `.adlc-toolkit/core/skills/adlc.md` — as if invoked with `--easy` before the user's arguments, against the `.adlc/` vault in the current repository.
 
 Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load `.adlc-toolkit/ETHOS.md`).
 
@@ -13,6 +13,6 @@ Read that file in full and follow **every step literally**. It is a protocol, no
 
 **Gate:** this skill ends in an approval gate. Stop and wait for the user's explicit approval before anything proceeds past it. Do not auto-fix-and-continue on a gate failure — surface what failed and wait.
 
-This skill dispatches sub-agents (codebase-explorer, task-implementer, correctness-reviewer, reflector, ui-reviewer). Run them as subagents and consolidate their reports.
+This skill dispatches sub-agents (codebase-explorer, architecture-adversary, task-implementer, correctness-reviewer, quality-reviewer, architecture-reviewer, reflector, ui-reviewer). Run them as subagents and consolidate their reports.
 
-**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that phase's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.
+**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that step's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.

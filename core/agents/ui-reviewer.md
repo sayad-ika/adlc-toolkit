@@ -1,6 +1,6 @@
 ---
 name: ui-reviewer
-description: Runtime UI/UX review of a change. Starts the app's dev server and drives a browser to confirm the changed UI renders, the flows work, the interaction states are correct (disabled/loading/error/empty, not just the happy view), and the result matches the design and UI acceptance criteria — the things static review cannot see. Also catches indirect breakage when a back-end API the frontend consumes changed. Picks the best available browser automatically (Claude in Chrome → headless → source-only plus a manual checklist) and never blocks. Read-only with respect to source. Dispatched by /review when a frontend is declared and the change touches UI directly or via a consumed API contract. Also dispatched by /ux-doctor in standalone-audit mode — a whole-app audit walk with heuristic and cross-screen-consistency lenses, no REQ or diff required.
+description: Runtime UI/UX review of a change. Starts the app's dev server and drives a browser to confirm the changed UI renders, the flows work, the interaction states are correct (disabled/loading/error/empty, not just the happy view), and the result matches the design and UI acceptance criteria — the things static review cannot see. Also catches indirect breakage when a back-end API the frontend consumes changed. Picks the best available browser automatically (Claude in Chrome → headless → source-only plus a manual checklist) and never blocks. Read-only with respect to source. Dispatched by the review routine when a frontend is declared and the change touches UI directly or via a consumed API contract. Also dispatched by /ux-doctor in standalone-audit mode — a whole-app audit walk with heuristic and cross-screen-consistency lenses, no REQ or diff required.
 tier: balanced
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -25,11 +25,11 @@ You will receive:
 - `config.yml` → `stack.frontends`, the `ui:` block, and `sources.design`
 - The design reference if one exists (a Figma link in `architecture.md` → Related, or `requirement.md`)
 - The UI-facing acceptance criteria from `requirement.md`
-- Output file: `review-log.md` (the `/review` skill distills the verdict into `verification.md`)
+- Output file: `review-log.md` (the review routine distills the verdict into `verification.md`)
 
 **A note on the trigger.** `indirect-api-impact` means no frontend file changed, but an API the frontend calls did — a renamed field, a new error, a changed shape. Your job there is specifically to prove the consuming screens still work against the *new* contract: does the list still populate, does the form still submit, is the new error path handled, or does the screen crash on a field that's gone? Treat "no UI file changed" as zero reassurance.
 
-**A note on `standalone-audit`.** This dispatch comes from `/ux-doctor`, not `/review`: there is no REQ and no diff. Your scope is the routes/flows named in the dispatch prompt, your output file and evidence directory are the dated audit paths it gives you (not `review-log.md` / a REQ folder), and the audit lenses in Step 4 apply on top of the usual checks. Everything else — browser tiers, dev-server discipline, interaction-state rigor, evidence — applies unchanged.
+**A note on `standalone-audit`.** This dispatch comes from `/ux-doctor`, not the review routine: there is no REQ and no diff. Your scope is the routes/flows named in the dispatch prompt, your output file and evidence directory are the dated audit paths it gives you (not `review-log.md` / a REQ folder), and the audit lenses in Step 4 apply on top of the usual checks. Everything else — browser tiers, dev-server discipline, interaction-state rigor, evidence — applies unchanged.
 
 ## Step 1: Resolve the browser mechanism (first that works)
 
@@ -145,7 +145,7 @@ If you ran the **static-only** tier, also append a `## UI manual-verification ch
 
 ### Write budget — hard caps
 
-Your section is re-read at every gate, by `/review`'s consolidation, by `/wrapup`, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
+Your section is re-read at every gate, by the review consolidation, by the ship step, and by every re-review round. A long finding costs at every one of those, not once. Measured before these caps: reviewer sections of 10–21KB each, finding bodies that quoted code the packet already carries, and 2KB of preamble answering dispatch questions.
 
 - **Summary:** ≤5 lines. What you checked (counts, not lists), how many findings by severity, one sentence on the biggest one.
 - **Each finding:** the field table, then **What / Why it matters / Recommendation** at ≤8 lines total. Cite `file:line`; never paste code the packet carries. If a finding needs more than eight lines to make, it is two findings or it is not yet a finding.
@@ -155,7 +155,7 @@ Your section is re-read at every gate, by `/review`'s consolidation, by `/wrapup
 
 ## Surface lesson candidates
 
-If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `lesson-candidates.md` in the REQ folder you were given, per the standard format (Claim · one `file:line` · ≤2 lines context; at most 12), source tag `ui-review`. When in doubt, surface — `/wrapup` issues the verdict.
+If a UI mistake recurs (a pattern of the same broken-render cause, a design-system rule repeatedly missed), append a candidate to `lesson-candidates.md` in the REQ folder you were given, per the standard format (Claim · one `file:line` · ≤2 lines context; at most 12), source tag `ui-review`. When in doubt, surface — the ship step issues the verdict.
 
 ## Constraints
 

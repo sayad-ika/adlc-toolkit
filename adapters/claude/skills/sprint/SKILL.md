@@ -1,6 +1,6 @@
 ---
 name: sprint
-description: "Parallel multi-REQ orchestrator (gate-pause; queue adjudication via autonomy.gates)."
+description: "Parallel multi-REQ orchestrator. One pipeline-runner per REQ in its own worktree, each running its classified path (Easy or Hard) and pausing at every gate; you keep one queue of waiting gates across all REQs. Who clears the queue follows autonomy.gates — the user (manual, default), the user with a decision-maker recommendation (assisted), or the decision-maker with only exceptions surfacing (auto)."
 ---
 
 Toolkit root: .adlc-toolkit
@@ -13,4 +13,4 @@ Read that file in full and follow **every step literally**. It is a protocol, no
 
 This skill dispatches sub-agents (pipeline-runner, decision-maker). Run them as subagents and consolidate their reports.
 
-**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that phase's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.
+**Git policy:** follow `git.mode` in `.adlc/config.yml` (default `manual`). `manual` — never run git writes; read git state and draft commit/PR artifacts for the user. `commit` / `commit+push` — you may commit (and push, fast-forward only) the REQ's own feature branch once that step's gate is approved. Never a protected branch, force-push, history rewrite, branch delete, `gh pr create`/`gh pr merge`, or `--no-verify` — in any mode.

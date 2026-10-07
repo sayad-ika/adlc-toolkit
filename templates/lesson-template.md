@@ -42,8 +42,8 @@ What breaks if this lesson isn't applied. Concrete consequences — bugs, perf r
 
 Concrete steps. When should the architect agent surface this lesson? What should task-implementer do differently?
 
-- During `/architect`: check for new compound `where` clauses in queries.
-- During `/implement`: if adding a query with multiple `where` clauses on the same collection, add the index to `firestore.indexes.json` in the same task.
+- During design: check for new compound `where` clauses in queries.
+- During build: if adding a query with multiple `where` clauses on the same collection, add the index to `firestore.indexes.json` in the same task.
 
 ### When this doesn't apply
 

@@ -48,8 +48,8 @@ In Copilot Chat:
 
 ```
 /init        → creates .adlc/
-/spec        → start a REQ
-/proceed     → full gated pipeline
+/adlc <what you want>  → classify, then run the Easy or Hard path
+/status                → what is in flight
 ```
 
 Prompt files appear as `/`-commands. To run a review with isolated roles, switch to (or hand off to) the `correctness-reviewer` / `quality-reviewer` / `architecture-reviewer` / `reflector` custom agents.
@@ -64,6 +64,6 @@ Prompt files appear as `/`-commands. To run a review with isolated roles, switch
 ## Notes
 
 - **Read-only reviewers** are enforced by each agent's tool set — the reviewer agents are not granted edit tools. Confirm tool grants in the agent picker if your org customizes them.
-- **`/sprint`** uses sequential handoffs rather than true parallelism — correct, not concurrent. `/proceed` works fully.
+- **`/sprint`** uses sequential handoffs rather than true parallelism — correct, not concurrent. `/adlc` works fully.
 - Prompt/agent files are pointer stubs that read `core/...` from the toolkit at runtime. A global install stamps the toolkit's **absolute** path, so keep the toolkit where you cloned it (don't move it after installing — just re-run the installer if you do).
 - Tool/agent frontmatter keys vary slightly across Copilot host IDEs; if an agent isn't picked up, check that IDE's custom-agent docs and adjust the emitter in `scripts/adlc.mjs build`.

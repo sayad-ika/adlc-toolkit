@@ -1,8 +1,8 @@
 # Instructions for Claude (how this vault works)
 
-This file is the **rulebook** for the `.adlc/` vault: what's authoritative, the vault's conventions, and the lines never crossed. The running skill carries each phase's full protocol — this file doesn't repeat it.
+This file is the **rulebook** for the `.adlc/` vault: what's authoritative, the vault's conventions, and the lines never crossed. The running skill carries each step's full protocol — this file doesn't repeat it.
 
-Edit it when project-wide rules change, never for a single REQ. Budget: under 5KB — it loads at every phase entry.
+Edit it when project-wide rules change, never for a single REQ. Budget: under 5KB — it loads at every preflight.
 
 ## Identity
 
@@ -53,7 +53,7 @@ When two sources disagree, **stop and surface the contradiction**. Never silentl
 
 ## How the pipeline writes here
 
-Each phase writes into the REQ's own folder — flat under `specs/`, or bucketed by month and author (`config.yml` → `layout.partition`) — and pauses at a gate: a chat prompt plus a `.awaiting-approval` marker there, deleted on approval. Full artifact map: each phase skill and the vault [[README]]. On `/proceed --revert`, captured lessons are kept with a retraction banner, never deleted.
+`/adlc` runs each piece of work on one of two paths — Easy/Medium (2 steps, 1 gate) or Hard (3 steps, 3 gates). Every step writes into the REQ's own folder — flat under `specs/`, or bucketed by month and author (`config.yml` → `layout.partition`) — and every gate is a chat prompt plus a `.awaiting-approval` marker there, deleted on approval. Full artifact map: the vault [[README]]. On `/adlc --revert`, captured lessons are kept with a retraction banner, never deleted.
 
 ## When to write to the vault
 

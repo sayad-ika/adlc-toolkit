@@ -1,6 +1,6 @@
 # Quickstart
 
-The ADLC toolkit gives any AI coding assistant a **spec-driven pipeline with a human approval gate at every phase**. It works with Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI, on macOS, Windows, and Linux.
+The ADLC toolkit gives any AI coding assistant a **plan-first pipeline that sizes its ceremony to the risk — one human gate for easy work, three for hard**. It works with Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI, on macOS, Windows, and Linux.
 
 This page gets you from install to your first approved piece of work in four steps. For tool-specific detail, see the [per-tool install guides](install/).
 
@@ -9,7 +9,7 @@ This page gets you from install to your first approved piece of work in four ste
 - **REQ** — one tracked unit of work (a *requirement*), e.g. `REQ-014`. Bugs get `BUG-NNN`.
 - **gate** — a pause where the pipeline stops and waits for your approval before continuing.
 - **vault** — the `.adlc/` folder in your repo: the specs, decisions, and lessons the pipeline maintains.
-- **phase** — one of five steps a REQ moves through: spec → architect → implement → review → wrap up.
+- **path** — how much ceremony a REQ gets. `/adlc` classifies it: **Easy/Medium** is 2 steps (do → check & ship) with 1 gate; **Hard** is 3 steps (design → build & verify → ship) with a gate after each.
 - **agent** — a focused sub-assistant (a reviewer, an explorer, an implementer) the pipeline dispatches.
 - **blast radius** — the full set of files and modules a change touches, directly or indirectly.
 - **ADR** — an *architecture decision record*: a short note capturing a decision, its context, and its consequences.
@@ -88,10 +88,16 @@ It creates `.adlc/`, scans existing docs (README, ARCHITECTURE, CONTRIBUTING, li
 ### 4. Run your first REQ
 
 ```
-/spec      → approve → /architect → approve → /implement → approve → /review → approve → /wrapup → approve
+/adlc add a CSV export button to the reports page
+→ Easy/Medium: ~2 files in src/reports, no sensitive area   (say "hard" to switch)
 ```
 
-Or run the whole thing with `/proceed`. Each gate pauses for your approval. For bugs, use `/bugfix`; for a small change, `/task` runs a slim two-gate pipeline that still records a REQ (and escalates to `/proceed` if it turns out large).
+`/adlc` classifies the request, says which path it picked and why, and runs it:
+
+- **Easy/Medium** — it writes a short plan, makes the change, runs the tests and a review, drafts the PR, then stops at **one** gate.
+- **Hard** — it stops at **three** gates: after the design (before any code), after build & review, and at ship.
+
+It works the same for bugs (`/adlc the cart crashes when…` or `/adlc --bug`). If easy work turns out risky mid-flight, it stops and offers to upgrade to Hard — nothing is lost. `/proceed`, `/task` and `/bugfix` still work, as aliases for `--hard`, `--easy` and `--bug`.
 
 ## Changing settings
 

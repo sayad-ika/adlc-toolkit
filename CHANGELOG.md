@@ -4,6 +4,26 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [2.0.0] — unreleased
+
+### Two paths, at most three steps — the pipeline sizes its ceremony to the risk **[breaking]** **[protocol]** **[vault-format]**
+
+A REQ used to take five phase skills, ~71 protocol steps and five gates, whatever its size; `/task` and `/bugfix` were separate pipelines with their own copies of the same review and wrap-up logic. Now there is one entry point, `/adlc`, which classifies the work and runs one of two paths. No skill or path has more than three steps.
+
+- **`/adlc` classifies first, in about a minute, with no agent call.** **Hard** if it touches a sensitive area (`autonomy.hard_stops`: auth, security, secrets, payments, migrations, public API, irreversible), needs a new ADR, spans more than ~5 files / 2 modules / one repo, has more than 3 acceptance criteria, is unclear enough to need design, or is a bug with no repro or unknown cause. Otherwise **Easy/Medium**. Risk wins over size. It prints one line saying which and why; the user can switch.
+- **Easy/Medium — 2 steps, 1 gate** (`core/paths/easy.md`): **Do** (short plan → change → tests; bugs get a mandatory regression test) → **Check & ship** (correctness-reviewer, + UI and reflector when they apply; PR, lessons, vault; one gate). It stops and offers to **upgrade to Hard** the moment a risk signal appears; nothing is lost. There is no gate before code on this path — that is the deliberate trade, and the reason anything risky is routed to Hard.
+- **Hard — 3 steps, 3 gates** (`core/paths/hard.md`): **Design** (spec + architecture + tasks, explorer and adversary, gate) → **Build & verify** (task DAG in parallel tiers, full four-to-five-reviewer pass, gate) → **Ship** (gate). The old implement gate is folded into the build gate.
+- **Bookkeeping stopped counting as steps.** `core/PREFLIGHT.md` holds setup once (rules, vault basics, REQ identity, work path, blast radius, state schema) and is skipped when already loaded — previously ~27 near-identical preflight items per Hard REQ. GATE-PROTOCOL gains **Open a gate** / **Close a gate**, replacing the update-state / write-marker / emit-card / clearance steps every phase repeated. Review and ship are shared routines (`core/paths/review.md`, `core/paths/ship.md`) used by both paths.
+- **Every other skill re-stepped to ≤3:** init 14→3, recover 5→2, analyze and optimize 6→2, status 7→1, toolkit-update 5→2, ux-doctor 7→3, autopilot and sprint 3 each, task-implementer 5→2. Pipeline protocol text went from ~2,350 lines across eight skills to ~400 across one skill and four path files.
+- **ETHOS principles 2 and 5 are reworded to match.** "Spec first" becomes **plan first**: Hard work's plan is approved before code; Easy work's plan is written first and approved with the result. "A small REQ does not earn a shortcut" becomes: the path sets the steps; nothing else does.
+- **Bugs archive now.** A merged bug gets the same archive offer as a REQ (`bugs/_archive/` + the same tail).
+
+**On update [breaking]:**
+- `/spec`, `/architect`, `/implement`, `/review` and `/wrapup` are **removed**. `/proceed`, `/task` and `/bugfix` remain as alias stubs for `/adlc --hard`, `--easy` and `--bug` (new manifest field `alias` + `args`; the generator emits the stub). A `local/` override of a removed skill no longer has anything to shadow — `toolkit-update` flags it.
+- `pipeline-state.json` gains `path`, `step` and `gate`; `currentPhase` / `completedPhases` / `currentPhaseGate` are gone. **Old REQs map themselves** the first time `/adlc` reads them (phases 1–2 → design, 3–4 → build, 5 → ship, `path: hard`; `kind: task` → `path: easy`) — see PREFLIGHT → Legacy state. The statusline and gate notifier read both shapes.
+- `autopilot --until` takes `design` or `build` instead of a phase name. The decision-maker judges `design` / `build` / `ship` gates (Easy has only `ship`).
+- Run `node scripts/adlc.mjs sync --tool=all` to drop the removed stubs and link `/adlc`.
+
 ## [1.8.0] — unreleased
 
 ### Team-safe lessons — IDs that can't collide, a ledger that can't conflict, a dedup that looks past your branch **[protocol]** **[vault-format]**

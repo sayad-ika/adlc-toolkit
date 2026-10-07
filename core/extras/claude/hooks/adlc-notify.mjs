@@ -10,7 +10,9 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
+// 2.0 state carries path + gate; pre-2.0 state carries currentPhase until /adlc rewrites it.
 const PHASE = { 1: 'spec', 2: 'architect', 3: 'implement', 4: 'review', 5: 'wrap up' };
+const label = (st) => (st.gate ? `${st.path || ''} ${st.gate}`.trim() : PHASE[st.currentPhase] || '');
 
 // Work folders may sit flat (specs/REQ-042-x/) or bucketed by month and author
 // (specs/2026-08/sf/REQ-042-x/), and one vault can hold both — see
@@ -33,7 +35,7 @@ function collect(root, depth, waiting) {
       let phase = '';
       try {
         const st = JSON.parse(readFileSync(join(folder, 'pipeline-state.json'), 'utf8'));
-        phase = PHASE[st.currentPhase] ? ` (${PHASE[st.currentPhase]})` : '';
+        phase = label(st) ? ` (${label(st)})` : '';
       } catch {}
       waiting.push(`${e.name}${phase}`);
       continue;

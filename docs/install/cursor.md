@@ -65,20 +65,20 @@ In Cursor's chat/agent input, type `/` and pick a command:
 
 ```
 /init        → creates .adlc/
-/spec        → start a REQ
-/proceed     → full gated pipeline
+/adlc <what you want>  → classify, then run the Easy or Hard path
+/status                → what is in flight
 ```
 
 The `/adlc-agent-*` commands let you run a single role (e.g. a correctness review) on demand.
 
 ## Verify
 
-- Typing `/` lists `init`, `spec`, `architect`, … and the `adlc-agent-*` helpers.
+- Typing `/` lists `init`, `adlc`, `autopilot`, … and the `adlc-agent-*` helpers.
 - `.cursor/rules/adlc.mdc` shows in Settings → Rules as always-applied.
 - After `/init`, `.adlc/` exists.
 
 ## Notes
 
-- **Read-only is advisory here.** During `/review`, the model is instructed not to edit, but Cursor won't block it. Review the diff after a review pass to confirm nothing changed.
-- **`/sprint` runs sequentially** on Cursor (no parallel sub-agents). `/proceed` works fully.
+- **Read-only is advisory here.** During review, the model is instructed not to edit, but Cursor won't block it. Review the diff after a review pass to confirm nothing changed.
+- **`/sprint` runs sequentially** on Cursor (no parallel sub-agents). `/adlc` works fully.
 - Commands are pointer stubs that read `.adlc-toolkit/core/skills/<name>.md` at runtime — keep the toolkit present at the stamped path.
