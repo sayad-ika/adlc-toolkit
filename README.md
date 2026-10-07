@@ -6,6 +6,8 @@ Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**
 
 [`Why ADLC`](#why-adlc) · [`How it works`](#how-it-works) · [`Workflow`](#workflow) · [`Skills`](#skills) · [`Agents`](#agents) · [`Install`](#install) · [`Make it yours`](#make-it-yours) · [`The vault`](#the-vault) · [`Team setup`](#team-setup) · [`Git policy`](#git-policy) · [`Philosophy`](#philosophy)
 
+> **New here?** Read the **[usage guide](docs/1-adlc-toolkit-usage-guide.md)** — which command to use when, how to answer gates, and how to get the most out of the toolkit with the least effort.
+
 ## Why ADLC
 
 AI assistants generate code faster than most teams can responsibly absorb it. The hard part was never the code — it's everything around the code: the spec that says what to build, the review that catches what's wrong, the memory of why decisions were made, the process a whole team can share. ADLC supplies that structure, so the speed is yours to keep:
