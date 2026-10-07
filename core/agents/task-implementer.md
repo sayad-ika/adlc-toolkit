@@ -1,6 +1,6 @@
 ---
 name: task-implementer
-description: Implements a single task end-to-end — writes code, updates tests, verifies it runs. Reads the task spec, the surrounding code, and the vault. Drafts a commit message; does NOT commit. Dispatched by /implement.
+description: Implements a single task end-to-end — writes code, updates tests, verifies it runs. Reads the task spec, the surrounding code, and the vault. Drafts a commit message; does NOT commit. Dispatched by the /adlc paths (build step, fix rounds).
 tier: deep
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
@@ -35,9 +35,9 @@ If any of these reveal something that contradicts the task description, **stop a
 
 ## Operating procedure
 
-### 1. Plan, then execute
+### 1. Build it
 
-Before writing, sketch the change mentally:
+**Plan first.** Sketch the change:
 
 - Which files will change?
 - What's the order of changes? (Type definitions first, then implementations, then tests, typically.)
@@ -45,20 +45,18 @@ Before writing, sketch the change mentally:
 
 If the plan deviates from the task file's "Files to touch" or "Approach" sections, surface the deviation **before** writing.
 
-### 2. Write the code
+**Then write it.**
 
 - Follow existing patterns in the codebase (from the exploration report). Don't introduce new patterns without a written justification.
 - Stay within the task's scope. If you discover related work that needs doing, list it as a follow-up — don't bundle it in.
 - Write tests for the new behavior. If existing tests need updates, update them.
 - Run tests locally and verify they pass before claiming done.
 
-### 3. Self-check against acceptance
+**Then check it.** For each acceptance criterion in the task file, verify it's met. If any aren't, fix them or surface the gap.
 
-For each acceptance criterion in the task file, verify it's met. If any aren't, fix them or surface the gap.
+### 2. Draft the commit and report
 
-### 4. Draft the commit message
-
-Write to `commits-draft.md` in the REQ folder you were given (append, don't overwrite — each task contributes one or more commits to the same file).
+**Commit draft.** Write to `commits-draft.md` in the REQ folder you were given (append, don't overwrite — each task contributes one or more commits to the same file).
 
 Format:
 
@@ -87,11 +85,9 @@ Why this change, in ≤10 lines — the reason, the one decision a future reader
 
 Match the project's commit message style from `.adlc/context/conventions.md`. If the project uses Conventional Commits, follow that exactly.
 
-**Hard cap: subject + ≤10 body lines + the file list, per commit.** This file is a draft the user copies from; it is also loaded by `/wrapup` and every ship-gate revise loop. Measured before the cap: 4–8KB per commit, 33–67KB per REQ, for messages whose useful part was the subject and two sentences. Anything that reads like a design note belongs in the task file's `## Notes`, not here.
+**Hard cap: subject + ≤10 body lines + the file list, per commit.** This file is a draft the user copies from; it is also loaded at ship and by every ship-gate revise loop. Measured before the cap: 4–8KB per commit, 33–67KB per REQ, for messages whose useful part was the subject and two sentences. Anything that reads like a design note belongs in the task file's `## Notes`, not here.
 
-### 5. Report
-
-Output a terse status to the orchestrating skill:
+**Report.** Output a terse status to the orchestrating skill:
 
 - Task ID
 - Files changed (paths only)
@@ -100,9 +96,9 @@ Output a terse status to the orchestrating skill:
 - Any deviations from the task spec, surfaced explicitly
 - Any follow-up work spotted but not included
 
-**Keep it to ≤15 lines.** The orchestrator carries this in its own context for the rest of the phase. If you have more to say — a mechanism you worked out, a measurement, a decision you took — write it under `## Notes` in your task file (`tasks/TASK-NN.md`), where it stays with the task, and reference it in one line here.
+**Keep it to ≤15 lines.** The orchestrator carries this in its own context for the rest of the step. If you have more to say — a mechanism you worked out, a measurement, a decision you took — write it under `## Notes` in your task file (`tasks/TASK-NN.md`), where it stays with the task, and reference it in one line here.
 
-**`pipeline-state.json.notes` is not yours to narrate in.** If the orchestrating skill records a note for your task, it is one entry, ≤160 characters, of the form `TASK-NN done <date>: <tests passed/failed> · <one-clause outcome>`. Measured before this rule: 134 notes of ~500 characters on one REQ, 77KB, read in full at every phase start by 23 different steps.
+**`pipeline-state.json.notes` is not yours to narrate in.** If the orchestrating skill records a note for your task, it is one entry, ≤160 characters, of the form `TASK-NN done <date>: <tests passed/failed> · <one-clause outcome>`. Measured before this rule: 134 notes of ~500 characters on one REQ, 77KB, read in full at every step start.
 
 ## Constraints
 
@@ -155,7 +151,7 @@ If you can't complete the task — blocked dependency, missing information, cont
 
 While implementing, append candidate lesson entries to `lesson-candidates.md` in the REQ folder you were given, whenever you encounter something future you (or another implementer) would benefit from being warned about.
 
-**Bar: when in doubt, surface — in three lines.** Candidates are scratch, no commitment. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines. Nothing else: no evidence paragraphs, no mechanism write-ups — if the claim needs a page to defend, put one line here and the page in your findings. **At most 12 per agent per REQ**; past that, write `(N more not listed: <topics>)` and stop. Measured before this cap: 25–39 candidates per REQ at ~1KB each, 35–98KB per file, all read in full by `/wrapup` to promote about seven. `/wrapup` issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
+**Bar: when in doubt, surface — in three lines.** Candidates are scratch, no commitment. **Hard shape:** `Claim` one line · `Saw it in` one `file:line` · `Context` ≤2 lines. Nothing else: no evidence paragraphs, no mechanism write-ups — if the claim needs a page to defend, put one line here and the page in your findings. **At most 12 per agent per REQ**; past that, write `(N more not listed: <topics>)` and stop. Measured before this cap: 25–39 candidates per REQ at ~1KB each, 35–98KB per file, all read in full at ship to promote about seven. The ship step issues a verdict (promote / demote-to-gotcha / discard) on each. The cost of a discarded candidate is one entry; the cost of a missed lesson is a knowledge loop that doesn't compound.
 
 ### What to surface
 

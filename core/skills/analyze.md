@@ -1,133 +1,37 @@
 ---
 name: analyze
-description: Standalone codebase health audit. Dispatches the health-auditor agent and produces a dated report in .adlc/audits/. No pipeline state, no gates — read-only audit that you run periodically or on demand.
+description: Standalone codebase health audit. Dispatches the health-auditor agent and produces a dated report in .adlc/audits/. No pipeline state, no gates — a read-only audit you run periodically or on demand.
 ---
 
-You are running a codebase health audit. This is **standalone work** — not part of the `/proceed` pipeline. No gates, no pipeline state. Just dispatch the auditor and surface the report.
+You are running a codebase health audit — standalone, no gates, no pipeline state. Setup per `$TOOLKIT_PATH/core/PREFLIGHT.md` §1–2, plus `context/architecture.md` (the auditor checks against it). For a per-change review use `/adlc`; for performance use `/optimize`; for UI and design systems use `/ux-doctor`.
 
-## When to use
+**Inputs** (offer the default once if none given): **scope** (path/glob; default whole repo minus generated, vendored and build output) · **depth** `quick` (top 10) · `standard` (top 30, default) · `thorough` · **focus** any of `dead-code, complexity, coverage, convention, duplication, deps, docs, vault` (default all). Scope with no source files → say so and stop. A `health-*.md` under 30 days old → offer it instead of a new run.
 
-- Periodic health check (weekly, monthly, before a planning cycle)
-- Before kicking off a tech-debt sprint
-- After onboarding a new team member who'll need to understand current debt
-- When the codebase "feels heavy" and you want a concrete inventory
+## Step 1 — Audit
 
-## When NOT to use
-
-- Per-REQ review — that's `/review`'s job, scoped to a specific diff
-- Performance / cost issues — use `/optimize` instead (different agent, different findings shape)
-- UI/UX and design-system issues — use `/ux-doctor` instead (static + runtime passes over the UI, different agents)
-
-## Inputs
-
-Optional arguments:
-
-- **Scope** — path or glob. Default: whole repo, excluding generated code, vendored deps, build artifacts.
-- **Depth** — `quick` (top 10 findings), `standard` (top 30, the default), `thorough` (everything material).
-- **Focus** — comma-separated categories to emphasize: `dead-code`, `complexity`, `coverage`, `convention`, `duplication`, `deps`, `docs`, `vault`. Default: all.
-
-If the user doesn't provide arguments, ask once whether they want the default (`standard`, whole repo, all categories) or to customize.
-
-## Preflight
-
-1. **Read the toolkit ETHOS.**
-1a. **Read the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md`) — the path grammar for `specs/`, `bugs/`, and `sprints/`. This skill resolves and lists work folders, and a vault may hold flat and bucketed folders at the same time. Never hard-code a path under those trees; use its `resolve` / `enumerate` rules.
-2. **Load vault context.** `.adlc/CLAUDE.md`, `config.yml`, `context/conventions.md`, `context/architecture.md`. The auditor needs to know the rules it's checking against.
-3. **Verify auditable scope exists.** Check that the scope path has source files. If empty, surface and stop.
-4. **Check for prior audits.** Read `.adlc/audits/health-*.md`. If a recent one exists (<30 days), surface it and ask whether the user wants a new run or to just look at the recent one.
-
-## Steps
-
-### 1. Dispatch health-auditor
+Dispatch `health-auditor` by exact name (missing → stop: run the toolkit sync):
 
 ```
-Repo: <repo-root>
-Scope: <scope-path or "whole repo">
-Depth: quick | standard | thorough
-Focus: <list>
-
-Run the codebase health audit per your skill instructions.
+Repo: <root> · Scope: <scope> · Depth: <depth> · Focus: <list>
 Write the report to: .adlc/audits/health-YYYY-MM-DD.md
 ```
 
-### 2. Wait for the report
+Check the report has Summary, Findings by severity, Detailed findings, Vault health, Trends, Recommendations. An error or empty result is reported as such — never fill the gap yourself.
 
-The auditor agent writes the dated report. Verify it exists and has the expected sections (Summary, Findings by severity, Detailed findings, Vault health, Trends, Recommendations).
+## Step 2 — Compare, log, report
 
-If the agent reports an error or empty findings, surface that — don't fake content.
-
-### 3. Compare against prior audits
-
-If prior audit reports exist, do a quick diff:
-
-- New findings since last audit
-- Findings that have been resolved (or stale findings that should be re-checked)
-- Trend direction (more, fewer, the same)
-
-Append a **Trends** subsection to the report if not already present.
-
-### 4. Update hot.md
-
-Append:
-
-```markdown
-## [YYYY-MM-DD] audit-health | <count> findings (<critical>C/<major>M/<minor>m) | depth: <depth>
-```
-
-### 5. Update index.md
-
-If audits aren't already indexed, add an "Audits" section to `index.md`:
-
-```markdown
-## Audits
-
-| Date | Type | Critical | Major | Minor | Notes |
-|---|---|---|---|---|---|
-| YYYY-MM-DD | health | N | N | N | <one-line summary> |
-```
-
-### 6. Report to the user
-
-Surface a concise summary in chat:
+- Against the last `health-*.md`: new, resolved, still open, direction. Add a **Trends** section if the auditor didn't.
+- `hot.md`: `## [YYYY-MM-DD] audit-health | <N> findings (<C>C/<M>M/<m>m) | depth: <depth>`. `index.md` → `## Audits` table (create it once): `| date | health | C | M | m | one line |`.
+- In chat:
 
 ```
-Codebase health audit — YYYY-MM-DD
-
-Scope: <scope>
-Depth: <depth>
-Files scanned: <count>
-
-Findings:
-  Critical: <N>  ← <one-line summary if any>
-  Major:    <N>
-  Minor:    <N>
-
-Top 3 things worth fixing first (biggest payoff for the effort):
-  1. <finding> (effort: <small/medium/large>)
-  2. <finding>
-  3. <finding>
-
-Vault health:
-  Footprint: hot path <N>KB · knowledge <N>KB · active specs <N>KB
-  Tiered-loading trigger: knowledge/ at <N>KB of 60KB · <N> of 30 lessons · <N> untagged · <N> near-duplicate pairs
-  <over-budget / stale / dead-reference findings, one line each — or "all within budget">
-
-Trends since last audit (YYYY-MM-DD):
-  Better:  <count> findings resolved
-  Worse:   <count> new findings
-  Still open: <count> findings
-
+Health audit — YYYY-MM-DD · <scope> · <depth> · <N> files
+Findings: <C> critical · <M> major · <m> minor
+Fix first (best payoff for the effort):
+  1. <finding> (effort: small)   2. …   3. …
+Vault: hot path <N>KB · knowledge <N>KB · <N>/30 lessons · <over-budget items or "within budget">
+Since <last date>: <x> resolved · <y> new · <z> still open
 Full report: .adlc/audits/health-YYYY-MM-DD.md
 ```
 
-## Constraints
-
-- **Read-only.** Audit only — Claude does not fix what's found.
-- **Don't open REQs automatically.** If the user wants to act on findings, they invoke `/spec` to draft a REQ from the audit. Don't auto-create that.
-- **Don't update conventions.** If the audit reveals that an undocumented convention is being followed by most of the code, that's a finding category (`convention-gap`) — don't unilaterally write the rule into `conventions.md`.
-- **Never run git mutations.**
-
-## Output artifacts
-
-- `.adlc/audits/health-YYYY-MM-DD.md`
-- Updates to `.adlc/hot.md` and `.adlc/index.md`
+Read-only: never fix, never open a REQ for a finding (the user runs `/adlc` on it), never write a found convention into `conventions.md` (that's a `convention-gap` finding), never a git write.
