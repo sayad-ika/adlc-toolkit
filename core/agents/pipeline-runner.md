@@ -44,7 +44,7 @@ You operate inside an isolated worktree for the entire run. The path is set once
 
 ## Pipeline phases
 
-Execute in order. Update `pipeline-state.json` after each phase. Pause for the user at every gate.
+Execute in order. Update `pipeline-state.json` after each phase. Pause for the user at each gate in `pipeline-state.gates` (set in Phase 1 per GATE-PROTOCOL → Profiles; absent = legacy five).
 
 ### Phase 0 — Setup
 
@@ -66,7 +66,7 @@ Validate inline:
 - Non-goals are listed
 - No ambiguity remains that affects scope or design
 
-Update state: `currentPhase: 1, completedPhases: [0, 1]`. **Gate.** Write the gate marker (see "Gate protocol" below) and emit terminal claim `gate-blocked:spec`.
+Update state: `currentPhase: 1, completedPhases: [0, 1]`. **Gate.** (only if `spec` is in gates; otherwise set gateState "deferred" and continue) Write the gate marker (see "Gate protocol" below) and emit terminal claim `gate-blocked:spec`.
 
 ### Phase 2 — Architect (gate)
 
@@ -84,7 +84,7 @@ Validate inline:
 - Design follows project conventions or deviates with explicit justification
 - Lessons checked are referenced
 
-Update state. **Gate.** Emit terminal claim `gate-blocked:architect`.
+Update state. **Gate.** Emit terminal claim `gate-blocked:architect` (`gate-blocked:plan` when the spec gate was deferred).
 
 ### Phase 3 — Implement (gate)
 
@@ -100,7 +100,7 @@ For each task, follow the `task-implementer` checklist inline:
 5. Append a commit-message draft to `commits-draft.md` — subject + ≤10 body lines + file list per commit; the same hard cap as `task-implementer`.
 6. Surface any lesson candidates to `lesson-candidates.md` per the "Surface lesson candidates" section below (source tag: `implement-task`).
 
-After all tasks: update state. **Gate.** Emit terminal claim `gate-blocked:implement`.
+After all tasks: update state. **Gate.** (only if `implement` is in gates; otherwise set gateState "deferred" and continue) Emit terminal claim `gate-blocked:implement`.
 
 ### Phase 4 — Review (gate)
 
@@ -239,7 +239,7 @@ Your status reports MUST lead with **exactly one** terminal-state tag from the t
 
 | Tag | Required preconditions | Orchestrator response |
 |---|---|---|
-| `gate-blocked:<phase>` | Phase complete; `.awaiting-approval` written; state updated. | Orchestrator surfaces gate to user. |
+| `gate-blocked:<gate>` (a gate name from `gates`) | Phase complete; `.awaiting-approval` written; state updated. | Orchestrator surfaces gate to user. |
 | `merged` | User has reported merge complete. Verified via `gh pr view --json state,mergedAt`. | Orchestrator marks REQ done. |
 | `blocked` | Cannot proceed without human input that's not a gate. State updated with blocker details. | Orchestrator surfaces blocker; halts that REQ. |
 | `failed` | Pipeline failed past automatic recovery. Details in `pipeline-state.json.notes`. | Orchestrator surfaces failure; halts that REQ. |

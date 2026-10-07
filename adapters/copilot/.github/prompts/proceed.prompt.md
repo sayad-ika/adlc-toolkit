@@ -1,5 +1,5 @@
 ---
-description: "Run all five phase skills with gates between."
+description: "Run all five phase skills, pausing at the gates the REQ's profile defines."
 ---
 
 Toolkit root: .adlc-toolkit

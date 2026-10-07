@@ -1,6 +1,6 @@
 # Gate cards — how the pipeline asks for your decision
 
-Every human gate in the ADLC pipeline — the pause at the end of `/spec`, `/architect`, `/implement`, `/review`, `/wrapup`, and inside `/bugfix`, `/task`, and `/autopilot` — presents the same **gate card**: a compact, scannable summary that ends in a decision. This page is the reader's tour; the authoritative spec the skills follow is [`core/GATE-PROTOCOL.md`](../core/GATE-PROTOCOL.md).
+Every human gate in the ADLC pipeline — the pause at the end of `/spec`, `/architect`, `/implement`, `/review`, `/wrapup`, and inside `/bugfix`, `/task`, and `/autopilot` — presents the same **gate card**: a compact, scannable summary that ends in a decision. This page is the reader's tour; the authoritative spec the skills follow is [`core/GATE-PROTOCOL.md`](../core/GATE-PROTOCOL.md). How many gates a REQ gets depends on its profile — see `core/GATE-PROTOCOL.md` → Profiles.
 
 ## The idea
 
@@ -28,7 +28,7 @@ Decision →  the gate's options, each stating what happens next
 
 `READY` / `NEEDS YOU` / `CHECKS` / `MY READ` are a **menu of sections each gate can use, not a fixed form** — each gate uses the ones its phase needs and can rename or add its own. A spec gate is often just verdict + `CHECKS` + decision; a review gate leads with `FINDINGS`; `/wrapup` shows the wrap-up checklist; `/autopilot`'s final review opens with a `RUN SUMMARY`. The order — done, needs you, recommendation, decision — is what never changes.
 
-## Example — the architect gate
+## Example — the architect gate (full profile)
 
 ```
 GATE 2/5 · Architect · REQ-014-payment-retries
@@ -51,6 +51,20 @@ Decision →  approve (move on to implementation) · revise <what> · abort
 ```
 
 Note the task order is shown as **compact text**, not a rendered picture: the card must read cleanly in a plain terminal, where Mermaid doesn't render. The full rendered diagram lives in `architecture.md`, where it renders in Obsidian, GitHub, and IDE preview. That's the rule for diagrams everywhere in the pipeline — see the [diagram conventions](fidelity-matrix.md) and the templates.
+
+## Example — a combined gate (standard profile)
+
+A `standard` REQ folds spec and design into one **Plan** gate: one block per covered phase, each keeping its own CHECKS line.
+
+```
+GATE 1/3 · Plan · REQ-015-export-button
+   spec + design ready — recommend approve
+
+SPEC        ✓ criteria testable · ✓ goal specific · ✓ assumptions explicit · ✓ no design · ✓ non-goals
+READY       architecture.md · 3 tasks in 2 stages · no new ADR
+CHECKS      ✓ criteria covered · ✓ no cycles · ✓ conventions · ✓ tests concrete
+            profile: standard (3 files, no sensitive surface)
+```
 
 ## Markers
 

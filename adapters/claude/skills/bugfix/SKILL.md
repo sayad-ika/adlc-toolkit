@@ -1,6 +1,6 @@
 ---
 name: bugfix
-description: "Slimmer pipeline for bugs."
+description: "Slim pipeline for bugs — Diagnose and Ship gates (+Verify when review finds critical/major)."
 ---
 
 Toolkit root: .adlc-toolkit

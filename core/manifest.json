@@ -1,6 +1,6 @@
 {
   "$comment": "Tool-agnostic catalog of the ADLC toolkit. The build script (scripts/build.mjs) reads this plus the frontmatter of each core/skills/*.md and core/agents/*.md file, then emits per-tool adapter stubs. Only metadata NOT present in the source frontmatter lives here.",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "vaultDir": ".adlc",
   "$layoutComment": "On-disk shape of the work-record trees. The prose contract — resolve/mint/enumerate, the four depths, the gitignore set — lives in core/VAULT-LAYOUT.md. Change both together.",
   "layout": {
@@ -27,7 +27,7 @@
       "phase": 1,
       "gate": true,
       "agents": [],
-      "summary": "Draft + validate a requirement. Phase 1."
+      "summary": "Draft + validate a requirement. Phase 1 (gate in full profile; folds into Plan in standard)."
     },
     {
       "name": "architect",
@@ -43,7 +43,7 @@
       "phase": 3,
       "gate": true,
       "agents": ["task-implementer"],
-      "summary": "Execute the task DAG. Phase 3."
+      "summary": "Execute the task DAG. Phase 3 (folds into Build & Review unless hardStop)."
     },
     {
       "name": "review",
@@ -81,7 +81,7 @@
         "reflector",
         "ui-reviewer"
       ],
-      "summary": "Run all five phase skills with gates between."
+      "summary": "Run all five phase skills, pausing at the gates the REQ's profile defines."
     },
     {
       "name": "autopilot",
@@ -112,7 +112,7 @@
       "category": "pipeline",
       "gate": true,
       "agents": ["codebase-explorer", "task-implementer"],
-      "summary": "Slimmer pipeline for bugs."
+      "summary": "Slim pipeline for bugs — Diagnose and Ship gates (+Verify when review finds critical/major)."
     },
     {
       "name": "task",

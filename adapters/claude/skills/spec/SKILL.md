@@ -1,6 +1,6 @@
 ---
 name: spec
-description: "Draft + validate a requirement. Phase 1."
+description: "Draft + validate a requirement. Phase 1 (gate in full profile; folds into Plan in standard)."
 ---
 
 Toolkit root: .adlc-toolkit

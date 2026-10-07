@@ -11,9 +11,9 @@ Works with **Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI**
 AI assistants generate code faster than most teams can responsibly absorb it. The hard part was never the code — it's everything around the code: the spec that says what to build, the review that catches what's wrong, the memory of why decisions were made, the process a whole team can share. ADLC supplies that structure, so the speed is yours to keep:
 
 <details>
-<summary><b>Nothing ships un-decided</b> — five phases, five human gates</summary>
+<summary><b>Nothing ships un-decided</b> — five phases, gates sized to the risk</summary>
 
-Work moves through spec → architect → implement → review → wrap-up, and each phase ends in a [gate](docs/gate-cards.md) where _you_ approve, redirect, or halt. Gates live at phase boundaries, not between keystrokes — smooth inside, hard stop at the line. The gate is the product, not the overhead.
+Work moves through spec → architect → implement → review → wrap-up, and the work stops at [gates](docs/gate-cards.md) — two to five, by risk: a contained change folds spec+design and build+review into one gate each; anything touching auth, data, or a public contract gets every gate. At each one _you_ approve, redirect, or halt. Gates live at phase boundaries, not between keystrokes — smooth inside, hard stop at the line. The gate is the product, not the overhead.
 
 </details>
 

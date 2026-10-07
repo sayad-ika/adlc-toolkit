@@ -1,9 +1,9 @@
 ---
 name: bugfix
-description: Streamlined pipeline for bug fixes. Slimmer than /proceed — bug report → investigate → fix → verify → ship, with gates between each. Use for defects, not for new features. Larger or scope-creeping bugs should be re-framed as a REQ via /spec.
+description: Streamlined pipeline for bug fixes. Report + investigate → Diagnose gate → fix + regression test + review + wrap-up → Ship gate (a Verify gate is added only when review finds a critical/major). Use for defects, not for new features. Larger or scope-creeping bugs should be re-framed as a REQ via /spec.
 ---
 
-You are running the bug-fix workflow. This is a slimmer cousin of `/proceed` with the same gate discipline but lighter ceremony per phase. Use it for bugs — defective existing behavior — not for new features.
+You are running the bug-fix workflow. This is a slimmer cousin of `/proceed` with two gates (three when a fix round is needed), each showing every check of the phases it covers. Use it for bugs — defective existing behavior — not for new features.
 
 ## When to use
 
@@ -24,9 +24,10 @@ If during investigation the bug turns out to be larger than expected, **stop and
 2. **Load vault basics.** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/conventions.md`, `context/architecture.md`.
 3. **Assign the BUG ID.** Mint it per `config.yml` → `req.id_scheme` (default `sequential`), applied to the `BUG` namespace, using the one scan from VAULT-LAYOUT's `mint` rule: `find .adlc/bugs -maxdepth 4 -type d -name 'BUG-*'` — depth 4 so it covers every month bucket and every author folder, not just yours. `sequential` takes max+1, padded to 3 (`BUG-NNN`); `prefixed` (`BUG-<req.prefix>-NNN`) narrows the `-name` to `BUG-<req.prefix>-*` and keeps the depth — scoped to your own author folder it would re-mint someone else's live IDs; `ticket` takes the issue key when invoked with an issue ref + `sources.issues` (e.g. `BUG-842`), else falls back to prefixed/sequential, noting it. Throughout, `BUG-NNN` denotes the assigned ID in whatever form the scheme produced.
 4. **Create the bug folder.** Read `config.yml` → `layout.partition`: `none` gives `bugs/BUG-NNN-<slug>`; `month-author` gives `bugs/<YYYY-MM>/<author>/BUG-NNN-<slug>`, where `<YYYY-MM>` is today's month (the month the bug folder is created — it never changes afterwards) and `<author>` is the first of `layout.author`, `req.prefix`, initials from `git config user.name`, or `_`. `mkdir -p` the parents, then create the folder. **That vault-relative path is `<BUG_PATH>` for the rest of this protocol** — it carries no `.adlc/` prefix, so every path below reads `.adlc/<BUG_PATH>/…`. Agent dispatch prompts get it written out in full — the agents resolve nothing.
-5. **Resolve a source reference (optional).** If invoked with an issue reference (e.g. `/bugfix #8`) or an issue URL, and `config.yml.sources.issues` is set (not `none`), resolve it with the same mechanism order as `/spec` (CLI such as `gh issue view <n> --json title,body,labels,comments,author,createdAt` first → MCP → URL fetch; default repo from `sources.repo`, a full URL overrides). This is the *same resolver* `/spec` uses. If a label indicates the issue is a feature rather than a defect, note it — the Phase 1 gate's `reframe` path will route it to `/spec`. If nothing resolves or no service is configured, print one line (`couldn't reach <service> for <ref> — drafting the report manually`) and continue; the seed is strictly additive.
+5. **Resolve a source reference (optional).** If invoked with an issue reference (e.g. `/bugfix #8`) or an issue URL, and `config.yml.sources.issues` is set (not `none`), resolve it with the same mechanism order as `/spec` (CLI such as `gh issue view <n> --json title,body,labels,comments,author,createdAt` first → MCP → URL fetch; default repo from `sources.repo`, a full URL overrides). This is the *same resolver* `/spec` uses. If a label indicates the issue is a feature rather than a defect, note it — the Diagnose gate's `reframe` path will route it to `/spec`. If nothing resolves or no service is configured, print one line (`couldn't reach <service> for <ref> — drafting the report manually`) and continue; the seed is strictly additive.
+6. **Finish a shipped bug.** If `now.md`'s active item is a BUG at a cleared ship gate, run /wrapup's merge detection first.
 
-## Phase 1 — Bug report (gate)
+## Phase 1 — Bug report (no gate — feeds Diagnose)
 
 ### Draft
 
@@ -39,7 +40,7 @@ Copy `templates/bug-template.md` to `.adlc/<BUG_PATH>/bug.md`. Substitute placeh
 - Reporter / Reported — issue author and creation date
 - Add the issue link to the bug's "Related" section for provenance.
 
-Seeded content is a **draft, not truth**. The gate's runnable-repro requirement is unchanged: a tracker issue often lacks clean repro steps, so fill what the issue gives, then — if repro steps still aren't runnable — ask follow-ups in chat. **Don't proceed to investigate without a runnable repro** (or an explicit "I can't reproduce — investigate from this stack trace"), seeded or not.
+Seeded content is a **draft, not truth**. The runnable-repro requirement is unchanged: a tracker issue often lacks clean repro steps, so fill what the issue gives, then — if repro steps still aren't runnable — ask follow-ups in chat. **Don't proceed to investigate without a runnable repro** (or an explicit "I can't reproduce — investigate from this stack trace"), seeded or not.
 
 ### Initialize pipeline state
 
@@ -52,40 +53,15 @@ Seeded content is a **draft, not truth**. The gate's runnable-repro requirement 
   "createdAt": "<ISO>",
   "currentPhase": 1,
   "completedPhases": [0, 1],
-  "gateState": "awaiting",
-  "currentPhaseGate": "report"
+  "gateState": "deferred",
+  "currentPhaseGate": null,
+  "gates": ["diagnose", "ship"]
 }
 ```
 
-### Gate card
+The report's checks (symptom concise · repro runnable · expected-vs-actual concrete · environment captured) and a feature-not-defect label (→ reframe) go on the Diagnose card.
 
-Emit per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md` (loaded at preflight). A bug-report gate is lean and adds a `reframe` option:
-
-- **Verdict** — "report ready — recommend approve", or "needs a runnable repro".
-- **NEEDS YOU** — a missing / still-non-runnable repro, or a label suggesting this is a feature not a defect (→ reframe). Omit if none.
-- **CHECKS** — symptom concise · repro runnable · expected-vs-actual concrete · environment captured.
-- **MY READ** — recommendation + why (never approve without a runnable repro).
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ investigate), **revise** (refine the report), **reframe** (convert to a feature REQ — calls `/spec`), **abort** (discard).
-
-```
-GATE 1/5 · Bug report · BUG-NNN-<slug>
-   report ready — recommend approve
-
-CHECKS   ✓ symptom concise · ✓ repro runnable · ✓ expected vs actual · ✓ environment
-
-MY READ  approve — repro is clean and reproduces the symptom
-
-Decision →  approve · revise <what> · reframe · abort
-```
-
-On `approve`: clear gate, advance.
-On `reframe`: archive `bug.md`, call `/spec` with the bug content as input, exit this skill.
-
-## Phase 2 — Investigate (gate)
-
-### Establish the work path
-
-Same pattern as `/architect`'s preflight step 4. Read `config.yml.workflow.isolation`. In `auto` or `branch` mode, verify `git -C <repo-path> status --porcelain` is clean (refuse and surface if not) and then run `git -C <repo-path> checkout -b bugfix/BUG-NNN-<slug>`. In `worktree` mode, run `git -C <repo-path> worktree add <repo>/.worktrees/BUG-NNN-<slug> -b bugfix/BUG-NNN-<slug>`. Update `pipeline-state.json` with `isolation`, `workPath`, `branch`, and `worktree` (null in branch mode). Append to `hot.md`: `## [DATE] work-path-set | BUG-NNN-<slug> | <mode> at <workPath>`.
+## Phase 2 — Investigate (gate: `diagnose`)
 
 ### Dispatch codebase-explorer
 
@@ -96,7 +72,7 @@ Targeted recon — not blast-radius-wide, but focused on the area suggested by t
 ```
 BUG: BUG-NNN-<slug>
 Bug report: .adlc/<BUG_PATH>/bug.md
-Work path: <workPath>
+Repo path: <repo-path> (read-only — the bug branch is created after the Diagnose gate)
 Focus: <function or module suggested by repro>
 
 Find:
@@ -124,19 +100,21 @@ While diagnosing, if the codebase quirk that produced the bug or any insight fro
 
 ### Gate card
 
-Emit per the gate protocol:
+Emit per the gate protocol — combined: **Report** and **Investigation**, each with its own CHECKS line. Set `currentPhaseGate: "diagnose"`, `gateState: "awaiting"`, write `.awaiting-approval`.
 
-- **Verdict** — "root cause found — recommend approve", or "scope looks bigger than a bug (→ reframe)".
+- **Verdict** — "root cause found — recommend approve", "needs a runnable repro", or "scope looks bigger than a bug (→ reframe)".
+- **REPORT** — symptom concise · repro runnable · expected-vs-actual concrete · environment captured.
 - **READY** — root cause `<file>:<line>` in one sentence; fix approach in 2-3 bullets; related vault entries (`[[…]]`).
-- **NEEDS YOU** — only if the diagnosis is uncertain or scope is creeping (→ reframe). Omit otherwise.
+- **NEEDS YOU** — a missing / non-runnable repro, an uncertain diagnosis, scope creep, or a feature label (→ reframe). Omit if none.
 - **CHECKS** — diagnosis matches repro · fix in scope (no creep) · regression-test plan concrete.
-- **MY READ** — recommendation + why.
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ fix), **revise** (refine diagnosis/approach), **reframe** (scope too big → feature REQ), **abort** (halt; cleanup worktree).
+- **MY READ** — recommendation + why (never approve without a runnable repro).
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ branch + fix), **revise** (report or diagnosis), **reframe** (scope too big → feature REQ), **abort** (discard; no branch exists yet, so nothing to clean).
 
 ```
-GATE 2/5 · Investigation · BUG-NNN-<slug>
+GATE 1/2 · Diagnose · BUG-NNN-<slug>
    root cause found — recommend approve
 
+REPORT   ✓ symptom concise · ✓ repro runnable · ✓ expected vs actual · ✓ environment
 READY    cause: src/pay/retry.ts:88 — retry re-enters before the guard clears
          approach: move the idempotency check above the retry loop; add a guard test
 CHECKS   ✓ diagnosis matches repro · ✓ in scope · ✓ regression plan concrete
@@ -146,7 +124,13 @@ MY READ  approve — tight diagnosis, contained fix
 Decision →  approve · revise <what> · reframe · abort
 ```
 
-## Phase 3 — Fix (gate)
+On `approve`: clear gate, advance. On `reframe`: archive `bug.md`, call `/spec` with the bug content as input, exit this skill.
+
+## Phase 3 — Fix (no gate)
+
+### Establish the work path
+
+Same pattern as `/architect`'s preflight step 4. Read `config.yml.workflow.isolation`. In `auto` or `branch` mode, verify `git -C <repo-path> status --porcelain` is clean (refuse and surface if not) and then run `git -C <repo-path> checkout -b bugfix/BUG-NNN-<slug>`. In `worktree` mode, run `git -C <repo-path> worktree add <repo>/.worktrees/BUG-NNN-<slug> -b bugfix/BUG-NNN-<slug>`. Update `pipeline-state.json` with `isolation`, `workPath`, `branch`, and `worktree` (null in branch mode). Append to `hot.md`: `## [DATE] work-path-set | BUG-NNN-<slug> | <mode> at <workPath>`.
 
 ### Dispatch task-implementer
 
@@ -159,7 +143,7 @@ Approach: <copy from bug.md "Fix approach">
 
 Implement:
 1. The fix itself
-2. A regression test that fails before the fix and passes after
+2. A regression test, written and run **before** the fix (record the failing assertion in bug.md's Investigation log), then passing after it
 3. Any cleanup necessary
 
 Draft commit message to .adlc/<BUG_PATH>/commits-draft.md.
@@ -176,30 +160,9 @@ After task-implementer returns:
 - Confirm running the original repro steps no longer produces the bug
 - Confirm no other tests broke
 
-### Gate card
+Any of them failing is a mid-phase stop (surface + options: retry · revise approach · abort), not a gate. When all pass, set `gateState: "deferred"` and go to Phase 4.
 
-Emit per the gate protocol:
-
-- **Verdict** — "fixed, regression test green — recommend approve".
-- **READY** — `<count>` files changed; regression test `<name>` (fails before, passes after); all tests pass; commit drafted.
-- **CHECKS** — regression test present · original repro no longer triggers · no other tests broke.
-- **MY READ** — recommendation + why.
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ verify), **revise** (adjust the fix), **abort**.
-
-```
-GATE 3/5 · Fix · BUG-NNN-<slug>
-   fixed, regression test green — recommend approve
-
-READY    3 files · regression test retry_guard_test — fails without the
-         fix, passes with it · all tests pass · commit drafted
-CHECKS   ✓ regression test · ✓ repro no longer triggers · ✓ no other tests broke
-
-MY READ  approve — fix is contained and covered
-
-Decision →  approve · revise <what> · abort
-```
-
-## Phase 4 — Review (gate)
+## Phase 4 — Review (gate: `verify`, only when needed)
 
 Slimmer than `/review`. Dispatch **only** `correctness-reviewer` and `reflector` (the two most likely to find issues in a bug fix). Skip quality and architecture unless the fix touched layering or introduced significant new code.
 
@@ -211,27 +174,24 @@ When dispatching, pass `Candidates file: .adlc/<BUG_PATH>/lesson-candidates.md` 
 
 Consolidate from `review-log.md` into `.adlc/<BUG_PATH>/verification.md` with the same shape as `/review`'s verdict file — digest table, roster line, consolidated findings — but only two reviewer sections.
 
-### Gate card
+### Route after review
 
-Emit per the gate protocol — findings-led like `/review`, but only two reviewers (correctness, reflector):
-
-- **Verdict** — "`<total>` findings — `<k>` need a call", or "clean — recommend approve".
-- **FINDINGS** — one line each, `crit / maj / min` + reviewer. This block is the `NEEDS YOU`.
-- **MY READ** — recommendation + why (never approve while a Critical stands).
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (→ ship), **fix** (`<ids>`), **revise**, **abort**.
+If any **critical or major** finding is open: insert `verify` before `ship` in `gates`, set `currentPhaseGate: "verify"`, `gateState: "awaiting"`, write the marker, and emit the **Verify** card — findings-led like `/review`, plus a `FIX` CHECKS line (regression test fails before, passes after · repro no longer triggers · no other tests broke) — with **approve · fix <ids> / fix all · revise · abort**. Never approve with a critical open. Fix rounds follow `/review` step 6. When none is open (or once the Verify gate clears), set `gateState: "deferred"` and go to Phase 5 — minor/trivial findings left ride on the Ship card.
 
 ```
-GATE 4/5 · Review · BUG-NNN-<slug>
-   clean — no findings, recommend approve
+GATE 2/3 · Verify · BUG-NNN-<slug>
+   2 findings — 1 needs a call
 
-FINDINGS  (none)
+FINDINGS  maj  correctness — retry guard skips the zero-amount path
+          min  reflector — LESSON pattern repeated
+FIX       ✓ regression test (fails before, passes after) · ✓ repro gone · ✓ no other tests broke
 
-MY READ   approve — correctness and reflector both clean
+MY READ   fix the major, then approve — the guard gap reopens the bug
 
-Decision →  approve · fix <ids> · revise <what> · abort
+Decision →  approve · fix <ids> · fix all · revise <what> · abort
 ```
 
-## Phase 5 — Wrap up (gate)
+## Phase 5 — Wrap up (gate: `ship`)
 
 Same as `/wrapup`, but with the bug-specific knowledge capture:
 
@@ -267,33 +227,39 @@ Same rule as `/wrapup`'s step 5a. Only if `config.yml.sources.write` includes th
 
 ### Gate card
 
-Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped:
+Emit per the gate protocol — mirrors `/wrapup`'s ship gate, bug-scoped. Set `currentPhaseGate: "ship"`, `gateState: "awaiting"`, write `.awaiting-approval`:
 
 - **Verdict** — "PR + vault ready — run the checklist".
 - **READY** — PR draft (`bug-fix-pr-draft.md`); merge checklist; vault capture in one line (candidates `<N>`; promoted `<L-BUG-NNN-n>`; gotchas `<^gNN>`; hot entries), then the dedup basis (`dedup vs origin/<base> as of <age>` / skipped).
 - **NEEDS YOU** — a drafted comment for the issue tracker, shown before sending (it is never sent without your OK); or, if no lesson or gotcha was kept at all, a confirmation — bug fixes usually teach something, so confirm that's right or reply `revise: capture` to take another pass through `bug.md` / `investigation.md` / `verification.md`. Omit if neither applies.
-- **CHECKS** — regression test in the diff · commit drafts landed in git log · no debug artifacts.
+- **FINDINGS** — the minor findings left from review, one line each. Omit if none.
+- **CHECKS** — with no Verify gate: `FIX` (regression test fails before, passes after · repro gone · no other tests broke) and `REVIEW` (counts · correctness, reflector) lines; then regression test in the diff · commit drafts in git log (`manual` with no Verify gate: ⚠ until the user runs them — name them under NEEDS YOU; `commit` modes: they land on approve) · no debug artifacts.
 - **MY READ** — recommendation + why.
-- **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **revise**, **merged** (finalize after you merge), **abort**.
+- **Decision** — on Claude, an `AskUserQuestion`: **approve** (run the merge checklist), **fix** `<ids>` (when findings are present), **revise**, **merged** (finalize after you merge), **abort**. After a fix round on this card, re-run the candidates verdict for new candidates and refresh `bug-fix-pr-draft.md`'s fix description before re-emitting.
 
 ```
-GATE 5/5 · Wrap up · BUG-NNN-<slug>
+GATE 2/2 · Ship · BUG-NNN-<slug>
    PR + vault ready — run the checklist
 
 READY       PR: bug-fix-pr-draft.md · merge-checklist.md
             knowledge saved: 1 gotcha (g14) · 1 activity-log entry
 NEEDS YOU   (none — knowledge capture done)
 
-CHECKS      ✓ regression test in diff · ✓ commits in log · ✓ no debug
+FIX         ✓ regression test (fails before, passes after) · ✓ repro gone · ✓ no other tests broke
+REVIEW      0 findings · correctness, reflector
+CHECKS      ✓ regression test in diff · ✓ commits drafted · ✓ no debug
 
 MY READ     approve — fix is shipped-ready; knowledge captured
 
 Decision →  approve · revise <what> · merged · abort
 ```
 
+On `merged` (replied or detected, per `/wrapup`): finalize `pipeline-state`.
+
 ## Constraints
 
-- **Commits follow `git.mode`** (`.adlc/config.yml`, default `manual`) — same rules as the full pipeline. In `manual`, draft `commits-draft.md` and the user commits. In `commit`/`commit+push`, commit the fix on the bug's own feature branch after the gate (and push it, ff-only), never on a protected branch.
+- **Commits follow `git.mode`** (`.adlc/config.yml`, default `manual`) — same rules as the full pipeline. In `manual`, draft `commits-draft.md` and the user commits. In `commit`/`commit+push`, commit the fix on the bug's own feature branch on the approval of the gate that covers the code — Verify, else Ship (and push it, ff-only), never on a protected branch.
+- **Two gates, every check.** Report, investigation, fix and review checks all appear on the Diagnose / Verify / Ship cards; a phase without its own gate still halts on failure.
 - **Never expand scope mid-bug.** If during investigation the fix grows past a small area, surface and recommend reframing.
 - **Always add a regression test.** No exceptions. A bug fix without a regression test is borrowing against future debugging.
 - **Always capture knowledge.** At least one non-discard verdict (promote OR demote-to-gotcha) at Phase 5. The verdict step exists precisely to keep the vault high-signal — discards are allowed, but a bug fix that ends in all-discards needs explicit user confirmation, not a silent skip.

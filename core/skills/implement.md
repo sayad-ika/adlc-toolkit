@@ -121,11 +121,11 @@ Run these commits in order from the worktree.
 }
 ```
 
-If `"implement"` is not in `pipeline-state.gates`: `"gateState": "deferred"`, `"currentPhaseGate": null`.
+If `pipeline-state.gates` exists and lacks `"implement"`: `"gateState": "deferred"`, `"currentPhaseGate": null`. No `gates` (legacy) = the gate stays.
 
 ### 8. Write the gate marker
 
-**Only when `pipeline-state.gates` contains `"implement"`** (legacy REQs, or `full` with `hardStop`). Otherwise skip steps 8–9 and the gate clearance: write the step-5 results (tests, forbidden-artifact flags, deviation status, diff stat) as one ≤160-char `notes[]` entry, say `Build done · <N> tasks · tests pass · <k> flags → review next`, and hand to `/review`, which puts them on the Build & Review card.
+**Only when `pipeline-state.gates` contains `"implement"` or is absent** (legacy REQs, or `full` with `hardStop`). Otherwise skip steps 8–9 and the gate clearance: write the step-5 results (tests, forbidden-artifact flags, deviation status, diff stat) as one ≤160-char `notes[]` entry, say `Build done · <N> tasks · tests pass · <k> flags → review next`, and hand to `/review`, which puts them on the Build & Review card.
 
 `.awaiting-approval` with:
 

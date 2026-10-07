@@ -39,7 +39,8 @@ These flags assume `pipeline-state.json` is in sync with git reality. If state h
 4. **Route on invocation flags.** If any of `--resume`, `--revert~1`/`~2`/`~3`, or `--cancel` was set, dispatch to the matching protocol in **Invocation flags** below and exit this skill's main flow. The flag protocols own their own gate prompts and state updates; the standard phase walk does not run when a flag was invoked.
 
 5. **Determine starting phase** (no flag set).
-   - Read `profile` / `gates`. **Absent → legacy:** behave exactly as before (five gates). `gateState: "deferred"` means the phase finished without its own gate — run the next phase.
+   - `--profile` on an existing REQ: a heavier one upgrades per GATE-PROTOCOL → Profiles (only gates not yet reached change); a lighter one is a `profile-override`. New REQs pass it to `/spec`.
+   - Read `profile` / `gates`. **No `gates` → legacy:** behave exactly as before (five gates). `gateState: "deferred"` means the phase finished without its own gate — run the next phase.
    - For a new REQ, start at Phase 1 (spec).
    - For an existing REQ, read `pipeline-state.json.currentPhase` and `.gateState`:
      - If `gateState: "awaiting"`, you're paused at a gate — re-emit the gate prompt for that phase.

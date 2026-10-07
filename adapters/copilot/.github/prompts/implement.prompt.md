@@ -1,5 +1,5 @@
 ---
-description: "Execute the task DAG. Phase 3."
+description: "Execute the task DAG. Phase 3 (folds into Build & Review unless hardStop)."
 ---
 
 Toolkit root: .adlc-toolkit

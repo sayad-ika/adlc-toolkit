@@ -1,6 +1,6 @@
 # Quickstart
 
-The ADLC toolkit gives any AI coding assistant a **spec-driven pipeline with a human approval gate at every phase**. It works with Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI, on macOS, Windows, and Linux.
+The ADLC toolkit gives any AI coding assistant a **spec-driven pipeline with human approval gates sized to the risk of the change**. It works with Claude Code, Cursor, GitHub Copilot, OpenAI Codex, and Gemini CLI, on macOS, Windows, and Linux.
 
 This page gets you from install to your first approved piece of work in four steps. For tool-specific detail, see the [per-tool install guides](install/).
 
@@ -91,7 +91,7 @@ It creates `.adlc/`, scans existing docs (README, ARCHITECTURE, CONTRIBUTING, li
 /spec      → approve → /architect → approve → /implement → approve → /review → approve → /wrapup → approve
 ```
 
-Or run the whole thing with `/proceed`. Each gate pauses for your approval. For bugs, use `/bugfix`; for a small change, `/task` runs a slim two-gate pipeline that still records a REQ (and escalates to `/proceed` if it turns out large).
+Or run the whole thing with `/proceed`. Each gate pauses for your approval. It picks a profile — standard (3 gates) or full (4–5) — and tells you why on the first card; `--profile=full` asks for every gate. For bugs, `/bugfix` (Diagnose → Ship, plus a Verify gate if review finds something serious); for a small change, `/task` runs a slim two-gate pipeline that still records a REQ (and escalates to `/proceed` if it turns out large).
 
 ## Changing settings
 

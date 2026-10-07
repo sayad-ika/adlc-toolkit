@@ -32,6 +32,7 @@ The defining feature: `/task` is **self-triaging**. Small work runs here; work t
 4. **Determine the slug.** Short kebab-case, ≤40 chars.
 5. **Create the REQ folder.** Same rule as `/spec` preflight step 5: read `config.yml` → `layout.partition`; `none` gives `specs/REQ-NNN-<slug>`, `month-author` gives `specs/<YYYY-MM>/<author>/REQ-NNN-<slug>` — today's month (the creation month, fixed from here) and `<author>` the first of `layout.author`, `req.prefix`, initials from `git config user.name`, or `_`. `mkdir -p` the parents. **That vault-relative path is `<REQ_PATH>` below** — no `.adlc/` prefix, so paths read `.adlc/<REQ_PATH>/…`, and agent dispatch prompts get it written out in full (the agents resolve nothing).
 6. **Resolve a source reference (optional).** Same resolver as `/spec` preflight step 6 (issue ref / URL via `gh` → MCP → fetch when `sources.issues` is set). Additive; never blocks.
+7. **Finish a shipped task.** If invoked on an existing task-REQ (or `now.md`'s active REQ is one) at a cleared ship gate, run /wrapup's merge detection first.
 
 ## Phase 1 — Plan (gate)
 
@@ -82,6 +83,9 @@ Add `kind: task` to the frontmatter so the vault and `/status` can tell task-REQ
 {
   "req": "REQ-NNN-<slug>",
   "kind": "task",
+  "profile": "easy",
+  "hardStop": false,
+  "gates": ["plan", "ship"],
   "createdAt": "<ISO>",
   "currentPhase": 1,
   "completedPhases": [0, 1],
@@ -172,7 +176,7 @@ Pass `Candidates file: .adlc/<REQ_PATH>/lesson-candidates.md` and `Output file: 
 
 ### 3. Ship gate card
 
-Emit per the gate protocol — one consolidated review + ship gate:
+Emit per the gate protocol — one consolidated review + ship gate. Set `currentPhaseGate: "ship"`, `gateState: "awaiting"`, write `.awaiting-approval`.
 
 - **Verdict** — "clean — recommend approve", or "`<k>` findings need a call".
 - **FINDINGS** (if any) — `crit / maj / min` + reviewer; this is the `NEEDS YOU`. Omit when clean.
@@ -196,14 +200,14 @@ MY READ  approve — small, clean, covered
 Decision →  approve · fix <ids> · revise <what> · merged · abort
 ```
 
-Gate clearance mirrors `/wrapup`: on `approve`, set `gateState: "cleared"`, log to `hot.md`; on `merged`, finalize `pipeline-state` (`terminal`/`prState: merged`), update `now.md`, log `## [DATE] req-merged | REQ-NNN-<slug>`.
+Gate clearance mirrors `/wrapup`: on `approve`, set `gateState: "cleared"`, log to `hot.md`; on `merged` (replied or detected per /wrapup "If merged (replied, or detected)"), finalize `pipeline-state` (`terminal`/`prState: merged`), update `now.md`, log `## [DATE] req-merged | REQ-NNN-<slug>`.
 
 ## Escalation handoff
 
 When triage or mid-flight escalation routes to `/proceed`, hand off cleanly — nothing is recreated:
 
 1. The `REQ-NNN-<slug>` folder, `requirement.md`, and any branch/worktree already exist and stay.
-2. Update `pipeline-state.json`: drop `kind: task`, set the phase so `/proceed` resumes correctly — Phase 1 `cleared` if escalation happened at the plan gate (proceed runs architect next), or keep the current phase if work was already underway (escalation mid-implement resumes at architect over the started branch). Append `## [DATE] task-escalated-to-proceed | REQ-NNN-<slug> | <reason>` to `hot.md`.
+2. Update `pipeline-state.json`: drop `kind: task`; set `profile` by GATE-PROTOCOL → Profiles triage (escalated for risk → `full` + `hardStop`; for size or ACs only → `standard`) and rewrite `gates` — the plan gate the user already cleared counts as the spec gate (full) or the spec half of Plan (standard; architect then shows the Plan card with SPEC marked "cleared at task plan gate"); and set the phase so `/proceed` resumes correctly — Phase 1 `cleared` if escalation happened at the plan gate (proceed runs architect next), or keep the current phase if work was already underway (escalation mid-implement resumes at architect over the started branch). Append `## [DATE] task-escalated-to-proceed | REQ-NNN-<slug> | <reason>` to `hot.md`.
 3. The lightweight `requirement.md` becomes the seed `/proceed`'s architect phase reads. `/architect` may expand it (full blast radius, task DAG, ADR if needed) — escalation exists precisely because that rigor is now warranted.
 4. Invoke `/proceed REQ-NNN-<slug>` and exit `/task`.
 

@@ -216,7 +216,7 @@ Files:
 
 Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body is the **PR + vault capture + merge checklist**, and it carries an extra `merged` option (used after the user runs the merge). Map:
 
-- **Header** — `Gate 5 of 5 · Wrap up · REQ-NNN-<slug>`.
+- **Header** — `GATE <n>/<N> · Wrap up · REQ-NNN-<slug>`.
 - **Verdict** — e.g. "PR + vault ready — run the checklist when you're set", or flag if the final sanity check surfaced anything.
 - **READY** — PR title + `pr-draft.md` (files changed, +/-); `merge-checklist.md`; vault capture in one compact line (candidates considered `<N>`; promoted `<L-REQ-NNN-n>`; gotchas `<^gNN>`; ADRs/concepts/components/glossary/hot as applicable), then the dedup basis: `dedup vs origin/<base> as of <age>` or `cross-branch dedup skipped: origin/<base> not found`. The age is the honest signal — a week-old fetch makes the check weaker, and the card shows it rather than hiding it.
 - **NEEDS YOU** — only genuine calls: the repo-doc list from step 1 (`docs: <file> — <claim> → <fact>`, applied on approve); a drafted issue-tracker write-back awaiting your OK (never auto-sent); a "no knowledge captured — is that right?" confirmation; any unresolved final-sanity item. Omit if none.
@@ -224,10 +224,10 @@ Emit the gate per `$TOOLKIT_PATH/core/GATE-PROTOCOL.md`. A wrap-up gate's body i
 - **MY READ** — recommendation + one-line why.
 - **Decision** — on Claude, an `AskUserQuestion`: **approve** (gate cleared — run the merge checklist), **revise** (adjust PR draft or vault updates), **merged** (after you merge — finalize state, log to `hot.md`), **abort** (halt without merging). Mark approve *(Recommended)* per `MY READ`.
 
-Example shape:
+Example shape (standard profile):
 
 ```
-GATE 5/5 · Wrap up · REQ-NNN-<slug>
+GATE 3/3 · Wrap up · REQ-NNN-<slug>
    PR + vault ready — run the checklist when you're set
 
 READY       PR: feat(pay): retry with backoff — pr-draft.md · 9 files, +240/-37

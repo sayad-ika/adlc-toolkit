@@ -1,4 +1,4 @@
-description = "Execute the task DAG. Phase 3."
+description = "Execute the task DAG. Phase 3 (folds into Build & Review unless hardStop)."
 prompt = """
 Toolkit root: .adlc-toolkit
 

@@ -39,6 +39,8 @@ All five assistants converged on the same three primitives — a memory/context 
 
 **Per-agent model tier.** Claude/Codex/Gemini/Copilot can assign a cheaper model to the recon pass and a stronger one to implementation. Cursor uses one model for the session. Tier defaults live in `core/manifest.json` → `tierToModel` and are overridable in `.adlc/config.yml`.
 
+**Combined gate questions.** When a gate also asks about an ADR, Claude shows two questions in one `AskUserQuestion`; other assistants show combined inline options (approve + accept ADR …). Same decision, one turn.
+
 ## Choosing where to install
 
 `scripts/adlc.mjs sync` does either for you. Global is the default; pass `--repo=<path>` for project-local.

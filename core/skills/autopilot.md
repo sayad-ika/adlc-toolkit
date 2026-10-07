@@ -22,7 +22,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 - `/autopilot <free-text feature description>` — start a new REQ and run it autonomously.
 - `/autopilot REQ-NNN-<slug>` — run or resume an existing REQ autonomously from its pipeline-state.
 - `/autopilot REQ-NNN-<slug> --dry-run` — plan only: emit the decisions you *would* make at each gate; execute nothing, commit nothing.
-- `/autopilot REQ-NNN-<slug> --until=<phase>` — run autonomously up to a named phase (spec|architect|implement|verify), then hand to the human.
+- `/autopilot REQ-NNN-<slug> --until=<phase>` — run autonomously up to a named phase (spec|architect|plan|implement|verify), then hand to the human.
 - `/autopilot REQ-NNN-<slug> --gates=<manual|assisted|auto>` — override the gates dial for this run.
 
 ## Preflight
@@ -30,7 +30,7 @@ You are the `/autopilot` orchestrator: the autonomous sibling of `/proceed`. You
 1. **Read the toolkit ETHOS** (`$TOOLKIT_PATH/ETHOS.md`) **, the gate protocol** (`$TOOLKIT_PATH/core/GATE-PROTOCOL.md`)**, the voice guide** (`$TOOLKIT_PATH/core/VOICE.md`)**, and the vault layout** (`$TOOLKIT_PATH/core/VAULT-LAYOUT.md` — where work records live on disk; never hard-code a path under `specs/`, `bugs/`, or `sprints/`) — the final review uses the shared card format. Already read in this run (an orchestrator or the previous phase loaded them) and no context compaction since? Don't re-read them; when unsure, re-read.
 2. **Read the vault basics:** `.adlc/CLAUDE.md`, `now.md`, `hot.md` (last 20), `config.yml`, `context/project-overview.md`, `context/conventions.md`.
 3. **Load the autonomy policy** from `config.yml` → `autonomy` (see Dials). Apply any flag overrides. If the `autonomy` block is absent, fall back to safe defaults: `gates: assisted`, `git: read-only`, `escalation: cautious` — and tell the user the block is missing so they can opt into more autonomy deliberately. **Cap `autonomy.git` by the top-level `git.mode`:** the effective git tier is the *lower* of the two (`git.mode: manual` ⇒ ship is `read-only` no matter what `autonomy.git` says). Surface the cap if it lowered the tier.
-4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → resolve its folder per `VAULT-LAYOUT.md`'s `resolve` rule and load `.adlc/<REQ_PATH>/pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask. `<REQ_PATH>` is vault-relative — no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`.
+4. **Determine REQ identity** (same rules as `/proceed`): existing REQ ID → resolve its folder per `VAULT-LAYOUT.md`'s `resolve` rule and load `.adlc/<REQ_PATH>/pipeline-state.json`; free-text → new REQ; nothing → use `now.md`'s active REQ or ask. A REQ at a cleared ship gate: run /wrapup's merge detection and stop. `<REQ_PATH>` is vault-relative — no `.adlc/` prefix — and every path below is written `.adlc/<REQ_PATH>/…`.
 5. **Confirm the run.** Before doing anything irreversible, emit a one-block summary of what this run may do on its own — which gates it decides itself, what git it may run, and how cautious the gate-keeper is (gates / git / escalation / caps) — plus the REQ, so the user sees the autonomy level. For `--dry-run`, skip straight to the plan.
 6. **Create the work surface:** feature branch (or worktree per `config.yml.workflow.isolation`), exactly as `/architect` would. Branch creation and worktree lifecycle are allowed git ops.
 
@@ -52,11 +52,11 @@ Before the phase walk (and refine it after `/architect`), compute and store a ri
 - **Sensitivity** — does it touch any `hard_stops` area (auth, security, secrets, payments, data-migration, public-API-contract, infra/CI)?
 - **Reversibility** — additive/reversible vs. destructive/irreversible.
 
-If the profile flags a hard-stop area, mark the relevant gate `forced_halt: true`. High-risk REQs auto-downgrade: `/autopilot` runs the easy phases autonomously and **always** halts at the sensitive gate for the human. Record this in `gate-decisions.md` when it fires.
+If the profile flags a hard-stop area, mark the relevant gate `forced_halt: true`. Also set `profile` / `hardStop` / `gates` per GATE-PROTOCOL → Profiles; `--profile` is accepted as in /proceed. A hard-stop REQ is `full` + `hardStop`, so its implement gate exists and is forced_halt. High-risk REQs auto-downgrade: `/autopilot` runs the easy phases autonomously and **always** halts at the sensitive gate for the human. Record this in `gate-decisions.md` when it fires.
 
 ## The autonomous gate loop
 
-For each phase in order (spec → architect → implement → verify → wrapup), reusing the existing phase skills unchanged:
+For each phase in order, reusing the phase skills unchanged; the gate logic below runs only at boundaries in `pipeline-state.gates` (absent = legacy five) — a "deferred" phase flows straight into the next:
 
 ```
 run the phase skill's protocol (/spec, /architect, /implement, /review, /wrapup)
@@ -107,7 +107,7 @@ Never inline the whole diff, the whole spec context, or vault context files — 
 
 **Forbidden, always:** `git push --force` / `--force-with-lease`; `git rebase`; `git commit --amend` on published commits; `git reset --hard` that drops commits; any push or merge to `main`/protected branches; `gh pr merge`; tag deletion; any history rewrite. `git revert` is left to the human — it's a decision, not bookkeeping.
 
-**Checkpoint commits:** one commit at each phase boundary (after `/implement`, and after each accepted REWORK), drafted from `commits-draft.md` and executed. Every autonomous decision maps to a commit, so the run is cleanly revertible. If `git: read-only`, draft the commits as `/proceed` does and execute nothing.
+**Checkpoint commits:** one commit at each gate in `gates` that carries code (the `verify` gate, or `implement` when present), and after each accepted REWORK, drafted from `commits-draft.md` and executed. Every autonomous decision maps to a commit, so the run is cleanly revertible. If `git: read-only`, draft the commits as `/proceed` does and execute nothing.
 
 ## Circuit breakers
 

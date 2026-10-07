@@ -4,6 +4,21 @@ All notable changes to the ADLC toolkit. The toolkit version lives in `core/mani
 
 Labels used below: **[breaking]** needs action on update, **[protocol]** changes how a skill behaves, **[vault-format]** changes on-disk vault layout, **[tooling]** install/build only.
 
+## [1.9.0] — unreleased
+
+### Gates sized to risk — fewer stops, every check kept **[protocol]**
+
+A `/proceed` REQ cost the user ~8 stops (five gates, a separate ADR confirm, "run your commits", the `merged` reply); `/bugfix` cost six. Most of those stops only re-showed automated checks. Each REQ now carries a profile (`core/GATE-PROTOCOL.md` → Profiles) that decides which phase boundaries get a gate: **standard** 3 (Plan · Build & Review · Wrap up), **full** 4 (Spec · Architect · Build & Review · Wrap up — plus Implement on a hard-stop surface), `/task` 2, `/bugfix` 2–3 (Diagnose · Ship, + Verify when review finds a critical/major). Triage is one list shared by every skill; profiles only size up on their own.
+
+- **No check removed.** A phase without its own gate ends `gateState: "deferred"` and its CHECKS ride on the next card; spec blockers, halt-on-failure, the blast-radius edge stop, the reviewer sets, the adversary, and "never approve with a critical open" are unchanged.
+- **Review reads the working tree**; drafted commits are checked at wrap-up (fixes a contradiction between `/review` preflight and its packet rules). In `manual` mode the "run your commits" step moves to just before wrap-up rather than disappearing. In `commit` modes the code is committed at the gate that carries it.
+- **ADR acceptance is part of the gate decision**, not a separate prompt.
+- **`merged` is detected from git** at the next pipeline command; replying `merged` still works.
+- **Protocol files load once per run** (~30KB saved per extra phase).
+- **Principles reworded:** ETHOS #1 ("every gate pauses; gates follow the profile, never fewer than two") and #5 ("profiles fold gates, never steps or checks"); the generated memory files (`scripts/adlc.mjs`) carry the same wording **[tooling]**.
+- **Validation:** nine planted-defect scenarios are specified in `docs/plans/2026-10-gate-consolidation-replay.md`; they haven't been run yet (they need a human at the gates).
+- **On update:** nothing to migrate. REQs without `gates` in `pipeline-state.json` run the legacy five gates to completion. Finish any `/bugfix` run that's mid-flight before updating — `/bugfix` has no resume path, and the old five-gate names (`report`, `fix`, …) are gone.
+
 ## [1.8.0] — unreleased
 
 ### Team-safe lessons — IDs that can't collide, a ledger that can't conflict, a dedup that looks past your branch **[protocol]** **[vault-format]**

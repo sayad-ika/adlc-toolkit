@@ -63,7 +63,7 @@ Subagent mode: true (you cannot dispatch sub-agents)
 Base branch: <base from config.yml>
 
 Run the full /proceed pipeline for this REQ per your skill instructions.
-Pause at every gate; emit terminal claim `gate-blocked:<phase>` when paused.
+Pause at each gate in the REQ's `gates`; emit `gate-blocked:<gate>`.
 Do NOT run git mutations beyond worktree creation.
 Update pipeline-state.json after every phase.
 ```
@@ -158,7 +158,7 @@ SPRINT GATE QUEUE · SPRINT-...
 3 REQs in flight. 2 gates awaiting your decision:
 
   1. REQ-101-add-export-button
-     Phase: architect (gate)
+     Phase: architect (gate) · gate 2/4
      Files affected: 6
      ADR proposed: yes (ADR-014)
      Drafted: .adlc/<REQ_PATH>/architecture.md
