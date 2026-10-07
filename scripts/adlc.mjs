@@ -274,7 +274,10 @@ function buildModel(toolkitPath) {
     const lines = [
       `Toolkit root: ${tp}`,
       ``,
-      `Execute the ADLC **${s.name}** protocol — defined in \`${skillRef(s.name)}\` — against the \`.adlc/\` vault in the current repository.`,
+      // An alias entry ({ alias, args }) is a stub that runs another skill with fixed flags.
+      s.alias
+        ? `This is an alias: execute the ADLC **${s.alias}** protocol — defined in \`${skillRef(s.alias)}\` — as if invoked with \`${s.args || ''}\` before the user's arguments, against the \`.adlc/\` vault in the current repository.`
+        : `Execute the ADLC **${s.name}** protocol — defined in \`${skillRef(s.name)}\` — against the \`.adlc/\` vault in the current repository.`,
       ``,
       `Read that file in full and follow **every step literally**. It is a protocol, not a guideline (ADLC ETHOS principle 5 — load \`${tp}/ETHOS.md\`).`,
       ``,
