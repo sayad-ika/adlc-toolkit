@@ -54,3 +54,28 @@ The same symbol means the same thing at every gate, so the user reads cards with
 ## Diagrams
 
 Text-first (invariant 6). Render a structural thing as compact text when it earns space — a DAG as `T1,T2 → T3,T4 → T5`. The full Mermaid stays in the artifact file, where it renders in Obsidian / GitHub / IDE preview. Don't add a dedicated "Diagrams: …" line — the file is already named in what's done.
+
+## Open a gate — the end of every gated step
+
+This is bookkeeping, not a step. Every gated step ends with all three:
+
+1. `pipeline-state.json`: `step`, `gate`, `gateState: "awaiting"`, plus whatever the step counts (`taskStatus`, `findings`).
+2. `.adlc/<REQ_PATH>/.awaiting-approval`:
+   ```
+   Gate: <design | build | ship>  (<easy | hard> path, step <n>/<N>)
+   REQ: <ID>-<slug>
+   Awaiting: <one line>
+   Files:
+     - <the artifacts the user should open>
+   ```
+3. The card, per the invariants above. Header: `GATE <n>/<N> · <Gate> · <ID>-<slug>  (<path>)`.
+
+## Close a gate — what each reply does
+
+The same for every gate unless the step says otherwise.
+
+- **approve** — delete the marker; `gateState: "cleared"`; append `## [DATE] <gate>-gate-cleared | <ID>-<slug>` to `hot.md`. If `git.mode` is `commit`/`commit+push`, commit the step's work on the REQ's feature branch using `commits-draft.md` (and push it, fast-forward only). Then continue to the next step, or stop if this was the last.
+- **revise `<what>`** — apply it, re-run the step's checks, re-emit the card. Stay on this gate.
+- **upgrade** (Easy path only) — switch to Hard per `paths/easy.md` → Upgrade. Nothing is lost.
+- **abort** — confirm in plain words first ("This drops REQ-042's work so far. Confirm?"). Then: in `worktree` mode, remove the worktree (`git worktree remove --force`); print the rest for the user to run (`checkout <base>`, `restore .`, `clean -fd`, `branch -D <branch>`) — branch deletion is always theirs. Mark any drafted ADR `rejected` (never delete it). Set `gateState: "aborted"`, log `<gate>-aborted` to `hot.md`. The REQ folder stays unless the user explicitly asks to delete it.
+- **anything else** — ask what they meant. Don't guess.
